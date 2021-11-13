@@ -71,7 +71,7 @@ struct index_of {
                                 index_impl<T, -2, index_impl_placeholder>,
                                 index_impl<T, -2, index_impl_placeholder, Args...>
                             >;
-    static constexpr int index = ArgsType::getIndex();
+    static inline constexpr int index = ArgsType::getIndex();
 };
 
 

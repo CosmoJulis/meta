@@ -20,16 +20,16 @@ namespace is {
 
 template<typename T, typename Allocator>
 struct _vector {
-    static constexpr bool value = false;
+    static inline constexpr bool value = false;
 };
 
 template<typename T, typename Allocator>
 struct _vector<std::vector<T>, Allocator> {
-    static constexpr bool value = true;
+    static inline constexpr bool value = true;
 };
 
 template<typename T, typename Allocator = std::allocator<T>>
-static constexpr bool vector = _vector<T, Allocator>::value;
+inline constexpr bool vector = _vector<T, Allocator>::value;
 
 
 
