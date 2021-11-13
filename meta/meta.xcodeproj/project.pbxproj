@@ -32,6 +32,7 @@
 		6817A552273EAEE10001DF76 /* boost_json_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_json_helper.hpp; sourceTree = "<group>"; };
 		6817A556273EB5F50001DF76 /* libboost_json-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_json-mt.dylib"; path = "../../../../../../usr/local/Cellar/boost/1.76.0/lib/libboost_json-mt.dylib"; sourceTree = "<group>"; };
 		6817A55A273EBA5F0001DF76 /* jni_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jni_helper.hpp; sourceTree = "<group>"; };
+		687E13C6273FCBB400262D04 /* arg_is.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_is.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +81,7 @@
 			children = (
 				6809A002273D1E880032D78D /* arg_index.hpp */,
 				6809A004273E1B930032D78D /* arg_list_log.hpp */,
+				687E13C6273FCBB400262D04 /* arg_is.hpp */,
 			);
 			path = template;
 			sourceTree = "<group>";
