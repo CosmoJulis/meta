@@ -1,12 +1,12 @@
 //
-//  string_utility.h
+//  string_utility.hpp
 //  meta
 //
 //  Created by Cosmo Julis on 11/12/21.
 //
 
-#ifndef string_utility_h
-#define string_utility_h
+#ifndef string_utility_hpp
+#define string_utility_hpp
 
 #include <vector>
 #include <string>
@@ -46,4 +46,4 @@ namespace string {
 
 }
 
-#endif /* string_utility_h */
+#endif /* string_utility_hpp */

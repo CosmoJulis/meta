@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <variant>
-
+#include <list>
 
 #include "utilities/string_utility.hpp"
 #include "template/arg_index.hpp"
@@ -27,7 +27,7 @@ public:
         if (&(placeholder()) == this) {
             return "";
         }
-        return std::string("L") + meta::string::join(meta::string::split(_classname, "."), "/");
+        return std::string("L") + meta::string::join(meta::string::split(_classname, "."), "/") + ";";
     }
     static JavaCppBridgeClassWrapper & placeholder() {
         static JavaCppBridgeClassWrapper singleton = JavaCppBridgeClassWrapper();
@@ -59,11 +59,18 @@ struct JavaCppBridgeType {
             std::is_same_v<T0, long> ? "L" :
             std::is_same_v<T0, float> ? "F" :
             std::is_same_v<T0, double> ? "D" :
-            (std::is_same_v<T0, std::string> || std::is_same_v<T0, char *>) ? "Ljava/lang/String" :
+            (std::is_same_v<T0, std::string> || std::is_same_v<T0, char *>) ? "Ljava/lang/String;" :
             std::is_same_v<T0, JavaCppBridgeClassWrapper> ? w.getSig() :
             throw "Unsupported basic types.");
     }
 };
+
+template<typename T, typename ... Args>
+struct JavaCppBridgeTypeList {
+    
+};
+
+
 
 template<typename R, typename... Args>
 class JavaCppBridgeBlock {
@@ -87,13 +94,11 @@ public:
 
     
     std::string getSignature() const {
-        return "";
+        
+        return "(" + + ")" + JavaCppBridgeType<R>::getSig();
     }
     
-    
-    // TODO: func signture
-    // TODO: java object type template
-    
+        
 private:
     std::string _function;
     std::vector<VariantType> _vcv;
@@ -121,6 +126,7 @@ int main(int argc, const char * argv[]) {
     std::cout << JavaCppBridgeType<JavaCppBridgeClassWrapper>::getSig() << std::endl;
     std::cout << JavaCppBridgeType<JavaCppBridgeClassWrapper>::getSig(JavaCppBridgeClassWrapper("com.application.Activity")) << std::endl;
 
+    
     return 0;
 }
 

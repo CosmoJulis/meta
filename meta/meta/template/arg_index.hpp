@@ -41,7 +41,7 @@ struct index_impl<T, index, F> {
         if constexpr (std::is_same_v<T, F>) {
             return index + 1;
         } else {
-            return -1;
+            return -1; 
         }
     }
 };

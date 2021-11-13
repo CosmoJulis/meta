@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		68099FFA273D1E480032D78D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68099FF9273D1E480032D78D /* main.cpp */; };
+		6817A557273EB5F50001DF76 /* libboost_json-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6817A556273EB5F50001DF76 /* libboost_json-mt.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +29,9 @@
 		6809A002273D1E880032D78D /* arg_index.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_index.hpp; sourceTree = "<group>"; };
 		6809A004273E1B930032D78D /* arg_list_log.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_list_log.hpp; sourceTree = "<group>"; };
 		6809A008273E48AB0032D78D /* string_utility.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string_utility.hpp; sourceTree = "<group>"; };
+		6817A552273EAEE10001DF76 /* boost_json_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_json_helper.hpp; sourceTree = "<group>"; };
+		6817A556273EB5F50001DF76 /* libboost_json-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_json-mt.dylib"; path = "../../../../../../usr/local/Cellar/boost/1.76.0/lib/libboost_json-mt.dylib"; sourceTree = "<group>"; };
+		6817A55A273EBA5F0001DF76 /* jni_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jni_helper.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6817A557273EB5F50001DF76 /* libboost_json-mt.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,6 +51,7 @@
 			children = (
 				68099FF8273D1E480032D78D /* meta */,
 				68099FF7273D1E480032D78D /* Products */,
+				6817A555273EB5F50001DF76 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -60,6 +66,8 @@
 		68099FF8273D1E480032D78D /* meta */ = {
 			isa = PBXGroup;
 			children = (
+				6817A558273EBA4A0001DF76 /* java */,
+				6809A00B273E920D0032D78D /* 3rd_helper */,
 				6809A007273E48740032D78D /* utilities */,
 				6809A000273D1E5C0032D78D /* template */,
 				68099FF9273D1E480032D78D /* main.cpp */,
@@ -82,6 +90,30 @@
 				6809A008273E48AB0032D78D /* string_utility.hpp */,
 			);
 			path = utilities;
+			sourceTree = "<group>";
+		};
+		6809A00B273E920D0032D78D /* 3rd_helper */ = {
+			isa = PBXGroup;
+			children = (
+				6817A552273EAEE10001DF76 /* boost_json_helper.hpp */,
+			);
+			path = 3rd_helper;
+			sourceTree = "<group>";
+		};
+		6817A555273EB5F50001DF76 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6817A556273EB5F50001DF76 /* libboost_json-mt.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6817A558273EBA4A0001DF76 /* java */ = {
+			isa = PBXGroup;
+			children = (
+				6817A55A273EBA5F0001DF76 /* jni_helper.hpp */,
+			);
+			path = java;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,6 +297,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z8327FKAVC;
 				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = "${BOOST_INCLUDE}";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/boost/1.76.0/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -275,6 +312,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z8327FKAVC;
 				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = "${BOOST_INCLUDE}";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/boost/1.76.0/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

@@ -1,12 +1,12 @@
 //
-//  arg_list_log.h
+//  arg_list_log.hpp
 //  meta
 //
 //  Created by Cosmo Julis on 11/12/21.
 //
 
-#ifndef arg_list_log_h
-#define arg_list_log_h
+#ifndef arg_list_log_hpp
+#define arg_list_log_hpp
 
 #include <string>
 
@@ -32,4 +32,4 @@ struct arg_list_log {
     }
 };
 
-#endif /* arg_list_log_h */
+#endif /* arg_list_log_hpp */
