@@ -30,7 +30,7 @@ namespace string {
         return sv;
     }
 
-    std::string join(const std::vector<std::string> & sv, const std::string & join)
+    std::string join(const std::vector<std::string> & sv, const std::string & join = "")
     {
         std::string ret;
         for (auto p = sv.begin(); p != sv.end(); p++) {

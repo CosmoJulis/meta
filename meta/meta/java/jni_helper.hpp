@@ -9,7 +9,7 @@
 #define jni_helper_hpp
 
 #include "../utilities/string_utility.hpp"
-#include "../template/arg_position.hpp"
+#include "../template/arg.hpp"
 
 namespace meta {
 
@@ -159,7 +159,7 @@ public:
     class j_arg_placeholder {
         j_arg_placeholder() { }
     };
-    
+
     using variant_type = std::conditional_t<
                                 sizeof...(Args) == 0,
                                 std::variant<j_arg_placeholder>,
@@ -168,20 +168,27 @@ public:
     j_function(const std::string & name, const Args & ... args) : _name(name) {
         (void)std::initializer_list<nullptr_t>{
             ([&args, this] {
-                constexpr int index = meta::arg::index_of<std::remove_const_t<std::remove_reference_t<decltype(args)>>, Args...>::index;
-                if constexpr (index > 0) {
-                    _vvt.emplace_back(variant_type(std::in_place_index<index>, args));
-                    _vidx.emplace_back(index);
-                }
+                using T0 = std::remove_reference_t<std::remove_const_t<decltype(args)>>;
+
+//                constexpr int index = meta::arg::index_of<T0, Args...>::index;
+                
+                std::cout << "T0: " << typeid(T0).name() << std::endl;
+                std::cout << "Args: " << meta::arg::log_list<Args...>::type_names() << std::endl;
+                
+//                if constexpr (index >= 0) {
+//                    _vvt.emplace_back(variant_type(std::in_place_index<index>, args));
+//                    _vsig.emplace_back(T0::sig());
+//                } else {
+//                    _vvt.emplace_back(variant_type(args));
+//                    _vsig.emplace_back(j_type<T0>::sig());
+//                }
             }(), nullptr)...
         };
     }
     
     std::string sig() const {
         std::string _sig = "(";
-        for (const auto & vt : _vvt) {
-//            _sig += vt.
-        }
+        _sig += meta::string::join(_vsig);
         _sig += ")";
         _sig += j_type<R>::sig();
         return _sig;
@@ -192,12 +199,7 @@ public:
         _fn += " ";
         _fn += _name;
         _fn += "(";
-        int index = 0;
-        for (const auto & vt : _vvt) {
-            auto jv = std::get<index>(vt);
-            _fn += j_type<decltype(jv)>::sig();
-            index++;
-        }
+        _fn += meta::string::join(_vsig, ",");
         _fn += ");";
         return _fn;
     }
@@ -205,7 +207,7 @@ public:
 private:
     std::string _name;
     std::vector<variant_type> _vvt;
-    std::vector<size_t> _vidx;
+    std::vector<std::string> _vsig;
 };
 
 

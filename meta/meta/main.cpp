@@ -185,39 +185,42 @@ int main(int argc, const char * argv[]) {
     
 //    return 0;
     
-    auto v = j_function<j_void>("bar");
-    std::cout << v.fullname() << std::endl;
+    auto fv = j_function<j_void>("foo");
+//    std::cout << fv.fullname() << std::endl;
     
+    auto fi = j_function<j_int, j_int>("bar", 1);
+//    std::cout << fi.fullname() << std::endl;
     
-    auto f = j_function<j_int, j_int, j_double, j_float>("foo", 1, 0.5, 0.1);
-    std::cout << f.fullname() << std::endl;
-
-    auto fs = j_function<j_void, j_string>("foo", "hello ");
-    std::cout << fs.fullname() << std::endl;
-
-
-    std::vector<int> vi;
-    vi.push_back(1);
-    vi.push_back(2);
-
-    std::vector<double> vd;
-    vd.push_back(0.1);
-    vd.push_back(0.2);
-
-    std::vector<std::string> vs;
-    vs.push_back("hello");
-    vs.push_back("world");
+    auto fii = j_function<j_char, j_int, j_int>("bar", 1, 2);
+//    std::cout << fii.fullname() << std::endl;
     
 
-    auto ffs = j_function<
-        j_void,
-        j_array<j_int>,
-        j_array<j_double>,
-        j_array<j_string>>
-        ("foo",
-         vi,
-         vd,
-         vs);
+//    auto fs = j_function<j_void, j_string>("foo", "hello ");
+//    std::cout << fs.fullname() << std::endl;
+
+
+//    std::vector<int> vi;
+//    vi.push_back(1);
+//    vi.push_back(2);
+//
+//    std::vector<double> vd;
+//    vd.push_back(0.1);
+//    vd.push_back(0.2);
+//
+//    std::vector<std::string> vs;
+//    vs.push_back("hello");
+//    vs.push_back("world");
+//
+//
+//    auto ffs = j_function<
+//        j_void,
+//        j_array<j_int>,
+//        j_array<j_double>,
+//        j_array<j_string>>
+//        ("foo",
+//         vi,
+//         vd,
+//         vs);
 
     
     
