@@ -175,7 +175,7 @@ public:
     j_function(const std::string & name, const Args & ... args) : _name(name) {
         (void)std::initializer_list<nullptr_t>{
             ([&args, this] {
-                using T0 = std::remove_const_t<std::remove_reference_t<decltype(args)>>;
+                using T0 = std::remove_cvref<decltype(args)>;
                 constexpr int index = meta::arg::index_of<T0, Args...>::index;
                 if constexpr (index >= 0) {
                     _vvt.emplace_back(variant_type(std::in_place_index<index>, args));

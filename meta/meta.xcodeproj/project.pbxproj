@@ -296,6 +296,7 @@
 		68099FFE273D1E480032D78D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++2a";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z8327FKAVC;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -311,6 +312,7 @@
 		68099FFF273D1E480032D78D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++2a";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z8327FKAVC;
 				ENABLE_HARDENED_RUNTIME = YES;
