@@ -188,7 +188,7 @@ public:
     
     std::string sig() const {
         std::string _sig = "(";
-        _sig += meta::string::join(sigs());
+        _sig += meta::string::join(_sigs());
         _sig += ")";
         _sig += R::sig();
         return _sig;
@@ -199,7 +199,7 @@ public:
         _fn += " ";
         _fn += _name;
         _fn += "(";
-        _fn += meta::string::join(sigs(), ",");
+        _fn += meta::string::join(_sigs(), ",");
         _fn += ");";
         return _fn;
     }
@@ -208,7 +208,8 @@ private:
     
     std::string _name;
     std::vector<variant_type> _vvt;
-    std::vector<std::string> sigs() const {
+    
+    std::vector<std::string> _sigs() const {
         std::vector<std::string> vs;
         for (const auto & vt : _vvt) {
             std::visit([&vs](const auto & k){
