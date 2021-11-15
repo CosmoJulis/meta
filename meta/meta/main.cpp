@@ -131,13 +131,95 @@
 //}
 
 
+using namespace std;
+
+template<typename T>
+struct has_data_size
+{
+  template<typename Y>
+    static constexpr bool checkMethods(decltype(std::declval<T>().data()) returnTypeOfData = nullptr,
+                                       decltype(std::declval<T>().size()) returnTypeOfSize = 0)
+    {
+      if constexpr (std::is_convertible_v<decltype(returnTypeOfData), const char*> &&
+                    std::is_convertible_v<decltype(returnTypeOfSize), int>) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+  template<typename Y>
+    static constexpr bool checkMethods(...)
+    {
+      return false;
+    }
+
+  static constexpr bool value = checkMethods<T>(nullptr, 0);
+};
+
+
+struct Foo {};
+
+class Bar {
+public:
+  char* data() {
+    return nullptr;
+  }
+    int size() {
+        return 0;
+    }
+private:
+    Bar(int a) { }
+};
+
+
 
 #include "java/jni_helper.hpp"
 
 
 int main(int argc, const char * argv[]) {
     using namespace meta::jni::helper;
-//    auto f = j_function<j_void, j_int, j_double, j_string, j_object>("foo", 1, 1.5, "hello", j_object("com.application.Activity"));
+    
+    
+
+    
+//    return 0;
+    
+    auto v = j_function<j_void>("bar");
+    std::cout << v.fullname() << std::endl;
+    
+    
+    auto f = j_function<j_int, j_int, j_double, j_float>("foo", 1, 0.5, 0.1);
+    std::cout << f.fullname() << std::endl;
+
+    auto fs = j_function<j_void, j_string>("foo", "hello ");
+    std::cout << fs.fullname() << std::endl;
+
+
+    std::vector<int> vi;
+    vi.push_back(1);
+    vi.push_back(2);
+
+    std::vector<double> vd;
+    vd.push_back(0.1);
+    vd.push_back(0.2);
+
+    std::vector<std::string> vs;
+    vs.push_back("hello");
+    vs.push_back("world");
+    
+
+    auto ffs = j_function<
+        j_void,
+        j_array<j_int>,
+        j_array<j_double>,
+        j_array<j_string>>
+        ("foo",
+         vi,
+         vd,
+         vs);
+
+    
     
     return 0;
 }

@@ -29,7 +29,7 @@ struct _vector<std::vector<T>, Allocator> {
 };
 
 template<typename T, typename Allocator = std::allocator<T>>
-inline constexpr bool vector = _vector<T, Allocator>::value;
+static inline constexpr bool vector = _vector<T, Allocator>::value;
 
 
 

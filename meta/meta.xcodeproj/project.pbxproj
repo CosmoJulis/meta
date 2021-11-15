@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		68099FFA273D1E480032D78D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68099FF9273D1E480032D78D /* main.cpp */; };
-		6817A557273EB5F50001DF76 /* libboost_json-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6817A556273EB5F50001DF76 /* libboost_json-mt.dylib */; };
+		68CE1764273FFA5F00D57EE9 /* libboost_json-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 68CE1763273FFA5F00D57EE9 /* libboost_json-mt.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,13 +26,13 @@
 /* Begin PBXFileReference section */
 		68099FF6273D1E480032D78D /* meta */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = meta; sourceTree = BUILT_PRODUCTS_DIR; };
 		68099FF9273D1E480032D78D /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		6809A002273D1E880032D78D /* arg_index.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_index.hpp; sourceTree = "<group>"; };
+		6809A002273D1E880032D78D /* arg_position.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_position.hpp; sourceTree = "<group>"; };
 		6809A004273E1B930032D78D /* arg_list_log.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_list_log.hpp; sourceTree = "<group>"; };
 		6809A008273E48AB0032D78D /* string_utility.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string_utility.hpp; sourceTree = "<group>"; };
 		6817A552273EAEE10001DF76 /* boost_json_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_json_helper.hpp; sourceTree = "<group>"; };
-		6817A556273EB5F50001DF76 /* libboost_json-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_json-mt.dylib"; path = "../../../../../../usr/local/Cellar/boost/1.76.0/lib/libboost_json-mt.dylib"; sourceTree = "<group>"; };
 		6817A55A273EBA5F0001DF76 /* jni_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jni_helper.hpp; sourceTree = "<group>"; };
 		687E13C6273FCBB400262D04 /* arg_is.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_is.hpp; sourceTree = "<group>"; };
+		68CE1763273FFA5F00D57EE9 /* libboost_json-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_json-mt.a"; path = "../../../../../../usr/local/Cellar/boost/1.76.0/lib/libboost_json-mt.a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,7 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6817A557273EB5F50001DF76 /* libboost_json-mt.dylib in Frameworks */,
+				68CE1764273FFA5F00D57EE9 /* libboost_json-mt.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,7 +79,7 @@
 		6809A000273D1E5C0032D78D /* template */ = {
 			isa = PBXGroup;
 			children = (
-				6809A002273D1E880032D78D /* arg_index.hpp */,
+				6809A002273D1E880032D78D /* arg_position.hpp */,
 				6809A004273E1B930032D78D /* arg_list_log.hpp */,
 				687E13C6273FCBB400262D04 /* arg_is.hpp */,
 			);
@@ -105,7 +105,7 @@
 		6817A555273EB5F50001DF76 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				6817A556273EB5F50001DF76 /* libboost_json-mt.dylib */,
+				68CE1763273FFA5F00D57EE9 /* libboost_json-mt.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
