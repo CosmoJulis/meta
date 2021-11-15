@@ -32,9 +32,6 @@ template<typename T, typename Allocator = std::allocator<T>>
 static inline constexpr bool vector = _vector<T, Allocator>::value;
 
 
-
-
-
 }
 
 }

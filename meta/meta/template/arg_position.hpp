@@ -75,23 +75,6 @@ struct index_of {
 };
 
 
-
-/*
- *  Get arg at position in args
- *  throw not found
- *  根据index获取Args的类型
- *  找不到会抛出异常
- *  index must constexpr
- */
-//template<size_t index, typename... Args>
-//struct at {
-//    using type = int;
-//    // TODO:
-//};
-
-
-
-
 }
 
 }

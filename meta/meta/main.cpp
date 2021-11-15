@@ -6,9 +6,7 @@
 //
 
 #include <iostream>
-#include <vector>
-#include <variant>
-#include <list>
+#include "template/arg.hpp"
 
 //#include "utilities/string_utility.hpp"
 //#include "template/arg_index.hpp"
@@ -131,96 +129,81 @@
 //}
 
 
-using namespace std;
-
-template<typename T>
-struct has_data_size
-{
-  template<typename Y>
-    static constexpr bool checkMethods(decltype(std::declval<T>().data()) returnTypeOfData = nullptr,
-                                       decltype(std::declval<T>().size()) returnTypeOfSize = 0)
-    {
-      if constexpr (std::is_convertible_v<decltype(returnTypeOfData), const char*> &&
-                    std::is_convertible_v<decltype(returnTypeOfSize), int>) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-  template<typename Y>
-    static constexpr bool checkMethods(...)
-    {
-      return false;
-    }
-
-  static constexpr bool value = checkMethods<T>(nullptr, 0);
-};
-
-
-struct Foo {};
-
-class Bar {
-public:
-  char* data() {
-    return nullptr;
-  }
-    int size() {
-        return 0;
-    }
-private:
-    Bar(int a) { }
-};
+//using namespace std;
+//
+//template<typename T>
+//struct has_data_size
+//{
+//  template<typename Y>
+//    static constexpr bool checkMethods(decltype(std::declval<T>().data()) returnTypeOfData = nullptr,
+//                                       decltype(std::declval<T>().size()) returnTypeOfSize = 0)
+//    {
+//      if constexpr (std::is_convertible_v<decltype(returnTypeOfData), const char*> &&
+//                    std::is_convertible_v<decltype(returnTypeOfSize), int>) {
+//        return true;
+//      } else {
+//        return false;
+//      }
+//    }
+//
+//  template<typename Y>
+//    static constexpr bool checkMethods(...)
+//    {
+//      return false;
+//    }
+//
+//  static constexpr bool value = checkMethods<T>(nullptr, 0);
+//};
+//
+//
+//struct Foo {};
+//
+//class Bar {
+//public:
+//  char* data() {
+//    return nullptr;
+//  }
+//    int size() {
+//        return 0;
+//    }
+//private:
+//    Bar(int a) { }
+//};
 
 
 
 #include "java/jni_helper.hpp"
 
 
+
 int main(int argc, const char * argv[]) {
+
+
     using namespace meta::jni::helper;
+        
+    
+
+    
+     
+    
+//    std::string s = meta::arg::list<int, double, char>::log();
+//
+//    std::cout << s << std::endl;
+    
+    
+    
+    
+//    meta::arg::remove_const<decltype(a), decltype(b)>::type ca2 = 4;
+    
+//    meta::arg::remove_const<decltype(a), decltype(b)>::type
+    
+    
+//    std::cout << meta::arg::index_of<j_int, j_char, j_int>::index << std::endl;
+//
     
     
 
-    
-//    return 0;
-    
-    auto fv = j_function<j_void>("foo");
-//    std::cout << fv.fullname() << std::endl;
-    
-    auto fi = j_function<j_int, j_int>("bar", 1);
-//    std::cout << fi.fullname() << std::endl;
-    
-    auto fii = j_function<j_char, j_int, j_int>("bar", 1, 2);
-//    std::cout << fii.fullname() << std::endl;
-    
 
-//    auto fs = j_function<j_void, j_string>("foo", "hello ");
-//    std::cout << fs.fullname() << std::endl;
-
-
-//    std::vector<int> vi;
-//    vi.push_back(1);
-//    vi.push_back(2);
-//
-//    std::vector<double> vd;
-//    vd.push_back(0.1);
-//    vd.push_back(0.2);
-//
-//    std::vector<std::string> vs;
-//    vs.push_back("hello");
-//    vs.push_back("world");
-//
-//
-//    auto ffs = j_function<
-//        j_void,
-//        j_array<j_int>,
-//        j_array<j_double>,
-//        j_array<j_string>>
-//        ("foo",
-//         vi,
-//         vd,
-//         vs);
 
     
     

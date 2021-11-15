@@ -11,6 +11,7 @@
 
 #include "arg_is.hpp"
 #include "arg_log.hpp"
+#include "arg_variation.hpp"
 #include "arg_position.hpp"
 
 

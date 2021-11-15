@@ -30,6 +30,7 @@
 		6809A008273E48AB0032D78D /* string_utility.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string_utility.hpp; sourceTree = "<group>"; };
 		6817A552273EAEE10001DF76 /* boost_json_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_json_helper.hpp; sourceTree = "<group>"; };
 		6817A55A273EBA5F0001DF76 /* jni_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jni_helper.hpp; sourceTree = "<group>"; };
+		6854C9ED274234AA000A8C0E /* arg_variation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_variation.hpp; sourceTree = "<group>"; };
 		687E13C6273FCBB400262D04 /* arg_is.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_is.hpp; sourceTree = "<group>"; };
 		68E8257E274228880005E2E5 /* arg.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -80,6 +81,7 @@
 				68E8257E274228880005E2E5 /* arg.hpp */,
 				687E13C6273FCBB400262D04 /* arg_is.hpp */,
 				6809A004273E1B930032D78D /* arg_log.hpp */,
+				6854C9ED274234AA000A8C0E /* arg_variation.hpp */,
 				6809A002273D1E880032D78D /* arg_position.hpp */,
 			);
 			path = template;
