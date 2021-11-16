@@ -66,7 +66,7 @@ int main(int argc, const char * argv[]) {
         
 
 //    auto jc = j_call<j_void, j_int>(j_class("com.application.Activity"), j_static_function<j_void, j_int>("idid", 1));
-    auto jc = j_call<j_void, j_int>("com.application.Activity", "idid", 1);
+    j_call<j_void, j_int>("com.application.Activity", "idid", 1);
     
     return 0;
 }
