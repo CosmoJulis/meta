@@ -243,39 +243,74 @@ struct j_class {
     std::string classname;
 };
 
+template <typename R, typename ... Args>
+class j_call {
+public:
+    j_call(const j_class & c, const j_static_function<R, Args...> & sf) {
+        std::cout << "class<" << c.classname << "> call \"" << sf.fullname() << "\"" << std::endl;
+    }
+
+    j_call(const std::string & classname, const std::string & function, const Args & ... args) :
+    j_call(j_class(classname), j_static_function<R, Args...>(function, args...)) { }
+
+    
+    j_call(const char * classname, const char * function, const Args & ... args) :
+    j_call(std::string(classname), std::string(function), args...) { }
+    
+
+    j_call(const j_object & o, const j_function<R, Args...> & f) {
+        std::cout << "object<" << o.classname() << "> call: \"" << f.fullname() << "\"" << std::endl;
+    }
+    
+    j_call(const j_object & o, const std::string & function, const Args & ... args) :
+    j_call(o, j_function<R, Args...>(function, args...)) { }
+    
+    j_call(const j_object & o, const char * function, const Args & ... args) :
+    j_call(o, std::string(function), args...) { }
+    
+private:
+
+};
+
+
+
+//template <typename R, typename ... Args>
+//void j_call(const j_class & c, const j_static_function<R, Args...> & sf) {
+//    std::cout << "class<" << c.classname << "> call \"" << sf.fullname() << "\"" << std::endl;
+//}
+//
+//template <typename R, typename ... Args>
+//void j_call(const std::string & classname, const std::string & function, const Args & ... args) {
+//    j_call(j_class(classname), j_static_function<R, Args...>(function, args...));
+//}
+//
+//template <typename R, typename ... Args>
+//void j_call(const char * classname, const char * function, const Args & ... args) {
+//    j_call(j_class(classname), j_static_function<R, Args...>(function, args...));
+//}
+//
+//
+//template <typename R, typename ... Args>
+//void j_call(const j_object & o, const j_function<R, Args...> & f) {
+//    std::cout << "object<" << o.classname() << "> call: \"" << f.fullname() << "\"" << std::endl;
+//}
+//
+//template <typename R, typename ... Args>
+//void j_call(const j_object & o, const std::string & function, const Args & ... args) {
+//    j_call(o, j_function<R, Args...>(function, args...));
+//}
+//
+//template <typename R, typename ... Args>
+//void j_call(const j_object & o, const char * function, const Args & ... args) {
+//    j_call(o, j_function<R, Args...>(function, args...));
+//}
 
 
 template <typename R, typename ... Args>
-void j_call(const j_class & c, const j_static_function<R, Args...> & sf) {
-    std::cout << "class<" << c.classname << "> call \"" << sf.fullname() << "\"" << std::endl;
-}
-
-template <typename R, typename ... Args>
-void j_call(const std::string & classname, const std::string & function, const Args & ... args) {
-    j_call(j_class(classname), j_static_function<R, Args...>(function, args...));
-}
-
-template <typename R, typename ... Args>
-void j_call(const char * classname, const char * function, const Args & ... args) {
-    j_call(j_class(classname), j_static_function<R, Args...>(function, args...));
-}
-
-
-template <typename R, typename ... Args>
-void j_call(const j_object & o, const j_function<R, Args...> & f) {
-    std::cout << "object<" << o.classname() << "> call: \"" << f.fullname() << "\"" << std::endl;
-}
-
-template <typename R, typename ... Args>
-void j_call(const j_object & o, const std::string & function, const Args & ... args) {
-    j_call(o, j_function<R, Args...>(function, args...));
-}
-
-template <typename R, typename ... Args>
-void j_call(const j_object & o, const char * function, const Args & ... args) {
-    j_call(o, j_function<R, Args...>(function, args...));
-}
-
+class my_j_call : public j_call<R, Args...> {
+    using j_call<R, Args...>::j_call;
+    // TODO: 实现自定义 env
+};
 
 /*
  *  jobject call function
