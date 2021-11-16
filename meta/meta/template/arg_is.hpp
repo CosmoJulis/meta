@@ -18,17 +18,17 @@ namespace arg {
 
 namespace is {
 
-template<typename T, typename Allocator>
+template <typename T, typename Allocator>
 struct _vector {
     static inline constexpr bool value = false;
 };
 
-template<typename T, typename Allocator>
+template <typename T, typename Allocator>
 struct _vector<std::vector<T>, Allocator> {
     static inline constexpr bool value = true;
 };
 
-template<typename T, typename Allocator = std::allocator<T>>
+template <typename T, typename Allocator = std::allocator<T>>
 static inline constexpr bool vector = _vector<T, Allocator>::value;
 
 

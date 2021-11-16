@@ -25,10 +25,10 @@ namespace arg {
  *  获取 T 在 Args... 中的第一个位置
  *  -1 不存在
  */
-template<typename T, typename... Args>
+template <typename T, typename ... Args>
 struct index_of {
     
-    template<typename _T, int _index, typename _F, typename ... _Args>
+    template <typename _T, int _index, typename _F, typename ... _Args>
     struct _impl {
         static constexpr int getIndex() {
             if constexpr (std::is_same_v<_T, _F>) {
@@ -39,7 +39,7 @@ struct index_of {
         }
     };
 
-    template<typename _T, int _index, typename _F>
+    template <typename _T, int _index, typename _F>
     struct _impl<_T, _index, _F> {
         static constexpr int getIndex() {
             if constexpr (std::is_same_v<_T, _F>) {
@@ -50,7 +50,7 @@ struct index_of {
         }
     };
 
-    template<typename _T, int _idx, typename _F, typename _J>
+    template <typename _T, int _idx, typename _F, typename _J>
     struct _impl<_T, _idx, _F, _J> {
         static constexpr int getIndex() {
             if constexpr (std::is_same_v<_T, _F>) {

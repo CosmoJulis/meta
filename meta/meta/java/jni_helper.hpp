@@ -122,7 +122,7 @@ struct j_object : j_type {
     }
 };
 
-template<typename T>
+template <typename T>
 struct j_array {
     static inline std::string sig() {
         return std::string("[") + T::sig();
@@ -130,8 +130,8 @@ struct j_array {
     
     using value_type = T;
     
-    template<typename E>
-    j_array(const std::vector<E> & vv) {
+    template <typename E>
+    j_array(const std::vector<E> & vv) { // TODO: vector to iterable
         for (const E & v : vv) {
             values.push_back(value_type(v));
         }
@@ -140,23 +140,23 @@ struct j_array {
 };
 
 
-template<typename T>
+template <typename T>
 struct is_j_array {
     static inline constexpr bool value = false;
 };
 
-template<typename T>
+template <typename T>
 struct is_j_array<j_array<T>> {
     static inline constexpr bool value = true;
 };
 
-template<typename T>
+template <typename T>
 inline constexpr bool is_j_array_t = is_j_array<T>::value;
 
-// TODO: vector to iterable
 
 
-template<typename R, typename... Args>
+
+template <typename R, typename ... Args>
 class j_function {
 public:
     
@@ -185,6 +185,8 @@ public:
             }(), nullptr)...
         };
     }
+    
+    j_function(const char * name, const Args & ... args) : j_function(name, args...) { }
     
     std::string sig() const {
         std::string _sig = "(";
@@ -223,7 +225,7 @@ protected:
 };
 
 
-template<typename R, typename... Args>
+template <typename R, typename ... Args>
 class j_static_function : public j_function<R, Args...> {
 public:
     j_static_function(const std::string & name, const Args & ... args) : j_function<R, Args...>(name, args...) { }
@@ -233,6 +235,66 @@ public:
         return "static " + _fn;
     }
 };
+
+
+
+struct j_class {
+    j_class(const std::string & name) : classname(name) { }
+    std::string classname;
+};
+
+template <typename R, typename ... Args>
+class j_call {
+public:
+    j_call(const j_class & c, const j_static_function<R, Args...> & sf) {
+        std::cout << "class<" << c.classname << "> call \"" << sf.fullname() << "\"" << std::endl;
+    }
+
+    j_call(const std::string & classname, const std::string & function, const Args & ... args) :
+    j_call(j_class(classname), j_static_function<R, Args...>(function, args...)) { }
+
+    
+    j_call(const char * classname, const char * function, const Args & ... args) :
+    j_call(std::string(classname), std::string(function), args...) { }
+    
+
+    j_call(const j_object & o, const j_function<R, Args...> & f) {
+        std::cout << "object<" << o.classname() << "> call: \"" << f.fullname() << "\"" << std::endl;
+    }
+    
+    j_call(const j_object & o, const std::string & function, const Args & ... args) :
+    j_call(o, j_function<R, Args...>(function, args...)) { }
+    
+    j_call(const j_object & o, const char * function, const Args & ... args) :
+    j_call(o, std::string(function), args...) { }
+    
+private:
+
+};
+
+/*
+ *  jobject call function
+ *  jclass call static function
+ *
+ void _vibrate(float duration)
+ {
+     JNIEnv * env = get_JNI_Env();
+     jclass jcls = get_bridge_java_class();
+     jobject jobj = get_bridge_java_singleton();
+     if (!env || !jcls || !jobj) return;
+
+     static jmethodID jmethod = nullptr;
+     if (!jmethod) {
+         jmethodID tmp = env->GetMethodID(jcls, "vibrate", "(F)V");
+         if (env->ExceptionCheck()) return;
+         jmethod = tmp;
+     }
+     if (jmethod) {
+         jfloat f = duration;
+         env->CallVoidMethod(jobj, jmethod, duration);
+     }
+ }
+ */
 
 
 }

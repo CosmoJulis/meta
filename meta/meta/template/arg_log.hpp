@@ -15,17 +15,17 @@ namespace meta {
 namespace arg {
 
 
-template<typename ... Args>
+template <typename ... Args>
 struct list {
     
-    template<typename _T, typename ... _Args>
+    template <typename _T, typename ... _Args>
     struct _impl {
         static std::string _type_name() {
             return _impl<_T>::_type_name() + ", " + _impl<_Args...>::_type_name();
         }
     };
 
-    template<typename _T>
+    template <typename _T>
     struct _impl<_T> {
         static std::string _type_name() {
             if constexpr (std::is_const_v<_T> && std::is_reference_v<_T>) {

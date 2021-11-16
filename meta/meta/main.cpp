@@ -14,10 +14,10 @@
 
 //using namespace std;
 //
-//template<typename T>
+//template <typename T>
 //struct has_data_size
 //{
-//  template<typename Y>
+//  template <typename Y>
 //    static constexpr bool checkMethods(decltype(std::declval<T>().data()) returnTypeOfData = nullptr,
 //                                       decltype(std::declval<T>().size()) returnTypeOfSize = 0)
 //    {
@@ -29,7 +29,7 @@
 //      }
 //    }
 //
-//  template<typename Y>
+//  template <typename Y>
 //    static constexpr bool checkMethods(...)
 //    {
 //      return false;
@@ -60,11 +60,13 @@
 int main(int argc, const char * argv[]) {
 
     using namespace meta::jni::helper;
+    
     auto j = j_static_function<j_void, j_int, j_double, j_int, j_double>("idid", 1, 0.1, 2, 0.2);
     std::cout << j.fullname() << std::endl;
         
 
-
+//    auto jc = j_call<j_void, j_int>(j_class("com.application.Activity"), j_static_function<j_void, j_int>("idid", 1));
+    auto jc = j_call<j_void, j_int>("com.application.Activity", "idid", 1);
     
     return 0;
 }
