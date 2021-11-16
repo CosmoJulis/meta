@@ -175,7 +175,7 @@ public:
     j_function(const std::string & name, const Args & ... args) : _name(name) {
         (void)std::initializer_list<nullptr_t>{
             ([&args, this] {
-                using T0 = std::remove_cvref<decltype(args)>;
+                using T0 = std::remove_cvref_t<decltype(args)>;
                 constexpr int index = meta::arg::index_of<T0, Args...>::index;
                 if constexpr (index >= 0) {
                     _vvt.emplace_back(variant_type(std::in_place_index<index>, args));
@@ -194,7 +194,7 @@ public:
         return _sig;
     }
     
-    std::string fullname() const {
+    virtual std::string fullname() const {
         std::string _fn = R::sig();
         _fn += " ";
         _fn += _name;
@@ -209,6 +209,7 @@ private:
     std::string _name;
     std::vector<variant_type> _vvt;
     
+protected:
     std::vector<std::string> _sigs() const {
         std::vector<std::string> vs;
         for (const auto & vt : _vvt) {
@@ -219,6 +220,18 @@ private:
         return vs;
     }
 
+};
+
+
+template<typename R, typename... Args>
+class j_static_function : public j_function<R, Args...> {
+public:
+    j_static_function(const std::string & name, const Args & ... args) : j_function<R, Args...>(name, args...) { }
+    
+    std::string fullname() const override {
+        std::string _fn = j_function<R, Args...>::fullname();
+        return "static " + _fn;
+    }
 };
 
 

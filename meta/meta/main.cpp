@@ -57,10 +57,12 @@
 
 
 
-
 int main(int argc, const char * argv[]) {
 
-
+    using namespace meta::jni::helper;
+    auto j = j_static_function<j_void, j_int, j_double, j_int, j_double>("idid", 1, 0.1, 2, 0.2);
+    std::cout << j.fullname() << std::endl;
+        
 
 
     
