@@ -59,20 +59,19 @@
 int main(int argc, const char * argv[]) {
     using namespace meta::jni::helper;
 
-
-
-
-
-    auto je = j_static_method<j_void>("idid");
-    std::cout << je.fullname() << std::endl;
+//    auto je = j_method<j_void>("com.application.Activity", "idid");
+//    std::cout << je.fullname() << std::endl;
+//
+//    auto jse = j_static_method<j_void>("com.application.Activity", "didi");
+//    std::cout << jse.fullname() << std::endl;
 
 
 //    auto j = j_static_function<j_void, j_int, j_string, j_string>("idid", 1, "foo", "bar");
 //    std::cout << j.fullname() << std::endl;
-//
-//
-////    auto jc = j_call<j_void, j_int>(j_class("com.application.Activity"), j_static_function<j_void, j_int>("idid", 1));
-//    j_call<j_void, j_int>("com.application.Activity", "idid", 1);
+
+    
+    auto jc = j_call<j_void, j_int>("com.application.Activity", "idid", 1);
+    jc.execute();
     
     return 0;
 }
