@@ -56,14 +56,14 @@
 
 
 
-
 int main(int argc, const char * argv[]) {
     using namespace meta::jni::helper;
 
 
 
 
-    auto je = j_static_function<j_void>("idid");
+
+    auto je = j_static_method<j_void>("idid");
     std::cout << je.fullname() << std::endl;
 
 

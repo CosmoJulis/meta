@@ -32,6 +32,8 @@
 		6817A55A273EBA5F0001DF76 /* jni_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jni_helper.hpp; sourceTree = "<group>"; };
 		6854C9ED274234AA000A8C0E /* arg_variation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_variation.hpp; sourceTree = "<group>"; };
 		687E13C6273FCBB400262D04 /* arg_is.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_is.hpp; sourceTree = "<group>"; };
+		68B2E0552744A78A00384069 /* jni.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jni.h; sourceTree = "<group>"; };
+		68B2E0562744A82200384069 /* jni_md.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jni_md.h; sourceTree = "<group>"; };
 		68E8257E274228880005E2E5 /* arg.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -113,6 +115,8 @@
 		6817A558273EBA4A0001DF76 /* java */ = {
 			isa = PBXGroup;
 			children = (
+				68B2E0562744A82200384069 /* jni_md.h */,
+				68B2E0552744A78A00384069 /* jni.h */,
 				6817A55A273EBA5F0001DF76 /* jni_helper.hpp */,
 			);
 			path = java;

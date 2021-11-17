@@ -11,6 +11,8 @@
 #include "../utilities/string_utility.hpp"
 #include "../template/arg.hpp"
 #include <variant>
+#include <unordered_map>
+#include "jni.h"
 
 namespace meta {
 
@@ -165,10 +167,16 @@ template <typename T>
 inline constexpr bool is_j_array_t = is_j_array<T>::value;
 
 
+
+#pragma mark - jni jclass jmethodid cached
+static std::unordered_map<std::string, jclass *> jclass_pointer_map;
+static std::unordered_map<std::string, jmethodID *> jmethod_id_pointer_map;
+
+
 #pragma mark - jni function/static function
 
 template <typename R, typename ... Args>
-class j_function {
+class j_method {
 private:
     class j_arg_placeholder {
     private:
@@ -190,7 +198,7 @@ public:
                                 std::variant<j_arg_placeholder>,
                                 std::variant<Args...>>;
     
-    j_function(const std::string & name, const Args & ... args) : _name(name) {
+    j_method(const std::string & name, const Args & ... args) : _method_name(name) {
         (void)std::initializer_list<nullptr_t>{
             ([&args, this] {
                 using T0 = std::remove_cvref_t<decltype(args)>;
@@ -204,7 +212,7 @@ public:
         };
     }
     
-    j_function(const char * name, const Args & ... args) : j_function(name, args...) { }
+    j_method(const char * name, const Args & ... args) : j_method(name, args...) { }
     
     std::string sig() const {
         std::string _sig = "(";
@@ -217,19 +225,32 @@ public:
     virtual std::string fullname() const {
         std::string _fn = R::sig();
         _fn += " ";
-        _fn += _name;
+        _fn += _method_name;
         _fn += "(";
         _fn += meta::string::join(_sigs(), ", ");
         _fn += ");";
         return _fn;
     }
     
+    jmethodID * jmethod_id_pointer() const {
+        std::string fn = fullname();
+        if (jmethod_id_pointer_map.contains(fn)) {
+            return jmethod_id_pointer_map[fn];
+        } else {
+            jmethodID * jmethod_id = nullptr;  // TODO: get jmethod id
+            jmethod_id_pointer_map[fn] = jmethod_id;
+            return jmethod_id;
+        }
+    }
+    
 private:
     
-    std::string _name;
+    std::string _method_name;
     std::vector<variant_type> _vvt;
     
 protected:
+    
+    
     std::vector<std::string> _sigs() const {
         std::vector<std::string> vs;
         for (const auto & vt : _vvt) {
@@ -246,12 +267,12 @@ protected:
 
 
 template <typename R, typename ... Args>
-class j_static_function : public j_function<R, Args...> {
+class j_static_method : public j_method<R, Args...> {
 public:
-    j_static_function(const std::string & name, const Args & ... args) : j_function<R, Args...>(name, args...) { }
+    j_static_method(const std::string & name, const Args & ... args) : j_method<R, Args...>(name, args...) { }
     
     std::string fullname() const override {
-        std::string _fn = j_function<R, Args...>::fullname();
+        std::string _fn = j_method<R, Args...>::fullname();
         return "static " + _fn;
     }
 };
@@ -259,9 +280,31 @@ public:
 
 #pragma mark - jni cached class
 
-struct j_class {
-    j_class(const std::string & name) : classname(name) { }
-    std::string classname;
+class j_class {
+public:
+    
+    j_class(const std::string & name) : _classname(name) {
+
+    }
+    
+    std::string classname() const {
+        return _classname;
+    }
+    
+    jclass * jclass_poniter() const {
+        if (jclass_pointer_map.contains(_classname)) {
+            return jclass_pointer_map[_classname];
+        } else {
+            jclass * jcls = nullptr;  // TODO: get jcls
+            jclass_pointer_map[_classname] = jcls;
+            return jcls;
+        }
+    }
+    
+private:
+
+    std::string _classname;
+
 };
 
 
@@ -271,24 +314,24 @@ struct j_class {
 template <typename R, typename ... Args>
 class j_call {
 public:
-    j_call(const j_class & c, const j_static_function<R, Args...> & sf) {
-        std::cout << "class<" << c.classname << "> call \"" << sf.fullname() << "\"" << std::endl;
+    j_call(const j_class & c, const j_static_method<R, Args...> & sf) {
+        std::cout << "class<" << c.classname() << "> call \"" << sf.fullname() << "\"" << std::endl;
     }
 
     j_call(const std::string & classname, const std::string & function, const Args & ... args) :
-    j_call(j_class(classname), j_static_function<R, Args...>(function, args...)) { }
+    j_call(j_class(classname), j_static_method<R, Args...>(function, args...)) { }
 
     
     j_call(const char * classname, const char * function, const Args & ... args) :
     j_call(std::string(classname), std::string(function), args...) { }
     
 
-    j_call(const j_object & o, const j_function<R, Args...> & f) {
+    j_call(const j_object & o, const j_method<R, Args...> & f) {
         std::cout << "object<" << o.classname() << "> call: \"" << f.fullname() << "\"" << std::endl;
     }
     
     j_call(const j_object & o, const std::string & function, const Args & ... args) :
-    j_call(o, j_function<R, Args...>(function, args...)) { }
+    j_call(o, j_method<R, Args...>(function, args...)) { }
     
     j_call(const j_object & o, const char * function, const Args & ... args) :
     j_call(o, std::string(function), args...) { }
