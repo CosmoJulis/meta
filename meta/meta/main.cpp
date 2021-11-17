@@ -6,8 +6,8 @@
 //
 
 #include <iostream>
+#include "template/arg.hpp"
 #include "java/jni_helper.hpp"
-
 
 
 
@@ -58,15 +58,21 @@
 
 
 int main(int argc, const char * argv[]) {
-
     using namespace meta::jni::helper;
-    
-    auto j = j_static_function<j_void, j_int, j_double, j_int, j_double>("idid", 1, 0.1, 2, 0.2);
-    std::cout << j.fullname() << std::endl;
-        
 
-//    auto jc = j_call<j_void, j_int>(j_class("com.application.Activity"), j_static_function<j_void, j_int>("idid", 1));
-    j_call<j_void, j_int>("com.application.Activity", "idid", 1);
+
+
+
+    auto je = j_static_function<j_void>("idid");
+    std::cout << je.fullname() << std::endl;
+
+
+//    auto j = j_static_function<j_void, j_int, j_string, j_string>("idid", 1, "foo", "bar");
+//    std::cout << j.fullname() << std::endl;
+//
+//
+////    auto jc = j_call<j_void, j_int>(j_class("com.application.Activity"), j_static_function<j_void, j_int>("idid", 1));
+//    j_call<j_void, j_int>("com.application.Activity", "idid", 1);
     
     return 0;
 }

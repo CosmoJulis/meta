@@ -18,6 +18,8 @@ namespace jni {
 
 namespace helper {
 
+#pragma mark - jni type
+
 struct j_type {
     static inline std::string sig();
 };
@@ -100,7 +102,15 @@ struct j_double : j_type {
     double value;
 };
 
-struct j_string : j_type {
+struct j_object : j_type {
+    static std::string classname();
+    
+    static inline std::string sig() {
+        return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
+    }
+};
+
+struct j_string : j_object {
     static inline std::string classname() {
         return "java.lang.String";
     }
@@ -114,13 +124,14 @@ struct j_string : j_type {
     std::string value;
 };
 
-struct j_object : j_type {
-    static std::string classname();
-    
-    static inline std::string sig() {
-        return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
-    }
+
+
+template<typename R, typename ... Args>
+struct j_interface_object : j_object {
+    // TODO interface base
 };
+
+
 
 template <typename T>
 struct j_array {
@@ -154,18 +165,25 @@ template <typename T>
 inline constexpr bool is_j_array_t = is_j_array<T>::value;
 
 
-
+#pragma mark - jni function/static function
 
 template <typename R, typename ... Args>
 class j_function {
-public:
-    
-    static_assert(std::is_base_of_v<j_type, R>, "Unsupported basic types, try j_type");
-    // todo: add assert for args
-    
+private:
     class j_arg_placeholder {
+    private:
         j_arg_placeholder() { }
     };
+    
+public:
+    
+    static_assert(
+        meta::arg::is::all_base_of_v<j_type, R, Args...> &&
+        !meta::arg::is::any_const_v<R, Args...> &&
+        !meta::arg::is::any_reference_v<R, Args...> &&
+        !meta::arg::is::any_pointer_v<R, Args...>,
+        "Unsupported basic types, try j_type");
+
 
     using variant_type = std::conditional_t<
                                 sizeof...(Args) == 0,
@@ -201,7 +219,7 @@ public:
         _fn += " ";
         _fn += _name;
         _fn += "(";
-        _fn += meta::string::join(_sigs(), ",");
+        _fn += meta::string::join(_sigs(), ", ");
         _fn += ");";
         return _fn;
     }
@@ -216,7 +234,9 @@ protected:
         std::vector<std::string> vs;
         for (const auto & vt : _vvt) {
             std::visit([&vs](const auto & k){
-                vs.push_back(std::decay_t<decltype(k)>::sig());
+                if constexpr (!std::is_same_v<std::remove_cvref_t<decltype(k)>, j_arg_placeholder>) {
+                    vs.push_back(std::decay_t<decltype(k)>::sig());
+                }
             }, vt);
         }
         return vs;
@@ -237,11 +257,16 @@ public:
 };
 
 
+#pragma mark - jni cached class
 
 struct j_class {
     j_class(const std::string & name) : classname(name) { }
     std::string classname;
 };
+
+
+#pragma mark - jni call
+
 
 template <typename R, typename ... Args>
 class j_call {
@@ -268,48 +293,26 @@ public:
     j_call(const j_object & o, const char * function, const Args & ... args) :
     j_call(o, std::string(function), args...) { }
     
+    virtual void execute() {
+        
+    }
+    
 private:
 
 };
 
 
 
-//template <typename R, typename ... Args>
-//void j_call(const j_class & c, const j_static_function<R, Args...> & sf) {
-//    std::cout << "class<" << c.classname << "> call \"" << sf.fullname() << "\"" << std::endl;
-//}
-//
-//template <typename R, typename ... Args>
-//void j_call(const std::string & classname, const std::string & function, const Args & ... args) {
-//    j_call(j_class(classname), j_static_function<R, Args...>(function, args...));
-//}
-//
-//template <typename R, typename ... Args>
-//void j_call(const char * classname, const char * function, const Args & ... args) {
-//    j_call(j_class(classname), j_static_function<R, Args...>(function, args...));
-//}
-//
-//
-//template <typename R, typename ... Args>
-//void j_call(const j_object & o, const j_function<R, Args...> & f) {
-//    std::cout << "object<" << o.classname() << "> call: \"" << f.fullname() << "\"" << std::endl;
-//}
-//
-//template <typename R, typename ... Args>
-//void j_call(const j_object & o, const std::string & function, const Args & ... args) {
-//    j_call(o, j_function<R, Args...>(function, args...));
-//}
-//
-//template <typename R, typename ... Args>
-//void j_call(const j_object & o, const char * function, const Args & ... args) {
-//    j_call(o, j_function<R, Args...>(function, args...));
-//}
 
 
 template <typename R, typename ... Args>
 class my_j_call : public j_call<R, Args...> {
+public:
     using j_call<R, Args...>::j_call;
-    // TODO: 实现自定义 env
+
+    void execute() override {
+        
+    }
 };
 
 /*
