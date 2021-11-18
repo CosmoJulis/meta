@@ -8,8 +8,8 @@
 #ifndef jni_helper_hpp
 #define jni_helper_hpp
 
-//#define Xcode
-#define Android
+#define Xcode
+//#define Android
 
 #ifdef Xcode
 #include <variant>
@@ -269,7 +269,7 @@ struct j_double : j_type {
     }
 };
 
-class j_object : j_type {
+struct j_object : j_type {
 public:
     j_object(const jobject & jo = nullptr) : _jo(jo) { }
     
@@ -289,14 +289,13 @@ public:
     jobject pointer() const {
         return _jo;
     }
-    
 private:
-    
     jobject _jo;
 
 };
 
 class j_string : public j_object {
+public:
     static inline std::string classname() {
         return "java.lang.String";
     }
@@ -305,9 +304,38 @@ class j_string : public j_object {
         return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
     }
 
-    j_string(const char * v = "") : value(v) { }
-    j_string(const std::string & v = "") : value(v) { }
-    std::string value;
+    j_string(const char * v = nullptr) : value(v) { }
+    j_string(const std::string & v) : value(v.c_str()) { }
+
+    const char * value;
+    
+//    operator const char *() {
+//        return value;
+//    }
+//
+//    operator std::string () {
+//        return std::string(value);
+//    }
+    
+    operator jstring() {
+        if (_jstr == nullptr) {
+            _jstr_alloc = true;
+            _jstr = j_vm::shared().env().pointer()->NewStringUTF(value);
+        }
+        return _jstr;
+    }
+    
+//    ~j_string() {
+//        if (_jstr_alloc) {
+//            j_vm::shared().env().pointer()->DeleteLocalRef(_jstr);
+//            _jstr = nullptr;
+//            _jstr_alloc = false;
+//        }
+//    }
+    
+private:
+    bool _jstr_alloc = false;
+    jstring _jstr = nullptr;
 };
 
 
@@ -449,9 +477,9 @@ public:
                 r = j_double(jd);
             }
             else if constexpr (std::is_same_v<R, j_string>) {
-                jstring js = env->CallDoubleMethod(jobj, jmethod, args...);
-//                r =
-                // TODO: string cast
+                jstring js = (jstring)env->CallObjectMethod(jobj, jmethod, args...);
+                const char * str = env->GetStringUTFChars(js, nullptr);
+                r = j_string(str);
             }
             else if constexpr (std::is_base_of_v<j_object, R>) {
                 jobject jo = env->CallObjectMethod(jobj, jmethod, args...);
@@ -508,9 +536,9 @@ public:
                 r = j_double(jd);
             }
             else if constexpr (std::is_same_v<R, j_string>) {
-                jstring js = env->CallStaticDoubleMethod(jcls, jmethod, args...);
-//                r =
-                // TODO: string cast
+                jstring js = (jstring)env->CallStaticObjectMethod(jcls, jmethod, args...);
+                const char * str = env->GetStringUTFChars(js, nullptr);
+                r = j_string(str);
             }
             else if constexpr (std::is_base_of_v<j_object, R>) {
                 jobject jo = env->CallStaticObjectMethod(jcls, jmethod, args...);

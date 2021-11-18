@@ -60,12 +60,19 @@
 int main(int argc, const char * argv[]) {
     using namespace meta::jni::helper;
 
-    j_int ji = 1;
-    int j = ji;
-    std::cout << j << std::endl;
-    
 //    auto jc = j_call<j_void, j_int>("com.application.Activity", "idid", 1);
 //    jc.execute();
+    
+//    auto jc = j_call<j_string, j_string, j_string>(
+//            "com.cosmojulis.jnitestapp.MainActivity",
+//            "test_combine",
+//            "hello",
+//            "world"
+//            );
+//    std::string r = jc.execute();
+    
+    auto jc = j_call<j_void, j_string, j_string>("hsfsd", "sfsfd", "foo", "bar");
+    jc.execute();
     
     return 0;
 }
