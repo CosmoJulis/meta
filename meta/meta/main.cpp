@@ -55,10 +55,17 @@
 
 
 
-
-
 int main(int argc, const char * argv[]) {
     using namespace meta::jni::helper;
+    
+//    auto jc = j_call<j_void, j_interface_object>{
+//        "com.cosmojulis.jnitestapp.MainActivity",
+//        "test_interface_object",
+//        [](){
+//
+//        }
+//    };
+//    jc.execute();
 
 //    auto jc = j_call<j_void, j_int>("com.application.Activity", "idid", 1);
 //    jc.execute();
@@ -71,8 +78,8 @@ int main(int argc, const char * argv[]) {
 //            );
 //    std::string r = jc.execute();
     
-    auto jc = j_call<j_void, j_string, j_string>("hsfsd", "sfsfd", "foo", "bar");
-    jc.execute();
+//    auto jc = j_call<j_void, j_string, j_string>("hsfsd", "sfsfd", "foo", "bar");
+//    jc.execute();
     
     return 0;
 }
