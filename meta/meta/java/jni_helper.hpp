@@ -672,7 +672,7 @@ namespace meta {
 
                     constexpr size_t size = sizeof...(Args);
                     jvalue jvs[size];
-                    get_jvalues(jvs);
+                    j_method<R, Args...>::get_jvalues(jvs);
 
                     R r;
                     if constexpr (std::is_same_v<R, j_void>) {

@@ -78,8 +78,8 @@ int main(int argc, const char * argv[]) {
 //            );
 //    std::string r = jc.execute();
     
-//    auto jc = j_call<j_void, j_string, j_string>("hsfsd", "sfsfd", "foo", "bar");
-//    jc.execute();
+    auto jc = j_call<j_void, j_string, j_string>("hsfsd", "sfsfd", "foo", "bar");
+    jc.execute();
     
     return 0;
 }
