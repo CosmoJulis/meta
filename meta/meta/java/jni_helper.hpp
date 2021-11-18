@@ -116,9 +116,9 @@ namespace meta {
                     return _classname;
                 }
 
-                std::string sig() const {
+                std::string sig = [this]{
                     return meta::string::join(meta::string::split(_classname, "."), "/");
-                }
+                }();
 
                 jclass pointer(const j_env & env) const {
 #ifdef Xcode
@@ -129,7 +129,7 @@ namespace meta {
                     {
                         return jclass_pointer_map[_classname];
                     } else {
-                        jclass jcls = env.pointer()->FindClass(sig().c_str());
+                        jclass jcls = env.pointer()->FindClass(sig.c_str());
                         if (env.pointer()->ExceptionCheck()) {
                             return nullptr;
                         }
@@ -147,19 +147,15 @@ namespace meta {
 #pragma mark - jni type
 
             struct j_type {
-                static inline std::string sig();
+                static inline std::string sig;
             };
 
             struct j_void : j_type {
-                static inline std::string sig() {
-                    return "V";
-                }
+                static inline std::string sig = [](){ return "V";}();
             };
 
             struct j_boolean : j_type {
-                static inline std::string sig() {
-                    return "Z";
-                }
+                static inline std::string sig = [](){ return "Z";}();
 
                 j_boolean(const bool & v = false) : value(v) { }
                 j_boolean(const unsigned char & v = 0) : value(v) { }
@@ -176,9 +172,7 @@ namespace meta {
             };
 
             struct j_byte : j_type {
-                static inline std::string sig() {
-                    return "B";
-                }
+                static inline std::string sig = [](){ return "B";}();
 
                 j_byte(const int8_t & v = 0) : value(v) { }
                 
@@ -202,9 +196,7 @@ namespace meta {
             };
 
             struct j_char : j_type {
-                static inline std::string sig() {
-                    return "C";
-                }
+                static inline std::string sig = [](){ return "C";}();
 
                 j_char(const char & v = 0) : value(v) { }
                 
@@ -224,9 +216,7 @@ namespace meta {
             };
 
             struct j_short : j_type {
-                static inline std::string sig() {
-                    return "S";
-                }
+                static inline std::string sig = [](){ return "S";}();
 
                 j_short(const short & v = 0) : value(v) { }
                 
@@ -242,9 +232,7 @@ namespace meta {
             };
 
             struct j_int : j_type {
-                static inline std::string sig() {
-                    return "I";
-                }
+                static inline std::string sig = [](){ return "I";}();
 
                 j_int(const int & v = 0) : value(v) { }
                 
@@ -260,9 +248,7 @@ namespace meta {
             };
 
             struct j_long : j_type {
-                static inline std::string sig() {
-                    return "L";
-                }
+                static inline std::string sig = [](){ return "L";}();
 
                 j_long(const long & v = 0) : value(v) { }
                 
@@ -278,9 +264,7 @@ namespace meta {
             };
 
             struct j_float : j_type {
-                static inline std::string sig() {
-                    return "F";
-                }
+                static inline std::string sig = [](){ return "F";}();
 
                 j_float(const float & v = 0) : value(v) { }
                 
@@ -296,9 +280,7 @@ namespace meta {
             };
 
             struct j_double : j_type {
-                static inline std::string sig() {
-                    return "D";
-                }
+                static inline std::string sig = [](){ return "D";}();
 
                 j_double(const double & v = 0) : value(v) { }
                 
@@ -321,9 +303,9 @@ namespace meta {
                     return "java.lang.Object";
                 }
 
-                static inline std::string sig() {
+                static inline std::string sig = [](){
                     return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
-                }
+                }();
 
                 static j_object & placeholder() {
                     static j_object _placeholder = j_object();
@@ -348,9 +330,9 @@ namespace meta {
                     return "java.lang.String";
                 }
 
-                static inline std::string sig() {
+                static inline std::string sig = [](){
                     return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
-                }
+                }();
 
                 j_string(const char * v = "") : value(v) {
                     if (_jstr == nullptr) {
@@ -416,9 +398,9 @@ namespace meta {
 
             template <typename T>
             struct j_array {
-                static inline std::string sig() {
-                    return std::string("[") + T::sig();
-                }
+                static inline std::string sig = [](){
+                    return std::string("[") + T::sig;
+                }();
 
                 using value_type = T;
 
@@ -448,6 +430,23 @@ namespace meta {
 
 
 
+        
+        template <typename T, typename ... Args>
+        struct j_types {
+            static inline std::string sig = [](){
+                return j_types<T>::sig + j_types<Args...>::sig;
+            }();
+        };
+        
+        template <typename T>
+        struct j_types<T> {
+            static inline std::string sig = T::sig;
+        };
+        
+        template <typename ... Args>
+        static inline std::string j_types_sig = j_types<Args...>::sig;
+        
+        
 
 /*
  * TODO:
@@ -472,8 +471,23 @@ namespace meta {
                         !meta::arg::is::any_reference_v<R, Args...> &&
                         !meta::arg::is::any_pointer_v<R, Args...>,
                         "Unsupported basic types, try j_type");
-
-                static_assert(!is_j_array_t<R>, "Return type can not be an array");
+#ifdef Xcode
+                static_assert(!meta::arg::is::any_base_of_v<j_void, Args...>, "Parameters can not be j_void");
+#endif
+//                static_assert(!is_j_array_t<R>, "Return type can not be an array");
+                
+                static inline std::string args_sig = [](){
+                    return j_types_sig<Args...>;
+                }();
+                
+                static inline std::string method_sig = [](){
+                    std::string _s = "(";
+                    _s += args_sig;
+                    _s += ")";
+                    _s += R::sig;
+                    return _s;
+                }();
+                
 
                 j_method() { }
 
@@ -500,21 +514,13 @@ namespace meta {
                     };
                 }
 
-                std::string sig() const {
-                    std::string _sig = "(";
-                    _sig += meta::string::join(_sigs());
-                    _sig += ")";
-                    _sig += R::sig();
-                    return _sig;
-                }
-
                 virtual std::string fullname() const {
                     std::string _fn = "<" + _jcls.classname() + "> ";
-                    _fn += R::sig();
+                    _fn += R::sig;
                     _fn += " ";
                     _fn += _method_name;
                     _fn += "(";
-                    _fn += meta::string::join(_sigs(), ", ");
+                    _fn += args_sig;
                     _fn += ");";
                     return _fn;
                 }
@@ -592,7 +598,7 @@ namespace meta {
                         return jmethod_id_pointer_map[fn];
                     } else {
                         jclass jcls = _jcls.pointer(env);
-                        jmethodID jmethod_id = env.pointer()->GetMethodID(jcls, _method_name.c_str(), sig().c_str());
+                        jmethodID jmethod_id = env.pointer()->GetMethodID(jcls, _method_name.c_str(), method_sig.c_str());
                         if (env.pointer()->ExceptionCheck()) {
                             return nullptr;
                         }
@@ -619,24 +625,6 @@ namespace meta {
 
                 j_class _jcls;
                 std::string _method_name;
-
-
-                std::vector<std::string> _sigs() const {
-                    std::vector<std::string> vs;
-                    for (const auto & vt : _vvt) {
-                        std::visit([&vs](const auto & k){
-#ifdef Xcode
-                            if constexpr (!std::is_same_v<std::remove_cvref_t<decltype(k)>, j_arg_placeholder>)
-#else
-                            if constexpr (!std::is_same_v<std::remove_const_t<std::remove_reference_t<decltype(k)>>, j_arg_placeholder>)
-#endif
-                            {
-                                vs.push_back(std::decay_t<decltype(k)>::sig());
-                            }
-                        }, vt);
-                    }
-                    return vs;
-                }
                 
                 void get_jvalues(jvalue * jvs) const {
                     int index = 0;
@@ -666,7 +654,7 @@ namespace meta {
 
                 R static_call(const j_env & je) {
 
-                    JNIEnv * env = je.pointer();
+                    JNIEnv * env = je.pointer();	
                     jclass jcls = j_method<R, Args...>::_jcls.pointer(env);
                     jmethodID jmethod = jmethod_id_pointer(je);
 
@@ -730,11 +718,11 @@ namespace meta {
                 std::string fullname() const override {
                     std::string _fn = "<" + j_method<R, Args...>::_jcls.classname() + "> ";
                     _fn += "static ";
-                    _fn += R::sig();
+                    _fn += R::sig;
                     _fn += " ";
                     _fn += j_method<R, Args...>::_method_name;
                     _fn += "(";
-                    _fn += meta::string::join(j_method<R, Args...>::_sigs(), ", ");
+                    _fn += j_method<R, Args...>::args_sig;
                     _fn += ");";
                     return _fn;
                 }
@@ -751,7 +739,7 @@ namespace meta {
                     } else {
                         jmethodID jmethod_id = env.pointer()->GetStaticMethodID(j_method<R, Args...>::_jcls.pointer(env),
                                                                                 j_method<R, Args...>::_method_name.c_str(),
-                                                                                j_method<R, Args...>::sig().c_str());
+                                                                                j_method<R, Args...>::method_sig.c_str());
                         if (env.pointer()->ExceptionCheck()) {
                             return nullptr;
                         }
