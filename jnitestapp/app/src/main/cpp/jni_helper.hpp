@@ -26,8 +26,10 @@
 #include "string_utility.hpp"
 #include "arg.hpp"
 #include <iostream>
+#include "alog.h"
 #endif
 
+// TODO: all env use j_call input env
 
 namespace meta {
 
@@ -111,50 +113,38 @@ namespace meta {
             class j_class {
             public:
 
-                j_class(const std::string & name = "") : _classname(name) {
+                j_class(const std::string & name = "") : classname(name), sig(meta::string::join(meta::string::split(name, "."), "/")) { }
 
-                }
-
-                std::string classname() const {
-                    return _classname;
-                }
-
-                std::string sig = [this]{
-                    return meta::string::join(meta::string::split(_classname, "."), "/");
-                }();
+                const std::string classname;
+                const std::string sig;
 
                 jclass pointer(const j_env & env) const {
-                    if (jclass_pointer_map.contains(_classname))
+                    if (jclass_pointer_map.contains(classname))
                     {
-                        return jclass_pointer_map[_classname];
+                        return jclass_pointer_map[classname];
                     } else {
                         jclass jcls = env.pointer()->FindClass(sig.c_str());
                         if (env.pointer()->ExceptionCheck()) {
                             return nullptr;
                         }
-                        jclass_pointer_map[_classname] = jcls;
+                        jclass_pointer_map[classname] = jcls;
                         return jcls;
                     }
                 }
-
-            private:
-
-                std::string _classname;
-
             };
 
 #pragma mark - jni type
 
             struct j_type {
-                static inline std::string sig;
+                static inline const std::string sig;
             };
 
             struct j_void : j_type {
-                static inline std::string sig = [](){ return "V";}();
+                static inline const std::string sig = [](){ return "V";}();
             };
 
             struct j_boolean : j_type {
-                static inline std::string sig = [](){ return "Z";}();
+                static inline const std::string sig = [](){ return "Z";}();
 
                 j_boolean(const bool & v = false) : value(v) { }
                 j_boolean(const unsigned char & v = 0) : value(v) { }
@@ -171,7 +161,7 @@ namespace meta {
             };
 
             struct j_byte : j_type {
-                static inline std::string sig = [](){ return "B";}();
+                static inline const std::string sig = [](){ return "B";}();
 
                 j_byte(const int8_t & v = 0) : value(v) { }
 
@@ -195,7 +185,7 @@ namespace meta {
             };
 
             struct j_char : j_type {
-                static inline std::string sig = [](){ return "C";}();
+                static inline const std::string sig = [](){ return "C";}();
 
                 j_char(const char & v = 0) : value(v) { }
 
@@ -215,7 +205,7 @@ namespace meta {
             };
 
             struct j_short : j_type {
-                static inline std::string sig = [](){ return "S";}();
+                static inline const std::string sig = [](){ return "S";}();
 
                 j_short(const short & v = 0) : value(v) { }
 
@@ -231,7 +221,7 @@ namespace meta {
             };
 
             struct j_int : j_type {
-                static inline std::string sig = [](){ return "I";}();
+                static inline const std::string sig = [](){ return "I";}();
 
                 j_int(const int & v = 0) : value(v) { }
 
@@ -247,7 +237,7 @@ namespace meta {
             };
 
             struct j_long : j_type {
-                static inline std::string sig = [](){ return "L";}();
+                static inline const std::string sig = [](){ return "L";}();
 
                 j_long(const long & v = 0) : value(v) { }
 
@@ -263,7 +253,7 @@ namespace meta {
             };
 
             struct j_float : j_type {
-                static inline std::string sig = [](){ return "F";}();
+                static inline const std::string sig = [](){ return "F";}();
 
                 j_float(const float & v = 0) : value(v) { }
 
@@ -279,7 +269,7 @@ namespace meta {
             };
 
             struct j_double : j_type {
-                static inline std::string sig = [](){ return "D";}();
+                static inline const std::string sig = [](){ return "D";}();
 
                 j_double(const double & v = 0) : value(v) { }
 
@@ -302,7 +292,7 @@ namespace meta {
                     return "java.lang.Object";
                 }
 
-                static inline std::string sig = [](){
+                static inline const std::string sig = [](){
                     return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
                 }();
 
@@ -325,11 +315,11 @@ namespace meta {
 
             class j_string : public j_object {
             public:
-                static inline std::string classname() {
+                static inline const std::string classname() {
                     return "java.lang.String";
                 }
 
-                static inline std::string sig = [](){
+                static inline const std::string sig = [](){
                     return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
                 }();
 
@@ -394,7 +384,7 @@ namespace meta {
 
             template <typename T>
             struct j_array {
-                static inline std::string sig = [](){
+                static inline const std::string sig = [](){
                     return std::string("[") + T::sig;
                 }();
 
@@ -427,20 +417,20 @@ namespace meta {
 
 
 
-        template <typename T, typename ... Args>
-        struct j_types {
-            static inline std::string sig = [](){
-                return j_types<T>::sig + j_types<Args...>::sig;
-            }();
-        };
+            template <typename T, typename ... Args>
+            struct j_types {
+                static inline const std::string sig = [](){
+                    return j_types<T>::sig + j_types<Args...>::sig;
+                }();
+            };
 
-        template <typename T>
-        struct j_types<T> {
-            static inline std::string sig = T::sig;
-        };
+            template <typename T>
+            struct j_types<T> {
+                static inline const std::string sig = T::sig;
+            };
 
-        template <typename ... Args>
-        static inline std::string j_types_sig = j_types<Args...>::sig;
+            template <typename ... Args>
+            static inline const std::string j_types_sig = j_types<Args...>::sig;
 
 
 
@@ -489,7 +479,7 @@ namespace meta {
 
 //                static_assert(!is_j_array_t<R>, "Return type can not be an array");   // TODO: fix jobjectarray
 
-                static inline std::string args_sig = [](){
+                static inline const std::string args_sig = [](){
                     if constexpr (sizeof...(Args) == 0) {
                         return "";
                     } else {
@@ -497,7 +487,7 @@ namespace meta {
                     }
                 }();
 
-                static inline std::string method_sig = [](){
+                static inline const std::string method_sig = [](){
                     std::string _s = "(";
                     _s += args_sig;
                     _s += ")";
@@ -529,7 +519,7 @@ namespace meta {
                 }
 
                 virtual std::string fullname() const {
-                    std::string _fn = "<" + _jcls.classname() + "> ";
+                    std::string _fn = "<" + _jcls.classname + "> ";
                     _fn += R::sig;
                     _fn += " ";
                     _fn += _method_name;
@@ -697,7 +687,7 @@ namespace meta {
                 }
 
                 std::string fullname() const override {
-                    std::string _fn = "<" + j_method<R, Args...>::_jcls.classname() + "> ";
+                    std::string _fn = "<" + j_method<R, Args...>::_jcls.classname + "> ";
                     _fn += "static ";
                     _fn += R::sig;
                     _fn += " ";
@@ -738,7 +728,7 @@ namespace meta {
                 }
 
                 j_static_call(const std::string & classname, const std::string & method_name, const Args & ... args) :
-                j_static_call(j_static_method<R, Args...>(classname, method_name, args...)) { }
+                        j_static_call(j_static_method<R, Args...>(classname, method_name, args...)) { }
 
                 R execute() {
 #ifdef Xcode
