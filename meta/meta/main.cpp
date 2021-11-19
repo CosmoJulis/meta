@@ -58,9 +58,7 @@
 int main(int argc, const char * argv[]) {
     using namespace meta::jni::helper;
     
-    std::cout << j_method<j_void, j_int>::args_sig << std::endl;
-    std::cout << j_method<j_void, j_int>::method_sig << std::endl;
-    return 0;
+
     
 //    auto jc = j_call<j_void, j_interface_object>{
 //        "com.cosmojulis.jnitestapp.MainActivity",
@@ -74,12 +72,12 @@ int main(int argc, const char * argv[]) {
 //    auto jc = j_call<j_void, j_int>("com.application.Activity", "idid", 1);
 //    jc.execute();
     
-//    auto jc = j_call<j_string, j_string, j_string>(
-//            "com.cosmojulis.jnitestapp.MainActivity",
-//            "test_combine",
-//            "hello",
-//            "world"
-//            );
+    auto jc = j_static_call<j_string, j_string, j_string>(
+            "com.cosmojulis.jnitestapp.MainActivity",
+            "test_combine",
+            "hello",
+            "world"
+            );
 //    std::string r = jc.execute();
 
 

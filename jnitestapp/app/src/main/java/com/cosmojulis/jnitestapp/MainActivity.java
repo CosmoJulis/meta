@@ -76,4 +76,17 @@ public class MainActivity extends AppCompatActivity {
         return r;
     }
 
+    public static String test_combine(String a, String b) {
+        String ab = a + b;
+        System.out.println("sl2577 combine " + ab);
+        return ab;
+    }
+
+    public static void teststr(String a) {
+        System.out.println("sl2577 str " + a);
+    }
+
+    public static void test_interface_object(MyCallback c) {
+        c.callback();
+    }
 }

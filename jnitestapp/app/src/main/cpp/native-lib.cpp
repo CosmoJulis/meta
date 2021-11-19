@@ -2,32 +2,15 @@
 #include <string>
 #include "jni_helper.hpp"
 #include <variant>
+#include "alog.h"
 
 using namespace meta::jni::helper;
 
-void test() {
-    auto jc = j_call<j_void>("com.cosmojulis.jnitestapp.MainActivity", "test");
-    jc.execute();
-}
-
-void test(int a) {
-    auto jc = j_call<j_void, j_int>("com.cosmojulis.jnitestapp.MainActivity", "test", a);
-    jc.execute();
-}
-
-void test(int a, int b) {
-    auto jc = j_call<j_void, j_int, j_int>("com.cosmojulis.jnitestapp.MainActivity", "test", a, b);
-    jc.execute();
-}
-
-int testr(int a) {
-    auto jc = j_call<j_int, j_int>("com.cosmojulis.jnitestapp.MainActivity", "testr", a);
-    int ret = int(jc.execute());
-    return ret;
-}
-
-void testInterface() {
-
+std::string test_combine(const std::string & a, const std::string & b) {
+    auto jsm = j_static_method<j_string, j_string, j_string>("com.cosmojulis.jnitestapp.MainActivity", "test_combine", a, b);
+    auto jc = j_static_call(jsm);
+    return jc.execute();
+//    return "foo bar";
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -36,13 +19,10 @@ Java_com_cosmojulis_jnitestapp_MainActivity_stringFromJNI(
         jobject /* this */) {
 
 
-    test();
-    test(5);
-    test(5, 10);
-    int r = testr(5);
-    std::string hello = std::to_string(r);
+    std::string hello = test_combine("foo", "bar");
 
-    return env->NewStringUTF(hello.c_str());
+
+    return env->NewStringUTF("hello world");
 }
 
 

@@ -121,11 +121,7 @@ namespace meta {
                 }();
 
                 jclass pointer(const j_env & env) const {
-#ifdef Xcode
                     if (jclass_pointer_map.contains(_classname))
-#else
-                    if (jclass_pointer_map.find(_classname) != jclass_pointer_map.end())
-#endif
                     {
                         return jclass_pointer_map[_classname];
                     } else {
@@ -307,10 +303,10 @@ namespace meta {
                     return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
                 }();
 
-                static j_object & placeholder() {
-                    static j_object _placeholder = j_object();
-                    return _placeholder;
-                }
+//                static j_object & placeholder() {
+//                    static j_object _placeholder = j_object();
+//                    return _placeholder;
+//                }
 
                 jobject pointer() const {
                     return _jo;
@@ -337,23 +333,20 @@ namespace meta {
                 j_string(const char * v = "") : value(v) {
                     if (_jstr == nullptr) {
                         _jstr_alloc = true;
-                        _jstr = j_vm::shared().env().pointer()->NewStringUTF(value);
+                        _jstr = j_vm::shared().env().pointer()->NewStringUTF(value.c_str());
                     }
                 }
 
                 j_string(const std::string & v) : value(v.c_str()) {
                     if (_jstr == nullptr) {
                         _jstr_alloc = true;
-                        _jstr = j_vm::shared().env().pointer()->NewStringUTF(value);
+                        _jstr = j_vm::shared().env().pointer()->NewStringUTF(value.c_str());
                     }
                 }
 
-                const char * value;
+                std::string value;
 
-//    operator const char *() {
-//        return value;
-//    }
-//
+                
                 operator std::string () const {
                     return value;
                 }
@@ -471,13 +464,24 @@ namespace meta {
                         !meta::arg::is::any_reference_v<R, Args...> &&
                         !meta::arg::is::any_pointer_v<R, Args...>,
                         "Unsupported basic types, try j_type");
-#ifdef Xcode
-                static_assert(!meta::arg::is::any_base_of_v<j_void, Args...>, "Parameters can not be j_void");
-#endif
-//                static_assert(!is_j_array_t<R>, "Return type can not be an array");
+
+                
+                static_assert([](){
+                    if constexpr (sizeof...(Args) == 0) {
+                        return true;
+                    } else {
+                        return !meta::arg::is::any_base_of_v<j_void, Args...>;
+                    }
+                }(), "Parameters can not be j_void");
+
+//                static_assert(!is_j_array_t<R>, "Return type can not be an array");   // TODO: fix jobjectarray
                 
                 static inline std::string args_sig = [](){
-                    return j_types_sig<Args...>;
+                    if constexpr (sizeof...(Args) == 0) {
+                        return "";
+                    } else {
+                        return j_types_sig<Args...>;
+                    }
                 }();
                 
                 static inline std::string method_sig = [](){
@@ -489,8 +493,6 @@ namespace meta {
                 }();
                 
 
-                j_method() { }
-
                 using variant_type = std::conditional_t<
                         sizeof...(Args) == 0,
                         std::variant<j_arg_placeholder>,
@@ -499,11 +501,9 @@ namespace meta {
                 j_method(const std::string & classname, const std::string & method_name, const Args & ... args) : _jcls(j_class(classname)), _method_name(method_name) {
                     (void)std::initializer_list<nullptr_t>{
                             ([&args, this] {
-#ifdef Xcode
+
                                 using T0 = std::remove_cvref_t<decltype(args)>;
-#else
-                                using T0 = std::remove_const_t<std::remove_reference_t<decltype(args)>>;
-#endif
+
                                 constexpr int index = meta::arg::index_of<T0, Args...>::index;
                                 if constexpr (index >= 0) {
                                     _vvt.emplace_back(variant_type(std::in_place_index<index>, args));
@@ -589,11 +589,7 @@ namespace meta {
 
                 virtual jmethodID jmethod_id_pointer(const j_env & env) const {
                     std::string fn = fullname();
-#ifdef Xcode
                     if (jmethod_id_pointer_map.contains(fn))
-#else
-                    if (jmethod_id_pointer_map.find(fn) != jmethod_id_pointer_map.end())
-#endif
                     {
                         return jmethod_id_pointer_map[fn];
                     } else {
@@ -630,11 +626,7 @@ namespace meta {
                     int index = 0;
                     for (const auto & vt : _vvt) {
                         std::visit([&jvs, &index](const auto & k){
-#ifdef Xcode
                             if constexpr (!std::is_same_v<std::remove_cvref_t<decltype(k)>, j_arg_placeholder>)
-#else
-                            if constexpr (!std::is_same_v<std::remove_const_t<std::remove_reference_t<decltype(k)>>, j_arg_placeholder>)
-#endif
                             {
                                 jvs[index] = jvalue(k);
                                 index++;
@@ -729,11 +721,7 @@ namespace meta {
                 
                 jmethodID jmethod_id_pointer(const j_env & env) const override {
                     std::string fn = fullname();
-#ifdef Xcode
                     if (jmethod_id_pointer_map.contains(fn))
-#else
-                    if (jmethod_id_pointer_map.find(fn) != jmethod_id_pointer_map.end())
-#endif
                     {
                         return jmethod_id_pointer_map[fn];
                     } else {
@@ -755,68 +743,58 @@ namespace meta {
 
 #pragma mark - jni call
 
-
             template <typename R, typename ... Args>
-            class j_call {
+            class j_static_call {
             public:
-                j_call(const j_static_method<R, Args...> & sf) {
-                    _jsmethod = sf;
+                j_static_call(const j_static_method<R, Args...> & sf) : _jsmethod(sf) {
                     std::cout << "call \"" << sf.fullname() << "\"" << std::endl;
                 }
 
-                j_call(const std::string & classname, const std::string & method_name, const Args & ... args) :
-                        j_call(j_static_method<R, Args...>(classname, method_name, args...)) { }
+                j_static_call(const std::string & classname, const std::string & method_name, const Args & ... args) :
+                j_static_call(j_static_method<R, Args...>(classname, method_name, args...)) { }
 
-
-                j_call(const j_object & o, const j_method<R, Args...> & f) {
-                    _jobj = o;
-                    _jmethod = f;
-                    std::cout << "object<" << o.classname() << "> call: \"" << f.fullname() << "\"" << std::endl;
-                }
-
-                j_call(const j_object & o, const std::string & function, const Args & ... args) :
-                        j_call(o, j_method<R, Args...>(function, args...)) { }
-
-                j_call(const j_object & o, const char * function, const Args & ... args) :
-                        j_call(o, std::string(function), args...) { }
-
-                virtual R execute() {
+                R execute() {
 #ifdef Xcode
                     j_env env;
 #else
                     j_env env = j_vm::shared().env();
 #endif
-                    if (&_jobj == &(j_object::placeholder())) {
-                        return _jsmethod.static_call(env);
-                    } else {
-                        return _jmethod.call(env, _jobj);
-                    }
+                    return _jsmethod.static_call(env);
                 }
 
             private:
                 j_static_method<R, Args...> _jsmethod;
-                j_method<R, Args...> _jmethod;
-                j_object & _jobj = j_object::placeholder();
-
             };
-
-
-
-
-
+        
+        
             template <typename R, typename ... Args>
-            class my_j_call : public j_call<R, Args...> {
+            class j_call {
+
             public:
-                using j_call<R, Args...>::j_call;
-
-                void execute() override {
-
+                j_call(const j_object & jo, const j_method<R, Args...> & jm) : _jobj(jo), _jmethod(jm) {
+                    std::cout << "object<" << jo.classname() << "> call: \"" << jm.fullname() << "\"" << std::endl;
                 }
+
+                j_call(const j_object & jo, const std::string & method_name, const Args & ... args) :
+                        j_call(jo, j_method<R, Args...>(method_name, args...)) { }
+
+                j_call(const j_object & jo, const char * method_name, const Args & ... args) :
+                        j_call(jo, std::string(method_name), args...) { }
+
+                R execute() {
+#ifdef Xcode
+                    j_env env;
+#else
+                    j_env env = j_vm::shared().env();
+#endif
+                    return _jmethod.call(env, _jobj);
+                }
+
+            private:
+                j_object _jobj;
+                j_method<R, Args...> _jmethod;
+
             };
-
-
-
-
 
         }
 

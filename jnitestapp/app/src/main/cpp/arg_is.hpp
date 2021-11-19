@@ -47,19 +47,24 @@ struct Or { };
 
 
 #pragma mark - is base of
+
+
+
 template <typename L, typename Base, typename T, typename ... Args>
 struct _base_of {
-    static inline constexpr bool value =
-        std::is_same_v<L, And> ?
-            _base_of<L, Base, T>::value && _base_of<L, Base, Args...>::value
-            :
-            _base_of<L, Base, T>::value || _base_of<L, Base, Args...>::value;
+    static inline constexpr bool value = [](){
+        if constexpr (std::is_same_v<L, And>) {
+            return _base_of<L, Base, T>::value && _base_of<L, Base, Args...>::value;
+        } else {
+            return _base_of<L, Base, T>::value || _base_of<L, Base, Args...>::value;
+        }
+    }();
 };
 
-template <typename L, typename Base, typename T>
-struct _base_of<L, Base, T> {
-    static inline constexpr bool value = std::is_base_of_v<Base, T>;
-};
+        template <typename L, typename Base, typename T>
+        struct _base_of<L, Base, T> {
+            static inline constexpr bool value = std::is_base_of_v<Base, T>;
+        };
 
 template <typename Base, typename ... Args>
 static inline constexpr bool all_base_of_v = _base_of<And, Base, Args...>::value;
