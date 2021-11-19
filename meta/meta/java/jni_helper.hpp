@@ -11,6 +11,8 @@
 #define Xcode
 //#define Android
 
+#define DEBUG_ENABLED 1
+
 #ifdef Xcode
 #include <variant>
 #include <unordered_map>
@@ -35,6 +37,7 @@ namespace meta {
 
 
 #pragma mark - jni jclass jmethodid cached
+        
             static std::unordered_map<std::string, jclass> jclass_pointer_map;
             static std::unordered_map<std::string, jmethodID> jmethod_id_pointer_map;
 
@@ -451,10 +454,20 @@ namespace meta {
             template <typename R, typename ... Args>
             class j_method {
             private:
-                class j_arg_placeholder {
-                private:
-                    j_arg_placeholder() { }
+                
+#if DEBUG_ENABLED
+                class _debug_j_arg_placeholder {
+                    _debug_j_arg_placeholder() { }
                 };
+                
+                using _debug_variant_type = std::conditional_t<
+                        sizeof...(Args) == 0,
+                        std::variant<_debug_j_arg_placeholder>,
+                        std::variant<Args...>>;
+                
+                std::vector<_debug_variant_type> _debug_vvt;
+#endif
+                
 
             public:
 
@@ -493,23 +506,24 @@ namespace meta {
                 }();
                 
 
-                using variant_type = std::conditional_t<
-                        sizeof...(Args) == 0,
-                        std::variant<j_arg_placeholder>,
-                        std::variant<Args...>>;
-
                 j_method(const std::string & classname, const std::string & method_name, const Args & ... args) : _jcls(j_class(classname)), _method_name(method_name) {
+                    
+                    int index = 0;
                     (void)std::initializer_list<nullptr_t>{
-                            ([&args, this] {
-
+                            ([this, &index, &args] {
+                                _jvs[index] = jvalue(args);
+                                index++;
+                                
+#if DEBUG_ENABLED
                                 using T0 = std::remove_cvref_t<decltype(args)>;
-
-                                constexpr int index = meta::arg::index_of<T0, Args...>::index;
-                                if constexpr (index >= 0) {
-                                    _vvt.emplace_back(variant_type(std::in_place_index<index>, args));
+                                constexpr int arg_index = meta::arg::index_of<T0, Args...>::index;
+                                if constexpr (arg_index >= 0) {
+                                    _debug_vvt.emplace_back(_debug_variant_type(std::in_place_index<arg_index>, args));
                                 } else {
-                                    _vvt.emplace_back(variant_type(args));
+                                    _debug_vvt.emplace_back(_debug_variant_type(args));
                                 }
+#endif
+
                             }(), nullptr)...
                     };
                 }
@@ -530,55 +544,51 @@ namespace meta {
                     jobject jobj = jo.pointer();
                     jmethodID jmethod = jmethod_id_pointer(je);
 
-                    constexpr size_t size = sizeof...(Args);
-                    jvalue jvs[size];
-                    get_jvalues(jvs);
-
                     R r;
                     if constexpr (std::is_same_v<R, j_void>) {
-                        env->CallVoidMethodA(jobj, jmethod, jvs);
+                        env->CallVoidMethodA(jobj, jmethod, _jvs);
                         if (env->ExceptionCheck()) throw "Call java method error";
                         return j_void();
                     }
                     else if constexpr (std::is_same_v<R, j_boolean>) {
-                        jboolean jb = env->CallBooleanMethodA(jobj, jmethod, jvs);
+                        jboolean jb = env->CallBooleanMethodA(jobj, jmethod, _jvs);
                         r = j_boolean(jb);
                     }
                     else if constexpr (std::is_same_v<R, j_byte>) {
-                        jbyte jb = env->CallByteMethodA(jobj, jmethod, jvs);
+                        jbyte jb = env->CallByteMethodA(jobj, jmethod, _jvs);
                         r = j_byte(jb);
                     }
                     else if constexpr (std::is_same_v<R, j_char>) {
-                        jchar jc = env->CallCharMethodA(jobj, jmethod, jvs);
+                        jchar jc = env->CallCharMethodA(jobj, jmethod, _jvs);
                         r = j_char(jc);
                     }
                     else if constexpr (std::is_same_v<R, j_short>) {
-                        jshort js = env->CallShortMethodA(jobj, jmethod, jvs);
+                        jshort js = env->CallShortMethodA(jobj, jmethod, _jvs);
                         r = j_short(js);
                     }
                     else if constexpr (std::is_same_v<R, j_int>) {
-                        jint ji = env->CallIntMethodA(jobj, jmethod, jvs);
+                        jint ji = env->CallIntMethodA(jobj, jmethod, _jvs);
                         r = j_int(ji);
                     }
                     else if constexpr (std::is_same_v<R, j_long>) {
-                        jlong jl = env->CallLongMethodA(jobj, jmethod, jvs);
+                        jlong jl = env->CallLongMethodA(jobj, jmethod, _jvs);
                         r = j_long(jl);
                     }
                     else if constexpr (std::is_same_v<R, j_float>) {
-                        jfloat jf = env->CallFloatMethodA(jobj, jmethod, jvs);
+                        jfloat jf = env->CallFloatMethodA(jobj, jmethod, _jvs);
                         r = j_float(jf);
                     }
                     else if constexpr (std::is_same_v<R, j_double>) {
-                        jdouble jd = env->CallDoubleMethodA(jobj, jmethod, jvs);
+                        jdouble jd = env->CallDoubleMethodA(jobj, jmethod, _jvs);
                         r = j_double(jd);
                     }
                     else if constexpr (std::is_same_v<R, j_string>) {
-                        jstring js = (jstring)env->CallObjectMethodA(jobj, jmethod, jvs);
+                        jstring js = (jstring)env->CallObjectMethodA(jobj, jmethod, _jvs);
                         const char * str = env->GetStringUTFChars(js, nullptr);
                         r = j_string(str);
                     }
                     else if constexpr (std::is_base_of_v<j_object, R>) {
-                        jobject jo = env->CallObjectMethodA(jobj, jmethod, jvs);
+                        jobject jo = env->CallObjectMethodA(jobj, jmethod, _jvs);
                         r = j_object(jo);
                     }
 
@@ -603,8 +613,6 @@ namespace meta {
                     }
                 }
 
-
-
                 std::string method_name() const {
                     return _method_name;
                 }
@@ -613,28 +621,11 @@ namespace meta {
                     return _jcls.classname();
                 }
 
-            private:
-
-                std::vector<variant_type> _vvt;
-
             protected:
 
+                jvalue _jvs[sizeof...(Args)];
                 j_class _jcls;
                 std::string _method_name;
-                
-                void get_jvalues(jvalue * jvs) const {
-                    int index = 0;
-                    for (const auto & vt : _vvt) {
-                        std::visit([&jvs, &index](const auto & k){
-                            if constexpr (!std::is_same_v<std::remove_cvref_t<decltype(k)>, j_arg_placeholder>)
-                            {
-                                jvs[index] = jvalue(k);
-                                index++;
-                            }
-                        }, vt);
-                    }
-                    
-                }
 
             };
 
@@ -644,61 +635,59 @@ namespace meta {
             public:
                 using j_method<R, Args...>::j_method;
 
-                R static_call(const j_env & je) {
+                R call(const j_env & je) {
 
                     JNIEnv * env = je.pointer();	
                     jclass jcls = j_method<R, Args...>::_jcls.pointer(env);
                     jmethodID jmethod = jmethod_id_pointer(je);
 
-                    constexpr size_t size = sizeof...(Args);
-                    jvalue jvs[size];
-                    j_method<R, Args...>::get_jvalues(jvs);
-
+                    auto & _jvs = j_method<R, Args...>::_jvs;
+                    
                     R r;
                     if constexpr (std::is_same_v<R, j_void>) {
-                        env->CallStaticVoidMethodA(jcls, jmethod, jvs);
+                        env->CallStaticVoidMethodA(jcls, jmethod, _jvs);
                         if (env->ExceptionCheck()) throw "Call java method error";
                         return j_void();
                     }
                     else if constexpr (std::is_same_v<R, j_boolean>) {
-                        jboolean jb = env->CallStaticBooleanMethodA(jcls, jmethod, jvs);
+                        jboolean jb = env->CallStaticBooleanMethodA(jcls, jmethod, _jvs);
                         r = j_boolean(jb);
                     }
                     else if constexpr (std::is_same_v<R, j_byte>) {
-                        jbyte jb = env->CallStaticByteMethodA(jcls, jmethod, jvs);
+                        jbyte jb = env->CallStaticByteMethodA(jcls, jmethod, _jvs);
                         r = j_byte(jb);
                     }
                     else if constexpr (std::is_same_v<R, j_char>) {
-                        jchar jc = env->CallStaticCharMethodA(jcls, jmethod, jvs);
+                        jchar jc = env->CallStaticCharMethodA(jcls, jmethod, _jvs);
                         r = j_char(jc);
                     }
                     else if constexpr (std::is_same_v<R, j_short>) {
-                        jshort js = env->CallStaticShortMethodA(jcls, jmethod, jvs);
+                        jshort js = env->CallStaticShortMethodA(jcls, jmethod, _jvs);
                         r = j_short(js);
                     }
                     else if constexpr (std::is_same_v<R, j_int>) {
-                        jint ji = env->CallStaticIntMethodA(jcls, jmethod, jvs);
+                        jint ji = env->CallStaticIntMethodA(jcls, jmethod, _jvs);
                         r = j_int(ji);
                     }
                     else if constexpr (std::is_same_v<R, j_long>) {
-                        jlong jl = env->CallStaticLongMethodA(jcls, jmethod, jvs);
+                        jlong jl = env->CallStaticLongMethodA(jcls, jmethod, _jvs);
                         r = j_long(jl);
                     }
                     else if constexpr (std::is_same_v<R, j_float>) {
-                        jfloat jf = env->CallStaticFloatMethodA(jcls, jmethod, jvs);
+                        jfloat jf = env->CallStaticFloatMethodA(jcls, jmethod, _jvs);
                         r = j_float(jf);
                     }
                     else if constexpr (std::is_same_v<R, j_double>) {
-                        jdouble jd = env->CallStaticDoubleMethodA(jcls, jmethod, jvs);
+                        jdouble jd = env->CallStaticDoubleMethodA(jcls, jmethod, _jvs);
                         r = j_double(jd);
                     }
                     else if constexpr (std::is_same_v<R, j_string>) {
-                        jstring js = (jstring)env->CallStaticObjectMethodA(jcls, jmethod, jvs);
+                        jstring js = (jstring)env->CallStaticObjectMethodA(jcls, jmethod, _jvs);
                         const char * str = env->GetStringUTFChars(js, nullptr);
                         r = j_string(str);
                     }
                     else if constexpr (std::is_base_of_v<j_object, R>) {
-                        jobject jo = env->CallStaticObjectMethodA(jcls, jmethod, jvs);
+                        jobject jo = env->CallStaticObjectMethodA(jcls, jmethod, _jvs);
                         r = j_object(jo);
                     }
 
@@ -739,8 +728,6 @@ namespace meta {
 
 
 
-
-
 #pragma mark - jni call
 
             template <typename R, typename ... Args>
@@ -759,7 +746,7 @@ namespace meta {
 #else
                     j_env env = j_vm::shared().env();
 #endif
-                    return _jsmethod.static_call(env);
+                    return _jsmethod.call(env);
                 }
 
             private:
