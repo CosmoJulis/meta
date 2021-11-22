@@ -97,8 +97,8 @@ namespace meta {
                     return _env->GetStaticMethodID(jcls, method_name.c_str(), method_sig.c_str());
                 }
                 
-                jobject new_object(const jclass & jcls, const jmethodID & jmtdID) const {
-                    return _env->NewObject(jcls, jmtdID);
+                jobject new_object(const jclass & jcls, const jmethodID & jmethod) const {
+                    return _env->NewObject(jcls, jmethod);
                 }
                 
                 bool register_natives(const jclass & jcls, const JNINativeMethod * methods, jint count) const {
@@ -108,6 +108,69 @@ namespace meta {
                 bool unregister_natives(const jclass & jcls) {
                     return _env->UnregisterNatives(jcls) == JNI_OK;
                 }
+                
+                void call_void_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
+                    _env->CallVoidMethodA(jobj, jmethod, args);
+                }
+                
+                void call_static_void_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) {
+                    _env->CallStaticVoidMethodA(jcls, jmethod, args);
+                }
+                
+//                j_boolean call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
+//                    
+//                }
+//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
+//                }
+//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
+//                }
+//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
+//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
+//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
+//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
+//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
+
+                
+//            else if constexpr (std::is_same_v<R, j_boolean>) {
+//                jboolean jb = env->CallBooleanMethodA(jobj, jmethod, _jvs);
+//                r = j_boolean(jb);
+//            }
+//            else if constexpr (std::is_same_v<R, j_byte>) {
+//                jbyte jb = env->CallByteMethodA(jobj, jmethod, _jvs);
+//                r = j_byte(jb);
+//            }
+//            else if constexpr (std::is_same_v<R, j_char>) {
+//                jchar jc = env->CallCharMethodA(jobj, jmethod, _jvs);
+//                r = j_char(jc);
+//            }
+//            else if constexpr (std::is_same_v<R, j_short>) {
+//                jshort js = env->CallShortMethodA(jobj, jmethod, _jvs);
+//                r = j_short(js);
+//            }
+//            else if constexpr (std::is_same_v<R, j_int>) {
+//                jint ji = env->CallIntMethodA(jobj, jmethod, _jvs);
+//                r = j_int(ji);
+//            }
+//            else if constexpr (std::is_same_v<R, j_long>) {
+//                jlong jl = env->CallLongMethodA(jobj, jmethod, _jvs);
+//                r = j_long(jl);
+//            }
+//            else if constexpr (std::is_same_v<R, j_float>) {
+//                jfloat jf = env->CallFloatMethodA(jobj, jmethod, _jvs);
+//                r = j_float(jf);
+//            }
+//            else if constexpr (std::is_same_v<R, j_double>) {
+//                jdouble jd = env->CallDoubleMethodA(jobj, jmethod, _jvs);
+//                r = j_double(jd);
+//            }
+//            else if constexpr (std::is_same_v<R, j_string>) {
+//                jstring js = (jstring)env->CallObjectMethodA(jobj, jmethod, _jvs);
+//                const char * str = je.get_string_utf_chars(js);
+//                r = j_string(str);
+//            }
+//            else if constexpr (std::is_base_of_v<j_object, R>) {
+//                jobject jo = env->CallObjectMethodA(jobj, jmethod, _jvs);
+                
                 
 
             private:
@@ -582,7 +645,7 @@ namespace meta {
 
                     R r;
                     if constexpr (std::is_same_v<R, j_void>) {
-                        env->CallVoidMethodA(jobj, jmethod, _jvs);
+                        je.call_void_method(jobj, jmethod, _jvs);
                         if (je.exception_check()) throw "Call java method error";
                         return j_void();
                     }
