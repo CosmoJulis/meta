@@ -54,33 +54,33 @@
 //};
 
 
+using namespace meta::jni::helper;
+
+
+class A {
+public:
+    static inline const std::string get() {
+        return "A";
+    }
+    A() {
+        std::cout << "use " << get() << std::endl;
+    }
+};
+
+class B : public A {
+public:
+    static inline const std::string get() {
+        return "B";
+    }
+    B() {
+        std::cout << "use " << get() << std::endl;
+    }
+};
 
 int main(int argc, const char * argv[]) {
-    using namespace meta::jni::helper;
-    
 
-    
-//    auto jc = j_call<j_void, j_interface_object>{
-//        "com.cosmojulis.jnitestapp.MainActivity",
-//        "test_interface_object",
-//        [](){
-//
-//        }
-//    };
-//    jc.execute();
-
-//    auto jc = j_call<j_void, j_int>("com.application.Activity", "idid", 1);
-//    jc.execute();
-    
-    auto jc = j_static_call<j_string, j_string, j_string>(
-            "com.cosmojulis.jnitestapp.MainActivity",
-            "test_combine",
-            "hello",
-            "world"
-            );
-//    std::string r = jc.execute();
-
-
-    
+    auto jsm = j_static_method<j_void, j_interface<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_interface<j_void>("com.cosmojulis.meta.JniHelperInterface"));
+    std::cout << "sl2577 sig = " << decltype(jsm)::method_sig() << std::endl;
+    std::cout << "sl2577 fullname = " << jsm.fullname() << std::endl;;
     return 0;
 }

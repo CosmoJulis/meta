@@ -19,6 +19,7 @@
 #include "jni.h"
 #include "../utilities/string_utility.hpp"
 #include "arg.hpp"
+#define LOGV(...)
 #else
 #include <variant>
 #include <unordered_map>
@@ -29,7 +30,6 @@
 #include "alog.h"
 #endif
 
-// TODO: all env use j_call input env
 
 namespace meta {
 
@@ -39,7 +39,7 @@ namespace meta {
 
 
 #pragma mark - jni jclass jmethodid cached
-        
+
             static std::unordered_map<std::string, jclass> jclass_pointer_map;
             static std::unordered_map<std::string, jmethodID> jmethod_id_pointer_map;
 
@@ -50,7 +50,7 @@ namespace meta {
             public:
                 j_env(JNIEnv * env = nullptr) : _env(env) { }
 
-                JNIEnv * pointer() const {
+                JNIEnv * unwrap() const {
                     return _env;
                 }
 
@@ -66,43 +66,44 @@ namespace meta {
                     return jvm;
                 }
 
-                void load_vm(JavaVM * vm) {
+                void load(JavaVM * vm) {
                     j_vm::shared()._vm = vm;
                 }
 
-                void clear_vm() {
+                void unload() {
+                    JNIEnv * ep = env().unwrap();
+                    for (auto & [k,v] : jclass_pointer_map) {
+                        ep->DeleteGlobalRef((jobject)v);
+                    }
                     jclass_pointer_map.clear();
+
+                    for (auto & [k,v] : jmethod_id_pointer_map) {
+                        ep->DeleteGlobalRef((jobject)v);
+                    }
                     jmethod_id_pointer_map.clear();
                 }
 
 
                 j_env env() {
-                    if (_j_env.pointer() != nullptr) {
-                        return _j_env;
-                    } else {
-                        JNIEnv * _env;
-                        jint ret = _vm->GetEnv(reinterpret_cast<void**>(&_env), JNI_VERSION_1_6);
-                        if (ret == JNI_EDETACHED) {
+                    JNIEnv * _env;
+                    jint ret = _vm->GetEnv(reinterpret_cast<void**>(&_env), JNI_VERSION_1_6);
+                    if (ret == JNI_EDETACHED) {
 #ifdef Xcode
-                            if (_vm->AttachCurrentThread(reinterpret_cast<void**>(&_env), nullptr) >= 0)
+                        if (_vm->AttachCurrentThread(reinterpret_cast<void**>(&_env), nullptr) >= 0)
 #else
-                            if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
+                        if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
 #endif
-                            {
-                                _j_env = j_env(_env);
-                                return _j_env;
-                            }
+                        {
+                            return j_env(_env);
                         }
-                        _j_env = j_env(_env);
                     }
-                    return _j_env;
+                    return j_env(_env);
                 }
 
             private:
-                j_env _j_env;
                 j_vm() { }
                 JavaVM * _vm;
-                    
+
             };
 
 
@@ -115,19 +116,20 @@ namespace meta {
 
                 j_class(const std::string & name = "") : classname(name), sig(meta::string::join(meta::string::split(name, "."), "/")) { }
 
-                const std::string classname;
-                const std::string sig;
+                std::string classname;
+                std::string sig;
 
-                jclass pointer(const j_env & env) const {
+                jclass unwrap(const j_env & env) const {
                     if (jclass_pointer_map.contains(classname))
                     {
                         return jclass_pointer_map[classname];
                     } else {
-                        jclass jcls = env.pointer()->FindClass(sig.c_str());
-                        if (env.pointer()->ExceptionCheck()) {
+                        JNIEnv * ep = env.unwrap();
+                        jclass jcls = ep->FindClass(sig.c_str());
+                        if (ep->ExceptionCheck()) {
                             return nullptr;
                         }
-                        jclass_pointer_map[classname] = jcls;
+                        jclass_pointer_map[classname] = (jclass)ep->NewGlobalRef(jcls);
                         return jcls;
                     }
                 }
@@ -136,15 +138,15 @@ namespace meta {
 #pragma mark - jni type
 
             struct j_type {
-                static inline const std::string sig;
+                static inline const std::string sig();
             };
 
             struct j_void : j_type {
-                static inline const std::string sig = [](){ return "V";}();
+                static inline const std::string sig() { return "V";}
             };
 
             struct j_boolean : j_type {
-                static inline const std::string sig = [](){ return "Z";}();
+                static inline const std::string sig() { return "Z";}
 
                 j_boolean(const bool & v = false) : value(v) { }
                 j_boolean(const unsigned char & v = 0) : value(v) { }
@@ -161,10 +163,10 @@ namespace meta {
             };
 
             struct j_byte : j_type {
-                static inline const std::string sig = [](){ return "B";}();
+                static inline const std::string sig() { return "B";}
 
                 j_byte(const int8_t & v = 0) : value(v) { }
-                
+
                 int8_t value;
 
                 operator int8_t() const {
@@ -185,10 +187,10 @@ namespace meta {
             };
 
             struct j_char : j_type {
-                static inline const std::string sig = [](){ return "C";}();
+                static inline const std::string sig() { return "C";}
 
                 j_char(const char & v = 0) : value(v) { }
-                
+
                 char value;
 
                 operator char() const {
@@ -205,10 +207,10 @@ namespace meta {
             };
 
             struct j_short : j_type {
-                static inline const std::string sig = [](){ return "S";}();
+                static inline const std::string sig() { return "S";}
 
                 j_short(const short & v = 0) : value(v) { }
-                
+
                 short value;
 
                 operator short() const {
@@ -221,10 +223,10 @@ namespace meta {
             };
 
             struct j_int : j_type {
-                static inline const std::string sig = [](){ return "I";}();
+                static inline const std::string sig() { return "I";}
 
                 j_int(const int & v = 0) : value(v) { }
-                
+
                 int value;
 
                 operator int() const {
@@ -237,10 +239,10 @@ namespace meta {
             };
 
             struct j_long : j_type {
-                static inline const std::string sig = [](){ return "L";}();
+                static inline const std::string sig() { return "L";}
 
                 j_long(const long & v = 0) : value(v) { }
-                
+
                 long value;
 
                 operator long() const {
@@ -253,10 +255,10 @@ namespace meta {
             };
 
             struct j_float : j_type {
-                static inline const std::string sig = [](){ return "F";}();
+                static inline const std::string sig() { return "F";}
 
                 j_float(const float & v = 0) : value(v) { }
-                
+
                 float value;
 
                 operator float() {
@@ -269,10 +271,10 @@ namespace meta {
             };
 
             struct j_double : j_type {
-                static inline const std::string sig = [](){ return "D";}();
+                static inline const std::string sig() { return "D";}
 
                 j_double(const double & v = 0) : value(v) { }
-                
+
                 double value;
 
                 operator double() {
@@ -284,109 +286,79 @@ namespace meta {
                 }
             };
 
+
             struct j_object : j_type {
             public:
-                j_object(const jobject & jo = nullptr) : _jo(jo) { }
-
-                static std::string classname() {
+                static inline const std::string default_classname() {
                     return "java.lang.Object";
                 }
+                static inline const std::string sig() {
+                    return std::string("L") + meta::string::join(meta::string::split(default_classname(), "."), "/") + ";";
+                }
 
-                static inline const std::string sig = [](){
-                    return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
-                }();
+                j_object(const jobject & jobj) : _jo(jobj) { }
 
-//                static j_object & placeholder() {
-//                    static j_object _placeholder = j_object();
-//                    return _placeholder;
-//                }
+                j_object(const std::string & classname = default_classname());
 
-                jobject pointer() const {
+
+                jobject unwrap() const {
                     return _jo;
                 }
 
                 operator jvalue() const {
                     return jvalue{.l=_jo};
                 }
+
+                const std::string & classname() const {
+                    return _classname;
+                }
             private:
-                jobject _jo;
+                std::string _classname;
+                jobject _jo = nullptr;
 
             };
 
             class j_string : public j_object {
             public:
-                static inline const std::string classname() {
-                    return "java.lang.String";
-                }
+                static inline const std::string classname = "java.lang.String";
 
-                static inline const std::string sig = [](){
-                    return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
-                }();
+                static inline const std::string sig() {
+                    return std::string("L") + meta::string::join(meta::string::split(classname, "."), "/") + ";";
+                }
 
                 j_string(const char * v = "") : value(v) {
-                    if (_jstr == nullptr) {
-                        _jstr_alloc = true;
-                        _jstr = j_vm::shared().env().pointer()->NewStringUTF(value.c_str());
-                    }
+                    _jstr = j_vm::shared().env().unwrap()->NewStringUTF(value.c_str());
                 }
 
-                j_string(const std::string & v) : value(v.c_str()) {
-                    if (_jstr == nullptr) {
-                        _jstr_alloc = true;
-                        _jstr = j_vm::shared().env().pointer()->NewStringUTF(value.c_str());
-                    }
+                j_string(const std::string & v) : value(v) {
+                    _jstr = j_vm::shared().env().unwrap()->NewStringUTF(value.c_str());
                 }
 
                 std::string value;
 
-                
                 operator std::string () const {
                     return value;
                 }
 
-// TODO: release new string memory
-//                ~j_string() {
-//                    if (_jstr_alloc) {
-//                        j_vm::shared().env().pointer()->DeleteLocalRef(_jstr);
-//                        _jstr = nullptr;
-//                        _jstr_alloc = false;
-//                    }
-//                }
-                
                 operator jvalue() const {
                     return jvalue{.l=_jstr};
                 }
 
             private:
-                
-//                void clear_jstring(jstring js) {
-//                    if (_jstr_alloc) {
-//                        j_vm::shared().env().pointer()->DeleteLocalRef(_jstr.get());
-//                        _jstr = nullptr;
-//                        _jstr_alloc = false;
-//                    }
-//                }
-                
-//                std::shared_ptr<_jstring> _jstr;
+
                 jstring _jstr = nullptr;
-                bool _jstr_alloc = false;
 
             };
 
 
-
-//            template<typename R, typename ... Args>
-            struct j_interface_object : j_object {
-                // TODO interface base
-            };
 
 
 
             template <typename T>
             struct j_array {
-                static inline const std::string sig = [](){
-                    return std::string("[") + T::sig;
-                }();
+                static inline const std::string sig(){
+                    return std::string("[") + T::sig();
+                }
 
                 using value_type = T;
 
@@ -396,6 +368,7 @@ namespace meta {
                         values.push_back(value_type(v));
                     }
                 }
+
                 std::vector<value_type> values;
             };
 
@@ -416,23 +389,25 @@ namespace meta {
 
 
 
-        
-        template <typename T, typename ... Args>
-        struct j_types {
-            static inline const std::string sig = [](){
-                return j_types<T>::sig + j_types<Args...>::sig;
-            }();
-        };
-        
-        template <typename T>
-        struct j_types<T> {
-            static inline const std::string sig = T::sig;
-        };
-        
-        template <typename ... Args>
-        static inline const std::string j_types_sig = j_types<Args...>::sig;
-        
-        
+
+            template <typename T, typename ... Args>
+            struct j_types {
+                static inline const std::string sig() {
+                    return j_types<T>::sig() + j_types<Args...>::sig();
+                }
+            };
+
+            template <typename T>
+            struct j_types<T> {
+                static inline const std::string sig() {
+                    return T::sig();
+                }
+            };
+
+            template <typename ... Args>
+            static inline const std::string j_types_sig = j_types<Args...>::sig();
+
+
 
 /*
  * TODO:
@@ -444,20 +419,20 @@ namespace meta {
             template <typename R, typename ... Args>
             class j_method {
             private:
-                
+
 #if DEBUG_ENABLED
                 class _debug_j_arg_placeholder {
                     _debug_j_arg_placeholder() { }
                 };
-                
+
                 using _debug_variant_type = std::conditional_t<
                         sizeof...(Args) == 0,
                         std::variant<_debug_j_arg_placeholder>,
                         std::variant<Args...>>;
-                
+
                 std::vector<_debug_variant_type> _debug_vvt;
 #endif
-                
+
 
             public:
 
@@ -468,7 +443,7 @@ namespace meta {
                         !meta::arg::is::any_pointer_v<R, Args...>,
                         "Unsupported basic types, try j_type");
 
-                
+
                 static_assert([](){
                     if constexpr (sizeof...(Args) == 0) {
                         return true;
@@ -478,32 +453,32 @@ namespace meta {
                 }(), "Parameters can not be j_void");
 
 //                static_assert(!is_j_array_t<R>, "Return type can not be an array");   // TODO: fix jobjectarray
-                
-                static inline const std::string args_sig = [](){
+
+                static inline const std::string args_sig() {
                     if constexpr (sizeof...(Args) == 0) {
                         return "";
                     } else {
                         return j_types_sig<Args...>;
                     }
-                }();
-                
-                static inline const std::string method_sig = [](){
-                    std::string _s = "(";
-                    _s += args_sig;
-                    _s += ")";
-                    _s += R::sig;
-                    return _s;
-                }();
-                
+                };
 
-                j_method(const std::string & classname, const std::string & method_name, const Args & ... args) : _jcls(j_class(classname)), _method_name(method_name) {
-                    
+                static inline const std::string method_sig() {
+                    std::string _s = "(";
+                    _s += args_sig();
+                    _s += ")";
+                    _s += R::sig();
+                    return _s;
+                };
+
+
+                j_method(const std::string & classname = "", const std::string & method_name = "", const Args & ... args) : _jcls(classname), method_name(method_name) {
+
                     int index = 0;
                     (void)std::initializer_list<nullptr_t>{
                             ([this, &index, &args] {
                                 _jvs[index] = jvalue(args);
                                 index++;
-                                
+
 #if DEBUG_ENABLED
                                 using T0 = std::remove_cvref_t<decltype(args)>;
                                 constexpr int arg_index = meta::arg::index_of<T0, Args...>::index;
@@ -518,21 +493,22 @@ namespace meta {
                     };
                 }
 
-                virtual std::string fullname() const {
+
+                inline std::string fullname() const {
                     std::string _fn = "<" + _jcls.classname + "> ";
-                    _fn += R::sig;
+                    _fn += R::sig();
                     _fn += " ";
-                    _fn += _method_name;
+                    _fn += method_name;
                     _fn += "(";
-                    _fn += args_sig;
+                    _fn += args_sig();
                     _fn += ");";
                     return _fn;
-                }
+                };
 
                 R call(const j_env & je, const j_object & jo) {
-                    JNIEnv * env = nullptr;
-                    jobject jobj = jo.pointer();
-                    jmethodID jmethod = jmethod_id_pointer(je);
+                    JNIEnv * env = je.unwrap();
+                    jobject jobj = jo.unwrap();
+                    jmethodID jmethod = unwrap(je);
 
                     R r;
                     if constexpr (std::is_same_v<R, j_void>) {
@@ -587,35 +563,35 @@ namespace meta {
                     return r;
                 }
 
-                virtual jmethodID jmethod_id_pointer(const j_env & env) const {
-                    std::string fn = fullname();
-                    if (jmethod_id_pointer_map.contains(fn))
+                jmethodID unwrap(const j_env & env) {
+                    if (jmethod_id_pointer_map.contains(fullname()))
                     {
-                        return jmethod_id_pointer_map[fn];
+                        return jmethod_id_pointer_map[fullname()];
                     } else {
-                        jclass jcls = _jcls.pointer(env);
-                        jmethodID jmethod_id = env.pointer()->GetMethodID(jcls, _method_name.c_str(), method_sig.c_str());
-                        if (env.pointer()->ExceptionCheck()) {
+                        jclass jcls = _jcls.unwrap(env);
+                        jmethodID jmethod_id = env.unwrap()->GetMethodID(jcls, method_name.c_str(), method_sig().c_str());
+                        if (env.unwrap()->ExceptionCheck()) {
                             return nullptr;
                         }
-                        jmethod_id_pointer_map[fn] = jmethod_id;
+                        jmethod_id_pointer_map[fullname()] = jmethod_id;
                         return jmethod_id;
                     }
                 }
 
-                std::string method_name() const {
-                    return _method_name;
-                }
+                std::string method_name;
 
                 std::string classname() const {
-                    return _jcls.classname();
+                    return _jcls.classname;
+                };
+
+                const j_class & jni_class() const {
+                    return _jcls;
                 }
 
             protected:
 
                 jvalue _jvs[sizeof...(Args)];
                 j_class _jcls;
-                std::string _method_name;
 
             };
 
@@ -626,13 +602,12 @@ namespace meta {
                 using j_method<R, Args...>::j_method;
 
                 R call(const j_env & je) {
-
-                    JNIEnv * env = je.pointer();	
-                    jclass jcls = j_method<R, Args...>::_jcls.pointer(env);
-                    jmethodID jmethod = jmethod_id_pointer(je);
+                    JNIEnv * env = je.unwrap();
+                    jclass jcls = j_method<R, Args...>::_jcls.unwrap(env);
+                    jmethodID jmethod = unwrap(je);
 
                     auto & _jvs = j_method<R, Args...>::_jvs;
-                    
+
                     R r;
                     if constexpr (std::is_same_v<R, j_void>) {
                         env->CallStaticVoidMethodA(jcls, jmethod, _jvs);
@@ -686,33 +661,73 @@ namespace meta {
                     return r;
                 }
 
-                std::string fullname() const override {
-                    std::string _fn = "<" + j_method<R, Args...>::_jcls.classname + "> ";
+                inline std::string fullname() const {
+                    std::string _fn = "<" + j_method<R, Args...>::classname() + "> ";
                     _fn += "static ";
-                    _fn += R::sig;
+                    _fn += R::sig();
                     _fn += " ";
-                    _fn += j_method<R, Args...>::_method_name;
+                    _fn += j_method<R, Args...>::method_name;
                     _fn += "(";
-                    _fn += j_method<R, Args...>::args_sig;
+                    _fn += j_method<R, Args...>::args_sig();
                     _fn += ");";
                     return _fn;
-                }
-                
-                jmethodID jmethod_id_pointer(const j_env & env) const override {
-                    std::string fn = fullname();
-                    if (jmethod_id_pointer_map.contains(fn))
+                };
+
+                jmethodID unwrap(const j_env & env) {
+                    if (jmethod_id_pointer_map.contains(fullname()))
                     {
-                        return jmethod_id_pointer_map[fn];
+                        return jmethod_id_pointer_map[fullname()];
                     } else {
-                        jmethodID jmethod_id = env.pointer()->GetStaticMethodID(j_method<R, Args...>::_jcls.pointer(env),
-                                                                                j_method<R, Args...>::_method_name.c_str(),
-                                                                                j_method<R, Args...>::method_sig.c_str());
-                        if (env.pointer()->ExceptionCheck()) {
+                        jmethodID jmethod_id = env.unwrap()->GetStaticMethodID(j_method<R, Args...>::_jcls.unwrap(env),
+                                                                               j_method<R, Args...>::method_name.c_str(),
+                                                                               j_method<R, Args...>::method_sig().c_str());
+                        if (env.unwrap()->ExceptionCheck()) {
                             return nullptr;
                         }
-                        jmethod_id_pointer_map[fn] = jmethod_id;
+                        jmethod_id_pointer_map[fullname()] = jmethod_id;
                         return jmethod_id;
                     }
+                }
+            };
+
+
+#pragma mark - jni interface callback
+
+            j_object::j_object(const std::string & classname) {
+                LOGV("sl2577 j_object init classname = %s", classname.c_str());
+                const auto & env = j_vm::shared().env();
+                auto jm = j_method<j_void>(classname, "<init>");
+                _jo =  env.unwrap()->NewObject(jm.jni_class().unwrap(env), jm.unwrap(env));
+            }
+
+
+            template <typename R, typename ... Args>
+            struct j_interface : j_object {
+
+                static inline const std::string default_classname() {
+                    return "com.cosmojulis.meta.JniHelperInterface";
+                }
+
+                static inline const std::string sig() {
+                    return std::string("L") + meta::string::join(meta::string::split(default_classname(), "."), "/") + ";";
+                }
+
+                j_interface(const std::string & classname = default_classname()) : j_object(classname) {
+                    LOGV("sl2577 j_interface init classname = %s", classname.c_str());
+                }
+                
+                // TODO register native class method
+                const std::string method_sig() {
+                    return j_method<R, Args...>::method_sig();
+                }
+
+                // TODO register native class method
+                R callback(JNIEnv * env, jobject obj) {
+
+                }
+
+                friend R callback(j_interface<R, Args...> & ji, JNIEnv * env, jobject obj) {
+                    return ji.callback(env, obj);
                 }
             };
 
@@ -723,12 +738,14 @@ namespace meta {
             template <typename R, typename ... Args>
             class j_static_call {
             public:
+                j_static_call() { }
+
                 j_static_call(const j_static_method<R, Args...> & sf) : _jsmethod(sf) {
                     std::cout << "call \"" << sf.fullname() << "\"" << std::endl;
                 }
 
                 j_static_call(const std::string & classname, const std::string & method_name, const Args & ... args) :
-                j_static_call(j_static_method<R, Args...>(classname, method_name, args...)) { }
+                        j_static_call(j_static_method<R, Args...>(classname, method_name, args...)) { }
 
                 R execute() {
 #ifdef Xcode
@@ -742,14 +759,14 @@ namespace meta {
             private:
                 j_static_method<R, Args...> _jsmethod;
             };
-        
-        
+
+
             template <typename R, typename ... Args>
             class j_call {
 
             public:
                 j_call(const j_object & jo, const j_method<R, Args...> & jm) : _jobj(jo), _jmethod(jm) {
-                    std::cout << "object<" << jo.classname() << "> call: \"" << jm.fullname() << "\"" << std::endl;
+                    std::cout << "object<" << jo.classname() << "> call: \"" << jm.fullname << "\"" << std::endl;
                 }
 
                 j_call(const j_object & jo, const std::string & method_name, const Args & ... args) :
@@ -779,15 +796,33 @@ namespace meta {
 
 }
 
+//void registerCallback() {
+//    using namespace meta::jni::helper;
+//    auto jcls = j_class("com/cosmojulis/meta/JniHelperInterface");
+//    auto jenv = j_vm::shared().env();
+//    if (jcls.unwrap(jenv) == NULL) {
+//        throw "Not found class com.cosmojulis.meta.JniHelperInterface";
+//    }
+//
+//    JNINativeMethod methods[] = {
+//        {(char *)j_interface_object::method_name.c_str(), (char *)j_interface_object::method_sig().c_str(), (void *)j_interface_object::callback}
+//    };
+//
+//    jenv.unwrap()->RegisterNatives(jcls.unwrap(jenv), methods, 1);
+//}
 
 jint JNI_OnLoad(JavaVM * vm, void * reserved) {
-    meta::jni::helper::j_vm::shared().load_vm(vm);
+    meta::jni::helper::j_vm::shared().load(vm);
     return JNI_VERSION_1_6;
 }
 
 void JNI_OnUnload(JavaVM * vm, void * reserved) {
-    meta::jni::helper::j_vm::shared().clear_vm();
+    meta::jni::helper::j_vm::shared().unload();
 }
+
+
+
+
 
 
 #endif /* jni_helper_hpp */

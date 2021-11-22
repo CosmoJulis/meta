@@ -18,10 +18,32 @@ Java_com_cosmojulis_jnitestapp_MainActivity_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
 
-    std::string hello = test_combine("foo", "bar");
+    std::string hello = "hello world";
 
     return env->NewStringUTF(hello.c_str());
 }
 
 
 
+
+extern "C" JNIEXPORT void  JNICALL
+Java_com_cosmojulis_jnitestapp_MainActivity_test(JNIEnv * env, jobject) {
+
+    auto jsc = j_static_call<j_void, j_interface<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_interface<j_void>("com.cosmojulis.meta.JniHelperInterface"));
+    jsc.execute();
+
+//    auto jsm = j_static_method<j_void, j_interface<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_interface<j_void>("com.cosmojulis.meta.JniHelperInterface"));
+//    LOGV("sl2577 sig = %s", decltype(jsm)::method_sig().c_str());
+//    LOGV("sl2577 fullname = %s", jsm.fullname().c_str());
+
+//    LOGV("sl2577 j_types_sig j_object = %s", j_types_sig<j_object>.c_str());
+//    auto jsm = j_static_method<j_void, j_object>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_object());
+//    LOGV("sl2577 sig = %s", decltype(jsm)::method_sig().c_str());
+//    LOGV("sl2577 fullname = %s", jsm.fullname().c_str());
+
+}
+
+extern "C" JNIEXPORT void  JNICALL
+Java_com_cosmojulis_meta_JniHelperInterface_callback(JNIEnv * env, jobject) {
+    LOGV("sl2577 JniHelperInterface callback");
+}
