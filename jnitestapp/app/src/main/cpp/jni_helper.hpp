@@ -26,8 +26,7 @@
 #include <variant>
 #include <unordered_map>
 #include <jni.h>
-#include "string_utility.hpp"
-#include "class_utility.hpp"
+#include "utility.hpp"
 #include "arg.hpp"
 #include <iostream>
 #include "alog.h"

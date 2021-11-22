@@ -55,6 +55,60 @@ namespace meta {
                 JNIEnv * unwrap() const {
                     return _env;
                 }
+                
+                jclass find_class(const std::string & name) const {
+                    return _env->FindClass(name.c_str());
+                }
+                
+                jobject new_global_ref(const jobject & jobj) const {
+                    return _env->NewGlobalRef(jobj);
+                }
+                
+                void delete_global_ref(const jobject & jobj) const {
+                    _env->DeleteGlobalRef(jobj);
+                }
+                
+                jobject new_local_ref(const jobject & jobj) const {
+                    return _env->NewLocalRef(jobj);
+                }
+                
+                void delete_local_ref(const jobject & jobj) const {
+                    _env->DeleteLocalRef(jobj);
+                }
+                
+                bool exception_check() const {
+                    return _env->ExceptionCheck();
+                }
+                
+                jstring new_string_utf(const std::string & str) const {
+                    return _env->NewStringUTF(str.c_str());
+                }
+                
+                const char * get_string_utf_chars(const jstring & jstr) const {
+                    return _env->GetStringUTFChars(jstr, nullptr);
+                }
+                
+                
+                jmethodID get_method_id(const jclass & jcls, const std::string & method_name, const std::string & method_sig) const {
+                    return _env->GetMethodID(jcls, method_name.c_str(), method_sig.c_str());
+                }
+                
+                jmethodID get_static_method_id(const jclass & jcls, const std::string & method_name, const std::string & method_sig) const {
+                    return _env->GetStaticMethodID(jcls, method_name.c_str(), method_sig.c_str());
+                }
+                
+                jobject new_object(const jclass & jcls, const jmethodID & jmtdID) const {
+                    return _env->NewObject(jcls, jmtdID);
+                }
+                
+                bool register_natives(const jclass & jcls, const JNINativeMethod * methods, jint count) const {
+                    return _env->RegisterNatives(jcls, methods, count) == JNI_OK;
+                }
+                
+                bool unregister_natives(const jclass & jcls) {
+                    return _env->UnregisterNatives(jcls) == JNI_OK;
+                }
+                
 
             private:
                 JNIEnv * _env;
@@ -73,14 +127,14 @@ namespace meta {
                 }
 
                 void unload() {
-                    JNIEnv * ep = env().unwrap();
+                    j_env _env = env();
                     for (auto & [k,v] : jclass_pointer_map) {
-                        ep->DeleteGlobalRef((jobject)v);
+                        _env.delete_global_ref((jobject)v);
                     }
                     jclass_pointer_map.clear();
 
                     for (auto & [k,v] : jmethod_id_pointer_map) {
-                        ep->DeleteGlobalRef((jobject)v);
+                        _env.delete_global_ref((jobject)v);
                     }
                     jmethod_id_pointer_map.clear();
                 }
@@ -126,12 +180,11 @@ namespace meta {
                     {
                         return jclass_pointer_map[classname];
                     } else {
-                        JNIEnv * ep = env.unwrap();
-                        jclass jcls = ep->FindClass(sig.c_str());
-                        if (ep->ExceptionCheck()) {
+                        jclass jcls = env.find_class(sig);
+                        if (env.exception_check()) {
                             return nullptr;
                         }
-                        jclass_pointer_map[classname] = (jclass)ep->NewGlobalRef(jcls);
+                        jclass_pointer_map[classname] = (jclass)env.new_global_ref(jcls);
                         return jcls;
                     }
                 }
@@ -299,7 +352,6 @@ namespace meta {
                         return "java.lang.Object";
                     }
                     else {
-                        int status;
                         // TODO: portablity test
                         std::string actual_class_name = meta::class_utility::classname<T>();
 
@@ -344,11 +396,11 @@ namespace meta {
             public:
 
                 j_string(const char * v = "") : value(v) {
-                    _jstr = j_vm::shared().env().unwrap()->NewStringUTF(value.c_str());
+                    _jstr = j_vm::shared().env().new_string_utf(value);
                 }
 
                 j_string(const std::string & v) : value(v) {
-                    _jstr = j_vm::shared().env().unwrap()->NewStringUTF(value.c_str());
+                    _jstr = j_vm::shared().env().new_string_utf(value);
                 }
 
                 std::string value;
@@ -531,7 +583,7 @@ namespace meta {
                     R r;
                     if constexpr (std::is_same_v<R, j_void>) {
                         env->CallVoidMethodA(jobj, jmethod, _jvs);
-                        if (env->ExceptionCheck()) throw "Call java method error";
+                        if (je.exception_check()) throw "Call java method error";
                         return j_void();
                     }
                     else if constexpr (std::is_same_v<R, j_boolean>) {
@@ -568,7 +620,7 @@ namespace meta {
                     }
                     else if constexpr (std::is_same_v<R, j_string>) {
                         jstring js = (jstring)env->CallObjectMethodA(jobj, jmethod, _jvs);
-                        const char * str = env->GetStringUTFChars(js, nullptr);
+                        const char * str = je.get_string_utf_chars(js);
                         r = j_string(str);
                     }
                     else if constexpr (std::is_base_of_v<j_object, R>) {
@@ -576,7 +628,7 @@ namespace meta {
                         r = j_object(jo);
                     }
 
-                    if (env->ExceptionCheck()) throw "Call java method error";
+                    if (je.exception_check()) throw "Call java method error";
 
                     return r;
                 }
@@ -587,8 +639,8 @@ namespace meta {
                         return jmethod_id_pointer_map[fullname()];
                     } else {
                         jclass jcls = _jcls.unwrap(env);
-                        jmethodID jmethod_id = env.unwrap()->GetMethodID(jcls, method_name.c_str(), method_sig().c_str());
-                        if (env.unwrap()->ExceptionCheck()) {
+                        jmethodID jmethod_id = env.get_method_id(jcls, method_name.c_str(), method_sig().c_str());
+                        if (env.exception_check()) {
                             return nullptr;
                         }
                         jmethod_id_pointer_map[fullname()] = jmethod_id;
@@ -629,7 +681,7 @@ namespace meta {
                     R r;
                     if constexpr (std::is_same_v<R, j_void>) {
                         env->CallStaticVoidMethodA(jcls, jmethod, _jvs);
-                        if (env->ExceptionCheck()) throw "Call java method error";
+                        if (je.exception_check()) throw "Call java method error";
                         return j_void();
                     }
                     else if constexpr (std::is_same_v<R, j_boolean>) {
@@ -666,7 +718,7 @@ namespace meta {
                     }
                     else if constexpr (std::is_same_v<R, j_string>) {
                         jstring js = (jstring)env->CallStaticObjectMethodA(jcls, jmethod, _jvs);
-                        const char * str = env->GetStringUTFChars(js, nullptr);
+                        const char * str = je.get_string_utf_chars(js);
                         r = j_string(str);
                     }
                     else if constexpr (std::is_base_of_v<j_object, R>) {
@@ -674,7 +726,7 @@ namespace meta {
                         r = j_object(jo);
                     }
 
-                    if (env->ExceptionCheck()) throw "Call java method error";
+                    if (je.exception_check()) throw "Call java method error";
 
                     return r;
                 }
@@ -696,10 +748,10 @@ namespace meta {
                     {
                         return jmethod_id_pointer_map[fullname()];
                     } else {
-                        jmethodID jmethod_id = env.unwrap()->GetStaticMethodID(j_method<R, Args...>::_jcls.unwrap(env),
-                                                                               j_method<R, Args...>::method_name.c_str(),
-                                                                               j_method<R, Args...>::method_sig().c_str());
-                        if (env.unwrap()->ExceptionCheck()) {
+                        jmethodID jmethod_id = env.get_static_method_id(j_method<R, Args...>::_jcls.unwrap(env),
+                                                                        j_method<R, Args...>::method_name.c_str(),
+                                                                        j_method<R, Args...>::method_sig().c_str());
+                        if (env.exception_check()) {
                             return nullptr;
                         }
                         jmethod_id_pointer_map[fullname()] = jmethod_id;
@@ -715,7 +767,7 @@ namespace meta {
                 LOGV("sl2577 j_object init classname = %s", classname().c_str());
                 const auto & env = j_vm::shared().env();
                 auto jm = j_method<j_void>(classname(), "<init>");
-                _jo =  env.unwrap()->NewObject(jm.jni_class().unwrap(env), jm.unwrap(env));
+                _jo = env.new_object(jm.jni_class().unwrap(env), jm.unwrap(env));
             }
 
 
@@ -812,20 +864,17 @@ namespace meta {
 
 }
 
-//void registerCallback() {
-//    using namespace meta::jni::helper;
-//    auto jcls = j_class("com/cosmojulis/meta/JniHelperInterface");
-//    auto jenv = j_vm::shared().env();
-//    if (jcls.unwrap(jenv) == NULL) {
-//        throw "Not found class com.cosmojulis.meta.JniHelperInterface";
-//    }
-//
-//    JNINativeMethod methods[] = {
+void registerCallback() {
+    using namespace meta::jni::helper;
+    auto jcls = j_class("com/cosmojulis/meta/JniHelperInterface");
+    auto je = j_vm::shared().env();
+    // TODO: custom jni native method class;
+    JNINativeMethod methods[] = {
 //        {(char *)j_interface_object::method_name.c_str(), (char *)j_interface_object::method_sig().c_str(), (void *)j_interface_object::callback}
-//    };
-//
-//    jenv.unwrap()->RegisterNatives(jcls.unwrap(jenv), methods, 1);
-//}
+    };
+
+    je.register_natives(jcls.unwrap(je), methods, sizeof(methods)/sizeof(methods[0]));
+}
 
 jint JNI_OnLoad(JavaVM * vm, void * reserved) {
     meta::jni::helper::j_vm::shared().load(vm);
