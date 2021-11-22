@@ -29,7 +29,7 @@ Java_com_cosmojulis_jnitestapp_MainActivity_stringFromJNI(
 extern "C" JNIEXPORT void  JNICALL
 Java_com_cosmojulis_jnitestapp_MainActivity_test(JNIEnv * env, jobject) {
 
-    auto jsc = j_static_call<j_void, j_interface<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_interface<j_void>("com.cosmojulis.meta.JniHelperInterface"));
+    auto jsc = j_static_call<j_void, j_interface<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_interface<j_void>());
     jsc.execute();
 
 //    auto jsm = j_static_method<j_void, j_interface<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_interface<j_void>("com.cosmojulis.meta.JniHelperInterface"));

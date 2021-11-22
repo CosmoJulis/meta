@@ -14,6 +14,7 @@
 #define DEBUG_ENABLED 1
 
 #ifdef Xcode
+#include <cxxabi.h>
 #include <variant>
 #include <unordered_map>
 #include "jni.h"
@@ -21,6 +22,7 @@
 #include "arg.hpp"
 #define LOGV(...)
 #else
+#include <cxxabi.h>
 #include <variant>
 #include <unordered_map>
 #include <jni.h>
@@ -29,6 +31,7 @@
 #include <iostream>
 #include "alog.h"
 #endif
+
 
 
 namespace meta {
@@ -286,19 +289,42 @@ namespace meta {
                 }
             };
 
-
-            struct j_object : j_type {
+            template <typename T = void>
+            struct j_object_type : j_type {
             public:
-                static inline const std::string default_classname() {
-                    return "java.lang.Object";
+                static inline std::string classname() {
+                    if constexpr (std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, void>) {
+                        return "java.lang.Object";
+                    }
+                    else if constexpr (std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, j_void>) {
+                        return "java.lang.Object";
+                    }
+                    else {
+                        int status;
+                        // TODO: portablity test
+                        std::string actual_class_name = abi::__cxa_demangle(typeid(T).name(), 0, 0, &status);
+                        if (status != 0) {
+                            throw "Class " + std::string(typeid(T).name()) + " parse error";
+                        }
+                        std::string define_class_name = *(meta::string::split(actual_class_name, "::").rbegin());
+                        
+                        auto vi = meta::string::split(define_class_name, "_");
+                        if (vi.size() > 0) {
+                            vi.erase(vi.begin());
+                        } else {
+                            throw "Class " + std::string(typeid(T).name()) + " parse error";
+                        }
+                        return meta::string::join(vi, ".");
+                    }
                 }
+
                 static inline const std::string sig() {
-                    return std::string("L") + meta::string::join(meta::string::split(default_classname(), "."), "/") + ";";
+                    return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
                 }
+                
+                j_object_type(const jobject & jobj) : _jo(jobj) { }
 
-                j_object(const jobject & jobj) : _jo(jobj) { }
-
-                j_object(const std::string & classname = default_classname());
+                j_object_type();
 
 
                 jobject unwrap() const {
@@ -309,22 +335,16 @@ namespace meta {
                     return jvalue{.l=_jo};
                 }
 
-                const std::string & classname() const {
-                    return _classname;
-                }
             private:
-                std::string _classname;
                 jobject _jo = nullptr;
 
             };
+        
+            using j_object = j_object_type<void>;
 
-            class j_string : public j_object {
+            class j_java_lang_String { };
+            class j_string : public j_object_type<j_java_lang_String> {
             public:
-                static inline const std::string classname = "java.lang.String";
-
-                static inline const std::string sig() {
-                    return std::string("L") + meta::string::join(meta::string::split(classname, "."), "/") + ";";
-                }
 
                 j_string(const char * v = "") : value(v) {
                     _jstr = j_vm::shared().env().unwrap()->NewStringUTF(value.c_str());
@@ -505,6 +525,7 @@ namespace meta {
                     return _fn;
                 };
 
+                
                 R call(const j_env & je, const j_object & jo) {
                     JNIEnv * env = je.unwrap();
                     jobject jobj = jo.unwrap();
@@ -692,28 +713,26 @@ namespace meta {
 
 
 #pragma mark - jni interface callback
-
-            j_object::j_object(const std::string & classname) {
-                LOGV("sl2577 j_object init classname = %s", classname.c_str());
+            template <typename T>
+            j_object_type<T>::j_object_type() {
+                LOGV("sl2577 j_object init classname = %s", classname().c_str());
                 const auto & env = j_vm::shared().env();
-                auto jm = j_method<j_void>(classname, "<init>");
+                auto jm = j_method<j_void>(classname(), "<init>");
                 _jo =  env.unwrap()->NewObject(jm.jni_class().unwrap(env), jm.unwrap(env));
             }
 
 
+            class j_com_cosmojulis_meta_JniHelperInterface { };
+        
             template <typename R, typename ... Args>
-            struct j_interface : j_object {
-
-                static inline const std::string default_classname() {
-                    return "com.cosmojulis.meta.JniHelperInterface";
-                }
+            struct j_interface : j_object_type<j_com_cosmojulis_meta_JniHelperInterface> {
 
                 static inline const std::string sig() {
-                    return std::string("L") + meta::string::join(meta::string::split(default_classname(), "."), "/") + ";";
+                    return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
                 }
 
-                j_interface(const std::string & classname = default_classname()) : j_object(classname) {
-                    LOGV("sl2577 j_interface init classname = %s", classname.c_str());
+                j_interface() {
+                    LOGV("sl2577 j_interface init classname = %s", classname().c_str());
                 }
                 
                 // TODO register native class method

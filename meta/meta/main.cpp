@@ -53,34 +53,29 @@
 //    Bar(int a) { }
 //};
 
+#include <cxxabi.h>
 
 using namespace meta::jni::helper;
 
-
-class A {
-public:
-    static inline const std::string get() {
-        return "A";
-    }
-    A() {
-        std::cout << "use " << get() << std::endl;
-    }
-};
-
-class B : public A {
-public:
-    static inline const std::string get() {
-        return "B";
-    }
-    B() {
-        std::cout << "use " << get() << std::endl;
-    }
-};
-
 int main(int argc, const char * argv[]) {
 
-    auto jsm = j_static_method<j_void, j_interface<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_interface<j_void>("com.cosmojulis.meta.JniHelperInterface"));
-    std::cout << "sl2577 sig = " << decltype(jsm)::method_sig() << std::endl;
-    std::cout << "sl2577 fullname = " << jsm.fullname() << std::endl;;
+    // exception classes not in <stdexcept>, thrown by the implementation
+    // instead of the user
+//    std::bad_exception  e;
+//    realname = abi::__cxa_demangle(e.what(), 0, 0, &status);
+//    std::cout << e.what() << "\t=> " << realname << "\t: " << status << '\n';
+//    free(realname);
+
+
+
+
+//    auto jsm = j_static_method<j_void, j_interface<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_interface<j_void>("com.cosmojulis.meta.JniHelperInterface"));
+//    std::cout << "sl2577 sig = " << decltype(jsm)::method_sig() << std::endl;
+//    std::cout << "sl2577 fullname = " << jsm.fullname() << std::endl;;
+    
+
+    
+    
+
     return 0;
 }
