@@ -44,6 +44,6 @@ Java_com_cosmojulis_jnitestapp_MainActivity_test(JNIEnv * env, jobject) {
 }
 
 extern "C" JNIEXPORT void  JNICALL
-Java_com_cosmojulis_meta_JniHelperInterface_callback(JNIEnv * env, jobject) {
-    LOGV("sl2577 JniHelperInterface callback");
+Java_com_cosmojulis_meta_JniHelperInterface_callback(JNIEnv * env, jobject jobject1) {
+    LOGV("sl2577 JniHelperInterface callback %s", jobject1);
 }

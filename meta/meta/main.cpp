@@ -8,8 +8,7 @@
 #include <iostream>
 #include "template/arg.hpp"
 #include "java/jni_helper.hpp"
-
-
+#include "utilities/class_utility.hpp"
 
 
 //using namespace std;
@@ -53,12 +52,14 @@
 //    Bar(int a) { }
 //};
 
-#include <cxxabi.h>
-
+namespace n {
+class test_class_name { };
+}
 using namespace meta::jni::helper;
 
 int main(int argc, const char * argv[]) {
 
+    std::cout << meta::class_utility::classname<n::test_class_name>() << std::endl;
     // exception classes not in <stdexcept>, thrown by the implementation
     // instead of the user
 //    std::bad_exception  e;

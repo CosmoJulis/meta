@@ -16,7 +16,7 @@ namespace meta {
 
 namespace string {
 
-    std::vector<std::string> split(const std::string & s, const std::string & split)
+    static inline const std::vector<std::string> split(const std::string & s, const std::string & split)
     {
         std::vector<std::string> sv;
         size_t start = 0;
@@ -30,7 +30,7 @@ namespace string {
         return sv;
     }
 
-    std::string join(const std::vector<std::string> & sv, const std::string & join = "")
+    static inline const std::string join(const std::vector<std::string> & sv, const std::string & join = "")
     {
         std::string ret;
         for (auto p = sv.begin(); p != sv.end(); p++) {

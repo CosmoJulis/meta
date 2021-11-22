@@ -9,16 +9,16 @@
 #define jni_helper_hpp
 
 #define Xcode
-//#define Android
+//#define AndroidStudio
 
 #define DEBUG_ENABLED 1
 
 #ifdef Xcode
-#include <cxxabi.h>
 #include <variant>
 #include <unordered_map>
 #include "jni.h"
 #include "../utilities/string_utility.hpp"
+#include "../utilities/class_utility.hpp"
 #include "arg.hpp"
 #define LOGV(...)
 #else
@@ -27,6 +27,7 @@
 #include <unordered_map>
 #include <jni.h>
 #include "string_utility.hpp"
+#include "class_utility.hpp"
 #include "arg.hpp"
 #include <iostream>
 #include "alog.h"
@@ -302,10 +303,8 @@ namespace meta {
                     else {
                         int status;
                         // TODO: portablity test
-                        std::string actual_class_name = abi::__cxa_demangle(typeid(T).name(), 0, 0, &status);
-                        if (status != 0) {
-                            throw "Class " + std::string(typeid(T).name()) + " parse error";
-                        }
+                        std::string actual_class_name = meta::class_utility::classname<T>();
+
                         std::string define_class_name = *(meta::string::split(actual_class_name, "::").rbegin());
                         
                         auto vi = meta::string::split(define_class_name, "_");

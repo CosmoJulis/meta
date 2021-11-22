@@ -37,8 +37,6 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(stringFromJNI());
 
         new Handler().postDelayed(() -> {
-//            JniHelperInterface jhi = new JniHelperInterface();
-//            jhi.callback();
             test();
         }, 3000);
     }
