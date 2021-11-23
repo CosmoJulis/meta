@@ -17,8 +17,6 @@ Java_com_cosmojulis_jnitestapp_MainActivity_stringFromJNI(
 }
 
 
-
-
 extern "C" JNIEXPORT void  JNICALL
 Java_com_cosmojulis_jnitestapp_MainActivity_test(JNIEnv * env, jobject) {
 
