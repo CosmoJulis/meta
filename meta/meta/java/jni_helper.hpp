@@ -234,7 +234,6 @@ namespace meta {
 
                 j_object_type();
 
-
                 jobject unwrap() const {
                     return _jo;
                 }
