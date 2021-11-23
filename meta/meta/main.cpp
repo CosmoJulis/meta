@@ -52,31 +52,68 @@
 //    Bar(int a) { }
 //};
 
-namespace n {
-class test_class_name { };
-}
+
 using namespace meta::jni::helper;
 
+
+
+
+
+
 int main(int argc, const char * argv[]) {
-
-    std::cout << meta::class_utility::classname<n::test_class_name>() << std::endl;
-    // exception classes not in <stdexcept>, thrown by the implementation
-    // instead of the user
-//    std::bad_exception  e;
-//    realname = abi::__cxa_demangle(e.what(), 0, 0, &status);
-//    std::cout << e.what() << "\t=> " << realname << "\t: " << status << '\n';
-//    free(realname);
-
-
-
-
-//    auto jsm = j_static_method<j_void, j_interface<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "callback", j_interface<j_void>("com.cosmojulis.meta.JniHelperInterface"));
-//    std::cout << "sl2577 sig = " << decltype(jsm)::method_sig() << std::endl;
-//    std::cout << "sl2577 fullname = " << jsm.fullname() << std::endl;;
     
+//    auto jc = j_call<j_void, j_boolean, j_string>(j_object(), "method", true, "hello world");
+//    std::cout << j_object().classname() << std::endl;
+    auto jc = j_call<j_void,
+    j_boolean,
+    j_byte,
+    j_char,
+    j_short,
+    j_int,
+    j_long,
+    j_float,
+    j_double,
+    j_string
+    >
+    (j_object(), "method",
+     true,
+     0x1,
+     'c',
+     2,
+     4,
+     8,
+     0.1,
+     0.2,
+     "hello world"
+     );
 
-    
-    
+    auto jm = j_method<j_void, j_boolean>("class", "m", true);
 
+
+    auto jsc = j_static_call<j_void,
+    j_boolean,
+    j_byte,
+    j_char,
+    j_short,
+    j_int,
+    j_long,
+    j_float,
+    j_double,
+    j_string
+    >
+    ("com.app.Activity", "method",
+     true,
+     0x1,
+     'c',
+     2,
+     4,
+     8,
+     0.1,
+     0.2,
+     "hello world"
+     );
+    
+  
+    
     return 0;
 }

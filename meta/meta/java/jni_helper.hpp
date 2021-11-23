@@ -45,214 +45,8 @@ namespace meta {
             static std::unordered_map<std::string, jclass> jclass_pointer_map;
             static std::unordered_map<std::string, jmethodID> jmethod_id_pointer_map;
 
-
-#pragma mark - jni env
-
-            class j_env {
-            public:
-                j_env(JNIEnv * env = nullptr) : _env(env) { }
-
-                JNIEnv * unwrap() const {
-                    return _env;
-                }
-                
-                jclass find_class(const std::string & name) const {
-                    return _env->FindClass(name.c_str());
-                }
-                
-                jobject new_global_ref(const jobject & jobj) const {
-                    return _env->NewGlobalRef(jobj);
-                }
-                
-                void delete_global_ref(const jobject & jobj) const {
-                    _env->DeleteGlobalRef(jobj);
-                }
-                
-                jobject new_local_ref(const jobject & jobj) const {
-                    return _env->NewLocalRef(jobj);
-                }
-                
-                void delete_local_ref(const jobject & jobj) const {
-                    _env->DeleteLocalRef(jobj);
-                }
-                
-                bool exception_check() const {
-                    return _env->ExceptionCheck();
-                }
-                
-                jstring new_string_utf(const std::string & str) const {
-                    return _env->NewStringUTF(str.c_str());
-                }
-                
-                const char * get_string_utf_chars(const jstring & jstr) const {
-                    return _env->GetStringUTFChars(jstr, nullptr);
-                }
-                
-                
-                jmethodID get_method_id(const jclass & jcls, const std::string & method_name, const std::string & method_sig) const {
-                    return _env->GetMethodID(jcls, method_name.c_str(), method_sig.c_str());
-                }
-                
-                jmethodID get_static_method_id(const jclass & jcls, const std::string & method_name, const std::string & method_sig) const {
-                    return _env->GetStaticMethodID(jcls, method_name.c_str(), method_sig.c_str());
-                }
-                
-                jobject new_object(const jclass & jcls, const jmethodID & jmethod) const {
-                    return _env->NewObject(jcls, jmethod);
-                }
-                
-                bool register_natives(const jclass & jcls, const JNINativeMethod * methods, jint count) const {
-                    return _env->RegisterNatives(jcls, methods, count) == JNI_OK;
-                }
-                
-                bool unregister_natives(const jclass & jcls) {
-                    return _env->UnregisterNatives(jcls) == JNI_OK;
-                }
-                
-                void call_void_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
-                    _env->CallVoidMethodA(jobj, jmethod, args);
-                }
-                
-                void call_static_void_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) {
-                    _env->CallStaticVoidMethodA(jcls, jmethod, args);
-                }
-                
-//                j_boolean call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
-//                    
-//                }
-//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
-//                }
-//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
-//                }
-//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
-//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
-//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
-//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
-//                void call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) {
-
-                
-//            else if constexpr (std::is_same_v<R, j_boolean>) {
-//                jboolean jb = env->CallBooleanMethodA(jobj, jmethod, _jvs);
-//                r = j_boolean(jb);
-//            }
-//            else if constexpr (std::is_same_v<R, j_byte>) {
-//                jbyte jb = env->CallByteMethodA(jobj, jmethod, _jvs);
-//                r = j_byte(jb);
-//            }
-//            else if constexpr (std::is_same_v<R, j_char>) {
-//                jchar jc = env->CallCharMethodA(jobj, jmethod, _jvs);
-//                r = j_char(jc);
-//            }
-//            else if constexpr (std::is_same_v<R, j_short>) {
-//                jshort js = env->CallShortMethodA(jobj, jmethod, _jvs);
-//                r = j_short(js);
-//            }
-//            else if constexpr (std::is_same_v<R, j_int>) {
-//                jint ji = env->CallIntMethodA(jobj, jmethod, _jvs);
-//                r = j_int(ji);
-//            }
-//            else if constexpr (std::is_same_v<R, j_long>) {
-//                jlong jl = env->CallLongMethodA(jobj, jmethod, _jvs);
-//                r = j_long(jl);
-//            }
-//            else if constexpr (std::is_same_v<R, j_float>) {
-//                jfloat jf = env->CallFloatMethodA(jobj, jmethod, _jvs);
-//                r = j_float(jf);
-//            }
-//            else if constexpr (std::is_same_v<R, j_double>) {
-//                jdouble jd = env->CallDoubleMethodA(jobj, jmethod, _jvs);
-//                r = j_double(jd);
-//            }
-//            else if constexpr (std::is_same_v<R, j_string>) {
-//                jstring js = (jstring)env->CallObjectMethodA(jobj, jmethod, _jvs);
-//                const char * str = je.get_string_utf_chars(js);
-//                r = j_string(str);
-//            }
-//            else if constexpr (std::is_base_of_v<j_object, R>) {
-//                jobject jo = env->CallObjectMethodA(jobj, jmethod, _jvs);
-                
-                
-
-            private:
-                JNIEnv * _env;
-            };
-
-
-            class j_vm {
-            public:
-                static j_vm & shared() {
-                    static j_vm jvm = j_vm();
-                    return jvm;
-                }
-
-                void load(JavaVM * vm) {
-                    j_vm::shared()._vm = vm;
-                }
-
-                void unload() {
-                    j_env _env = env();
-                    for (auto & [k,v] : jclass_pointer_map) {
-                        _env.delete_global_ref((jobject)v);
-                    }
-                    jclass_pointer_map.clear();
-
-                    for (auto & [k,v] : jmethod_id_pointer_map) {
-                        _env.delete_global_ref((jobject)v);
-                    }
-                    jmethod_id_pointer_map.clear();
-                }
-
-
-                j_env env() {
-                    JNIEnv * _env;
-                    jint ret = _vm->GetEnv(reinterpret_cast<void**>(&_env), JNI_VERSION_1_6);
-                    if (ret == JNI_EDETACHED) {
-#ifdef Xcode
-                        if (_vm->AttachCurrentThread(reinterpret_cast<void**>(&_env), nullptr) >= 0)
-#else
-                        if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
-#endif
-                        {
-                            return j_env(_env);
-                        }
-                    }
-                    return j_env(_env);
-                }
-
-            private:
-                j_vm() { }
-                JavaVM * _vm;
-
-            };
-
-
-
-
-#pragma mark - jni class
-
-            class j_class {
-            public:
-
-                j_class(const std::string & name = "") : classname(name), sig(meta::string::join(meta::string::split(name, "."), "/")) { }
-
-                std::string classname;
-                std::string sig;
-
-                jclass unwrap(const j_env & env) const {
-                    if (jclass_pointer_map.contains(classname))
-                    {
-                        return jclass_pointer_map[classname];
-                    } else {
-                        jclass jcls = env.find_class(sig);
-                        if (env.exception_check()) {
-                            return nullptr;
-                        }
-                        jclass_pointer_map[classname] = (jclass)env.new_global_ref(jcls);
-                        return jcls;
-                    }
-                }
-            };
-
+        
+        
 #pragma mark - jni type
 
             struct j_type {
@@ -261,6 +55,10 @@ namespace meta {
 
             struct j_void : j_type {
                 static inline const std::string sig() { return "V";}
+                static inline j_void & placeholder() {
+                    static j_void _placeholder = j_void();
+                    return _placeholder;
+                }
             };
 
             struct j_boolean : j_type {
@@ -458,18 +256,20 @@ namespace meta {
             class j_string : public j_object_type<j_java_lang_String> {
             public:
 
-                j_string(const char * v = "") : value(v) {
-                    _jstr = j_vm::shared().env().new_string_utf(value);
-                }
+                j_string(const char * v = "");
+                j_string(const std::string & v);
 
-                j_string(const std::string & v) : value(v) {
-                    _jstr = j_vm::shared().env().new_string_utf(value);
-                }
+                
+                j_string(const jstring & jstr) : _jstr(jstr) { }
 
                 std::string value;
 
                 operator std::string () const {
                     return value;
+                }
+                
+                jstring unwrap() const {
+                    return _jstr;
                 }
 
                 operator jvalue() const {
@@ -481,8 +281,6 @@ namespace meta {
                 jstring _jstr = nullptr;
 
             };
-
-
 
 
 
@@ -541,11 +339,243 @@ namespace meta {
 
 
 
-/*
- * TODO:
- *      template<>
- *      j_method().wrap(Args.... args);
- */
+
+#pragma mark - jni env
+
+            class j_env {
+            public:
+                j_env(JNIEnv * env = nullptr) : _env(env) { }
+
+                JNIEnv * unwrap() const {
+                    return _env;
+                }
+                
+                jclass find_class(const std::string & name) const {
+                    return _env->FindClass(name.c_str());
+                }
+                
+                jobject new_global_ref(const jobject & jobj) const {
+                    return _env->NewGlobalRef(jobj);
+                }
+                
+                void delete_global_ref(const jobject & jobj) const {
+                    _env->DeleteGlobalRef(jobj);
+                }
+                
+                jobject new_local_ref(const jobject & jobj) const {
+                    return _env->NewLocalRef(jobj);
+                }
+                
+                void delete_local_ref(const jobject & jobj) const {
+                    _env->DeleteLocalRef(jobj);
+                }
+                
+                bool exception_check() const {
+                    return _env->ExceptionCheck();
+                }
+                
+                jstring new_string_utf(const std::string & str) const {
+                    return _env->NewStringUTF(str.c_str());
+                }
+                
+                const char * get_string_utf_chars(const jstring & jstr) const {
+                    return _env->GetStringUTFChars(jstr, nullptr);
+                }
+                
+                
+                jmethodID get_method_id(const jclass & jcls, const std::string & method_name, const std::string & method_sig) const {
+                    return _env->GetMethodID(jcls, method_name.c_str(), method_sig.c_str());
+                }
+                
+                jmethodID get_static_method_id(const jclass & jcls, const std::string & method_name, const std::string & method_sig) const {
+                    return _env->GetStaticMethodID(jcls, method_name.c_str(), method_sig.c_str());
+                }
+                
+                jobject new_object(const jclass & jcls, const jmethodID & jmethod) const {
+                    return _env->NewObject(jcls, jmethod);
+                }
+                
+                bool register_natives(const jclass & jcls, const JNINativeMethod * methods, jint count) const {
+                    return _env->RegisterNatives(jcls, methods, count) == JNI_OK;
+                }
+                
+                bool unregister_natives(const jclass & jcls) {
+                    return _env->UnregisterNatives(jcls) == JNI_OK;
+                }
+                
+                j_void call_static_void_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    _env->CallStaticVoidMethodA(jcls, jmethod, args);
+                    return j_void::placeholder();
+                }
+
+                j_void call_void_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    _env->CallVoidMethodA(jobj, jmethod, args);
+                    return j_void::placeholder();
+                }
+
+                j_boolean call_static_boolean_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallStaticBooleanMethodA(jcls, jmethod, args);
+                }
+
+                j_boolean call_boolean_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallBooleanMethodA(jobj, jmethod, args);
+                }
+
+                j_byte call_static_byte_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallStaticByteMethodA(jcls, jmethod, args);
+                }
+
+                j_byte call_byte_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallByteMethodA(jobj, jmethod, args);
+                }
+
+                j_byte call_static_char_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallStaticCharMethodA(jcls, jmethod, args);
+                }
+
+                j_byte call_char_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallCharMethodA(jobj, jmethod, args);
+                }
+
+                j_short call_static_short_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallStaticShortMethodA(jcls, jmethod, args);
+                }
+
+                j_short call_short_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallShortMethodA(jobj, jmethod, args);
+                }
+
+                j_int call_static_int_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallStaticIntMethodA(jcls, jmethod, args);
+                }
+
+                j_int call_int_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallIntMethodA(jobj, jmethod, args);
+                }
+
+                j_long call_static_long_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallStaticLongMethodA(jcls, jmethod, args);
+                }
+
+                j_long call_long_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallLongMethodA(jobj, jmethod, args);
+                }
+
+                j_float call_static_float_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallStaticFloatMethodA(jcls, jmethod, args);
+                }
+
+                j_float call_float_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallFloatMethodA(jobj, jmethod, args);
+                }
+
+                j_double call_static_double_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallStaticDoubleMethodA(jcls, jmethod, args);
+                }
+
+                j_double call_double_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallDoubleMethodA(jobj, jmethod, args);
+                }
+
+                j_string call_static_string_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return (jstring)_env->CallStaticObjectMethodA(jcls, jmethod, args);
+                }
+
+                j_string call_string_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return (jstring)_env->CallObjectMethodA(jobj, jmethod, args);
+                }
+
+                j_object call_static_object_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallStaticObjectMethodA(jcls, jmethod, args);
+                }
+
+                j_object call_object_method(const jobject & jobj, const jmethodID & jmethod, const jvalue * args) const {
+                    return _env->CallObjectMethodA(jobj, jmethod, args);
+                }
+                
+                
+
+            private:
+                JNIEnv * _env;
+            };
+
+
+            class j_vm {
+            public:
+                static j_vm & shared() {
+                    static j_vm jvm = j_vm();
+                    return jvm;
+                }
+
+                void load(JavaVM * vm) {
+                    j_vm::shared()._vm = vm;
+                }
+
+                void unload() {
+                    j_env _env = env();
+                    for (auto & [k,v] : jclass_pointer_map) {
+                        _env.delete_global_ref((jobject)v);
+                    }
+                    jclass_pointer_map.clear();
+
+                    for (auto & [k,v] : jmethod_id_pointer_map) {
+                        _env.delete_global_ref((jobject)v);
+                    }
+                    jmethod_id_pointer_map.clear();
+                }
+
+
+                j_env env() {
+                    JNIEnv * _env;
+                    jint ret = _vm->GetEnv(reinterpret_cast<void**>(&_env), JNI_VERSION_1_6);
+                    if (ret == JNI_EDETACHED) {
+#ifdef Xcode
+                        if (_vm->AttachCurrentThread(reinterpret_cast<void**>(&_env), nullptr) >= 0)
+#else
+                        if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
+#endif
+                        {
+                            return j_env(_env);
+                        }
+                    }
+                    return j_env(_env);
+                }
+
+            private:
+                j_vm() { }
+                JavaVM * _vm;
+
+            };
+
+
+
+
+#pragma mark - jni class
+
+            class j_class {
+            public:
+
+                j_class(const std::string & name = "") : classname(name), sig(meta::string::join(meta::string::split(name, "."), "/")) { }
+
+                std::string classname;
+                std::string sig;
+
+                jclass unwrap(const j_env & env) const {
+                    if (jclass_pointer_map.contains(classname))
+                    {
+                        return jclass_pointer_map[classname];
+                    } else {
+                        jclass jcls = env.find_class(sig);
+                        if (env.exception_check()) {
+                            return nullptr;
+                        }
+                        jclass_pointer_map[classname] = (jclass)env.new_global_ref(jcls);
+                        return jcls;
+                    }
+                }
+            };
+
+
 #pragma mark - jni function/static function
 
             template <typename R, typename ... Args>
@@ -639,7 +669,6 @@ namespace meta {
 
                 
                 R call(const j_env & je, const j_object & jo) {
-                    JNIEnv * env = je.unwrap();
                     jobject jobj = jo.unwrap();
                     jmethodID jmethod = unwrap(je);
 
@@ -647,48 +676,38 @@ namespace meta {
                     if constexpr (std::is_same_v<R, j_void>) {
                         je.call_void_method(jobj, jmethod, _jvs);
                         if (je.exception_check()) throw "Call java method error";
-                        return j_void();
+                        return j_void::placeholder();
                     }
                     else if constexpr (std::is_same_v<R, j_boolean>) {
-                        jboolean jb = env->CallBooleanMethodA(jobj, jmethod, _jvs);
-                        r = j_boolean(jb);
+                        r = je.call_boolean_method(jobj, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_byte>) {
-                        jbyte jb = env->CallByteMethodA(jobj, jmethod, _jvs);
-                        r = j_byte(jb);
+                        r = je.call_byte_method(jobj, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_char>) {
-                        jchar jc = env->CallCharMethodA(jobj, jmethod, _jvs);
-                        r = j_char(jc);
+                        r = je.call_char_method(jobj, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_short>) {
-                        jshort js = env->CallShortMethodA(jobj, jmethod, _jvs);
-                        r = j_short(js);
+                        r = je.call_short_method(jobj, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_int>) {
-                        jint ji = env->CallIntMethodA(jobj, jmethod, _jvs);
-                        r = j_int(ji);
+                        r = je.call_int_method(jobj, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_long>) {
-                        jlong jl = env->CallLongMethodA(jobj, jmethod, _jvs);
-                        r = j_long(jl);
+                        r = je.call_long_method(jobj, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_float>) {
-                        jfloat jf = env->CallFloatMethodA(jobj, jmethod, _jvs);
-                        r = j_float(jf);
+                        r = je.call_float_method(jobj, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_double>) {
-                        jdouble jd = env->CallDoubleMethodA(jobj, jmethod, _jvs);
-                        r = j_double(jd);
+                        r = je.call_double_method(jobj, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_string>) {
-                        jstring js = (jstring)env->CallObjectMethodA(jobj, jmethod, _jvs);
-                        const char * str = je.get_string_utf_chars(js);
-                        r = j_string(str);
+//                        const char * str = je.get_string_utf_chars(js);
+                        r = je.call_string_method(jobj, jmethod, _jvs);
                     }
                     else if constexpr (std::is_base_of_v<j_object, R>) {
-                        jobject jo = env->CallObjectMethodA(jobj, jmethod, _jvs);
-                        r = j_object(jo);
+                        r = je.call_object_method(jobj, jmethod, _jvs);
                     }
 
                     if (je.exception_check()) throw "Call java method error";
@@ -696,14 +715,14 @@ namespace meta {
                     return r;
                 }
 
-                jmethodID unwrap(const j_env & env) {
+                virtual jmethodID unwrap(const j_env & je) {
                     if (jmethod_id_pointer_map.contains(fullname()))
                     {
                         return jmethod_id_pointer_map[fullname()];
                     } else {
-                        jclass jcls = _jcls.unwrap(env);
-                        jmethodID jmethod_id = env.get_method_id(jcls, method_name.c_str(), method_sig().c_str());
-                        if (env.exception_check()) {
+                        jclass jcls = _jcls.unwrap(je);
+                        jmethodID jmethod_id = je.get_method_id(jcls, method_name.c_str(), method_sig().c_str());
+                        if (je.exception_check()) {
                             return nullptr;
                         }
                         jmethod_id_pointer_map[fullname()] = jmethod_id;
@@ -735,58 +754,46 @@ namespace meta {
                 using j_method<R, Args...>::j_method;
 
                 R call(const j_env & je) {
-                    JNIEnv * env = je.unwrap();
-                    jclass jcls = j_method<R, Args...>::_jcls.unwrap(env);
+                    jclass jcls = j_method<R, Args...>::_jcls.unwrap(je);
                     jmethodID jmethod = unwrap(je);
 
                     auto & _jvs = j_method<R, Args...>::_jvs;
 
                     R r;
                     if constexpr (std::is_same_v<R, j_void>) {
-                        env->CallStaticVoidMethodA(jcls, jmethod, _jvs);
+                        je.call_static_void_method(jcls, jmethod, _jvs);
                         if (je.exception_check()) throw "Call java method error";
-                        return j_void();
+                        return j_void::placeholder();
                     }
                     else if constexpr (std::is_same_v<R, j_boolean>) {
-                        jboolean jb = env->CallStaticBooleanMethodA(jcls, jmethod, _jvs);
-                        r = j_boolean(jb);
+                        r = je.call_static_boolean_method(jcls, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_byte>) {
-                        jbyte jb = env->CallStaticByteMethodA(jcls, jmethod, _jvs);
-                        r = j_byte(jb);
+                        r = je.call_static_byte_method(jcls, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_char>) {
-                        jchar jc = env->CallStaticCharMethodA(jcls, jmethod, _jvs);
-                        r = j_char(jc);
+                        r = je.call_static_char_method(jcls, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_short>) {
-                        jshort js = env->CallStaticShortMethodA(jcls, jmethod, _jvs);
-                        r = j_short(js);
+                        r = je.call_static_short_method(jcls, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_int>) {
-                        jint ji = env->CallStaticIntMethodA(jcls, jmethod, _jvs);
-                        r = j_int(ji);
+                        r = je.call_static_int_method(jcls, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_long>) {
-                        jlong jl = env->CallStaticLongMethodA(jcls, jmethod, _jvs);
-                        r = j_long(jl);
+                        r = je.call_static_long_method(jcls, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_float>) {
-                        jfloat jf = env->CallStaticFloatMethodA(jcls, jmethod, _jvs);
-                        r = j_float(jf);
+                        r = je.call_static_float_method(jcls, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_double>) {
-                        jdouble jd = env->CallStaticDoubleMethodA(jcls, jmethod, _jvs);
-                        r = j_double(jd);
+                        r = je.call_static_double_method(jcls, jmethod, _jvs);
                     }
                     else if constexpr (std::is_same_v<R, j_string>) {
-                        jstring js = (jstring)env->CallStaticObjectMethodA(jcls, jmethod, _jvs);
-                        const char * str = je.get_string_utf_chars(js);
-                        r = j_string(str);
+                        r = je.call_static_string_method(jcls, jmethod, _jvs);
                     }
                     else if constexpr (std::is_base_of_v<j_object, R>) {
-                        jobject jo = env->CallStaticObjectMethodA(jcls, jmethod, _jvs);
-                        r = j_object(jo);
+                        r = je.call_static_object_method(jcls, jmethod, _jvs);
                     }
 
                     if (je.exception_check()) throw "Call java method error";
@@ -806,7 +813,7 @@ namespace meta {
                     return _fn;
                 };
 
-                jmethodID unwrap(const j_env & env) {
+                jmethodID unwrap(const j_env & env) override {
                     if (jmethod_id_pointer_map.contains(fullname()))
                     {
                         return jmethod_id_pointer_map[fullname()];
@@ -833,6 +840,14 @@ namespace meta {
                 _jo = env.new_object(jm.jni_class().unwrap(env), jm.unwrap(env));
             }
 
+            j_string::j_string(const char * v) : value(v) {
+                _jstr = j_vm::shared().env().new_string_utf(value);
+            }
+        
+            j_string::j_string(const std::string & v) : value(v) {
+                _jstr = j_vm::shared().env().new_string_utf(value);
+            }
+        
 
             class j_com_cosmojulis_meta_JniHelperInterface { };
         
@@ -897,11 +912,11 @@ namespace meta {
 
             public:
                 j_call(const j_object & jo, const j_method<R, Args...> & jm) : _jobj(jo), _jmethod(jm) {
-                    std::cout << "object<" << jo.classname() << "> call: \"" << jm.fullname << "\"" << std::endl;
+                    std::cout << "object<" << jo.classname() << "> call: \"" << jm.fullname() << "\"" << std::endl;
                 }
 
                 j_call(const j_object & jo, const std::string & method_name, const Args & ... args) :
-                        j_call(jo, j_method<R, Args...>(method_name, args...)) { }
+                        j_call(jo, j_method<R, Args...>(jo.classname(), method_name, args...)) { }
 
                 j_call(const j_object & jo, const char * method_name, const Args & ... args) :
                         j_call(jo, std::string(method_name), args...) { }
