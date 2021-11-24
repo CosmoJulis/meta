@@ -200,10 +200,17 @@ namespace meta {
                 }
             };
 
+#if _LIBCPP_STD_VER >= 20
+            template <meta::class_utility::literal_string T>
+#else
             template <typename T = void>
+#endif
             struct j_object_type : j_type {
             public:
                 static inline std::string classname() {
+#if _LIBCPP_STD_VER >= 20
+                    return T.value;
+#else
                     if constexpr (std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, void>) {
                         return "java.lang.Object";
                     }
@@ -224,6 +231,7 @@ namespace meta {
                         }
                         return meta::string::join(vi, ".");
                     }
+#endif
                 }
 
                 static inline const std::string sig() {
@@ -247,10 +255,18 @@ namespace meta {
 
             };
 
+#if _LIBCPP_STD_VER >= 20
+            using j_object = j_object_type<"java.lang.Object">;
+#else
             using j_object = j_object_type<void>;
+#endif
 
+#if _LIBCPP_STD_VER >= 20
+            class j_string : public j_object_type<"java.lang.String"> {
+#else
             class j_java_lang_String { };
             class j_string : public j_object_type<j_java_lang_String> {
+#endif
             public:
 
                 j_string(const char * v = "");
@@ -653,7 +669,7 @@ namespace meta {
 #ifdef Xcode
                         if (_vm->AttachCurrentThread(reinterpret_cast<void**>(&_env), nullptr) >= 0)
 #else
-                        if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
+                            if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
 #endif
                         {
                             return j_env(_env);
@@ -930,8 +946,11 @@ namespace meta {
 
 
 
-
+#if _LIBCPP_STD_VER >= 20
+            template <meta::class_utility::literal_string T>
+#else
             template <typename T>
+#endif
             j_object_type<T>::j_object_type() {
                 LOGV("sl2577 j_object init classname = %s", classname().c_str());
                 const auto & env = j_vm::shared().env();
@@ -965,11 +984,14 @@ namespace meta {
 
 #pragma mark - jni interface callback
 
+#if _LIBCPP_STD_VER >= 20
+            template <typename R, typename ... Args>
+            struct j_interface : j_object_type<"com.cosmojulis.meta.JniHelperInterface"> {
+#else
             class j_com_cosmojulis_meta_JniHelperInterface { };
-
             template <typename R, typename ... Args>
             struct j_interface : j_object_type<j_com_cosmojulis_meta_JniHelperInterface> {
-
+#endif
                 static inline const std::string sig() {
                     return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
                 }
