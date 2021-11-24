@@ -9,7 +9,7 @@
 #include "template/arg.hpp"
 #include "java/jni_helper.hpp"
 #include "utilities/utility.hpp"
-
+#include <version>
 
 //using namespace std;
 //
@@ -56,16 +56,30 @@
 using namespace meta::jni::helper;
 
 
-
-
-
-class myname { };
+template<meta::class_utility::literal_string lit>
+void Print() {
+    // The size of the string is available as a constant expression.
+    constexpr auto size = sizeof(lit.value);
+    // and so is the string's content.
+    constexpr auto contents = lit.value;
+    
+    
+    std::cout << "Size: " << size << ", Contents: " << contents << std::endl;
+}
 
 int main(int argc, const char * argv[]) {
+    Print<"literal string">(); // Prints "Size: 15, Contents: literal string"
 
 
+    
+    constexpr char a[15] = "literal string";
+    
+    Print<a>();
+    
+    return 0;
 //    auto jc = j_call<j_void, j_boolean, j_string>(j_object(), "method", true, "hello world");
 //    std::cout << j_object().classname() << std::endl;
+    
     auto jc = j_call<j_void,
     j_boolean,
     j_byte,

@@ -9,6 +9,7 @@
 #define class_utility_hpp
 
 #include <cxxabi.h>
+#include <version>
 
 
 namespace meta {
@@ -31,6 +32,19 @@ namespace class_utility {
             return actual_class_name;
         }
     }
+
+#if _LIBCPP_STD_VER >= 20
+    template<size_t N>
+    struct literal_string {
+        constexpr literal_string(const char (&str)[N]) {
+            std::copy_n(str, N, value);
+        }
+        char value[N];
+    };
+
+    template<literal_string str>
+    constexpr const char * literal_string_v = str.value;
+#endif
 
 }
 
