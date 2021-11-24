@@ -217,7 +217,7 @@ namespace meta {
                         std::string define_class_name = *(meta::string::split(actual_class_name, "::").rbegin());
                         
                         auto vi = meta::string::split(define_class_name, "_");
-                        if (vi.size() > 0 && (*vi.begin()) == "j_") {
+                        if (vi.size() > 0 && (*vi.begin()) == "j") {
                             vi.erase(vi.begin());
                         } else {
                             throw "Class " + std::string(typeid(T).name()) + " parse error";

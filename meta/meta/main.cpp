@@ -8,7 +8,7 @@
 #include <iostream>
 #include "template/arg.hpp"
 #include "java/jni_helper.hpp"
-#include "utilities/class_utility.hpp"
+#include "utilities/utility.hpp"
 
 
 //using namespace std;
@@ -59,9 +59,11 @@ using namespace meta::jni::helper;
 
 
 
+class myname { };
 
 int main(int argc, const char * argv[]) {
-    
+
+
 //    auto jc = j_call<j_void, j_boolean, j_string>(j_object(), "method", true, "hello world");
 //    std::cout << j_object().classname() << std::endl;
     auto jc = j_call<j_void,
@@ -90,30 +92,30 @@ int main(int argc, const char * argv[]) {
     auto jm = j_method<j_void, j_boolean>("class", "m", true);
 
 
-    auto jsc = j_static_call<j_void,
-    j_boolean,
-    j_byte,
-    j_char,
-    j_short,
-    j_int,
-    j_long,
-    j_float,
-    j_double,
-    j_string
-    >
-    ("com.app.Activity", "method",
-     true,
-     0x1,
-     'c',
-     2,
-     4,
-     8,
-     0.1,
-     0.2,
-     "hello world"
-     );
-    
-  
+//    auto jsc = j_static_call<j_void,
+//    j_boolean,
+//    j_byte,
+//    j_char,
+//    j_short,
+//    j_int,
+//    j_long,
+//    j_float,
+//    j_double,
+//    j_string
+//    >
+//    ("com.app.Activity", "method",
+//     true,
+//     0x1,
+//     'c',
+//     2,
+//     4,
+//     8,
+//     0.1,
+//     0.2,
+//     "hello world"
+//     );
+//
+//
     
     return 0;
 }
