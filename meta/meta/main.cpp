@@ -63,7 +63,20 @@ void callback(const std::function<void(Args...)> & callback) {
     
 }
 
+//template <typename T, typename ... Args>
+//struct test {
+//    std::function<T(Args...)> func;
+//    test(const std::function<T(Args...)> & f) : func(f) {}
+//
+//};
 
+class A {
+    
+};
+struct test {
+    A a;
+    test(const A & _a) : a(_a) { }
+};
 
 
 
@@ -71,6 +84,17 @@ int main(int argc, const char * argv[]) {
 //    auto jc = j_call<j_void, j_boolean, j_string>(j_object(), "method", true, "hello world");
 //    std::cout << j_object().classname() << std::endl;
 
+    auto jsc = j_static_call<j_void, j_helper<j_void>>("com.cosmojulis.jnitestapp.MainActivity", "javaMethod", j_helper<j_void>([](){
+        
+
+    }));
+    
+
+//    jsc.execute();
+
+//    test<void, int> tvi = [](int i) {
+//
+//    };
 
     
     return 0;

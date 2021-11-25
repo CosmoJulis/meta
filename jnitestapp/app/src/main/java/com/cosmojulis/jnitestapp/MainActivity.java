@@ -1,20 +1,13 @@
 package com.cosmojulis.jnitestapp;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 
-import android.app.Notification;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
 
 import com.cosmojulis.jnitestapp.databinding.ActivityMainBinding;
-import com.cosmojulis.meta.JniHelperInterface;
-
-import java.lang.reflect.ParameterizedType;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import com.cosmojulis.meta.JniHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,8 +29,12 @@ public class MainActivity extends AppCompatActivity {
         TextView tv = binding.sampleText;
         tv.setText(stringFromJNI());
 
+
+
         new Handler().postDelayed(() -> {
             test();
+            test();
+
         }, 3000);
     }
 
@@ -45,10 +42,12 @@ public class MainActivity extends AppCompatActivity {
 
     public native void test();
 
-
-    public static void callback(JniHelperInterface jhi) {
-        jhi.callback();
+    public static void javaMethod(JniHelper jhi) {
+//        jhi.callback(1, 2, "string");
+//        jhi.callback();
+//        jhi.hello(1, 2, 3);
+//        jhi.hello();
+//        jniHelperClass.getMethod("hello").invoke(null);
     }
-
 
 }

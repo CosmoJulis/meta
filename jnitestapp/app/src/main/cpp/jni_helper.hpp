@@ -14,9 +14,11 @@
 #define DEBUG_ENABLED 1
 
 #include <variant>
+#include <any>
 #include <unordered_map>
 #include "utility.hpp"
 #include "arg.hpp"
+
 
 #ifdef Xcode
 #include "jni.h"
@@ -41,8 +43,10 @@ namespace meta {
             static std::unordered_map<std::string, jclass> jclass_pointer_map;
             static std::unordered_map<std::string, jmethodID> jmethod_id_pointer_map;
 
-            class j_class_native_methods;
-            static std::unordered_map<std::string, j_class_native_methods> jclass_name_native_methods_map;
+//            class j_class_native_methods;
+//            static std::unordered_map<std::string, j_class_native_methods> jclass_name_native_methods_map;
+
+
 
 
 #pragma mark - jni type
@@ -63,7 +67,7 @@ namespace meta {
                 static inline const std::string sig() { return "Z";}
 
                 j_boolean(const bool & v = false) : value(v) { }
-                j_boolean(const unsigned char & v = 0) : value(v) { }
+                j_boolean(const jboolean & jb) : value(jb) { }
 
                 bool value;
 
@@ -79,7 +83,7 @@ namespace meta {
             struct j_byte : j_type {
                 static inline const std::string sig() { return "B";}
 
-                j_byte(const int8_t & v = 0) : value(v) { }
+                j_byte(const jbyte & jb = 0) : value(jb) { }
 
                 int8_t value;
 
@@ -104,6 +108,7 @@ namespace meta {
                 static inline const std::string sig() { return "C";}
 
                 j_char(const char & v = 0) : value(v) { }
+                j_char(const jchar & jc) : value(jc) { }
 
                 char value;
 
@@ -123,7 +128,7 @@ namespace meta {
             struct j_short : j_type {
                 static inline const std::string sig() { return "S";}
 
-                j_short(const short & v = 0) : value(v) { }
+                j_short(const jshort & js = 0) : value(js) { }
 
                 short value;
 
@@ -139,7 +144,7 @@ namespace meta {
             struct j_int : j_type {
                 static inline const std::string sig() { return "I";}
 
-                j_int(const int & v = 0) : value(v) { }
+                j_int(const jint & ji = 0) : value(ji) { }
 
                 int value;
 
@@ -155,7 +160,7 @@ namespace meta {
             struct j_long : j_type {
                 static inline const std::string sig() { return "L";}
 
-                j_long(const long & v = 0) : value(v) { }
+                j_long(const jlong & jl = 0) : value(jl) { }
 
                 long value;
 
@@ -171,7 +176,7 @@ namespace meta {
             struct j_float : j_type {
                 static inline const std::string sig() { return "F";}
 
-                j_float(const float & v = 0) : value(v) { }
+                j_float(const jfloat & jf = 0) : value(jf) { }
 
                 float value;
 
@@ -187,7 +192,7 @@ namespace meta {
             struct j_double : j_type {
                 static inline const std::string sig() { return "D";}
 
-                j_double(const double & v = 0) : value(v) { }
+                j_double(const jdouble & jd = 0) : value(jd) { }
 
                 double value;
 
@@ -200,14 +205,17 @@ namespace meta {
                 }
             };
 
+//            struct j_object_is_interface : std::true_type { };
+//            struct j_object_is_not_interface : std::false_type { };
+
 #if _LIBCPP_STD_VER >= 20
-            template <meta::class_utility::literal_string T>
+            template <meta::class_utility::string_literal T>
 #else
-            template <typename T = void>
+            template <typename T>
 #endif
             struct j_object_type : j_type {
             public:
-                static inline std::string classname() {
+                static inline const std::string classname() {
 #if _LIBCPP_STD_VER >= 20
                     return T.value;
 #else
@@ -250,7 +258,7 @@ namespace meta {
                     return jvalue{.l=_jo};
                 }
 
-            private:
+            protected:
                 jobject _jo = nullptr;
 
             };
@@ -363,39 +371,39 @@ namespace meta {
             };
 
 
-#pragma mark - jni native method
-            class j_native_method {
-            public:
-                j_native_method(const std::string & name = "", const std::string & sig = "", void * func_ptr = nullptr) :
-                        _name(name), _sig(sig), _func_ptr(func_ptr) { }
+//#pragma mark - jni native method
+//            class j_native_method {
+//            public:
+//                j_native_method(const std::string & name = "", const std::string & sig = "", void * func_ptr = nullptr) :
+//                _name(name), _sig(sig), _func_ptr(func_ptr) { }
+//
+//                operator JNINativeMethod() const {
+//                    return JNINativeMethod {
+//                        (char *)_name.c_str(),
+//                        (char *)_sig.c_str(),
+//                        _func_ptr
+//                    };
+//                }
+//
+//                std::string id() const {
+//                    return _name + _sig;
+//                }
+//
+//            private:
+//                std::string _name;
+//                std::string _sig;
+//                void * _func_ptr;
+//            };
 
-                operator JNINativeMethod() const {
-                    return JNINativeMethod {
-                            (char *)_name.c_str(),
-                            (char *)_sig.c_str(),
-                            _func_ptr
-                    };
-                }
 
-                std::string id() const {
-                    return _name + _sig;
-                }
-
-            private:
-                std::string _name;
-                std::string _sig;
-                void * _func_ptr;
-            };
-
-
-            class j_class_native_methods {
-            public:
-                j_class_native_methods(const std::string & classname = "") : _classname(classname) { }
-
-                std::unordered_map<std::string, j_native_method> registed_native_method_id_map;
-            private:
-                std::string _classname;
-            };
+//            class j_class_native_methods {
+//            public:
+//                j_class_native_methods(const std::string & classname = "") : _classname(classname) { }
+//
+//                std::unordered_map<std::string, j_native_method> registed_native_method_id_map;
+//            private:
+//                std::string _classname;
+//            };
 
 
 #pragma mark - jni env
@@ -453,91 +461,93 @@ namespace meta {
                     return _env->NewObject(jcls, jmethod);
                 }
 
-
-
-                bool register_native(const j_class & jcls, const j_native_method & jnm) const {
-                    std::vector<j_native_method> vjnm;
-                    vjnm.push_back(jnm);
-                    return register_natives(jcls, vjnm);
+                bool is_same_object(const jobject & lhs, const jobject & rhs) const {
+                    return _env->IsSameObject(lhs, rhs);
                 }
 
-                bool register_natives(const j_class & jcls, const std::vector<j_native_method> & vjnm) const {
-                    bool uncontains = false;
-                    bool new_reg_class = false;
-                    for (const auto & jnm : vjnm) {
-                        if (jclass_name_native_methods_map.contains(jcls.classname)) {
-                            if (jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map.contains(jnm.id())) {
-                            } else {
-                                uncontains = true;
-                                break;
-                            }
-                        } else {
-                            new_reg_class = true;
-                            break;
-                        }
-                    }
+//                bool register_native(const j_class & jcls, const j_native_method & jnm) const {
+//                    std::vector<j_native_method> vjnm;
+//                    vjnm.push_back(jnm);
+//                    return register_natives(jcls, vjnm);
+//                }
 
-                    if (!uncontains) {
-                        return true;
-                    }
+//                bool register_natives(const j_class & jcls, const std::vector<j_native_method> & vjnm) const {
+//                    bool uncontains = false;
+//                    bool new_reg_class = false;
+//                    for (const auto & jnm : vjnm) {
+//                        if (jclass_name_native_methods_map.contains(jcls.classname)) {
+//                            if (jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map.contains(jnm.id())) {
+//                            } else {
+//                                uncontains = true;
+//                                break;
+//                            }
+//                        } else {
+//                            new_reg_class = true;
+//                            break;
+//                        }
+//                    }
+//
+//                    if (!uncontains) {
+//                        return true;
+//                    }
+//
+//                    if (new_reg_class) {
+//                        jclass_name_native_methods_map[jcls.classname] = j_class_native_methods(jcls.classname);
+//
+//                        size_t count = vjnm.size();
+//                        JNINativeMethod methods[count];
+//                        for (int i = 0; i < count; i++) {
+//                            methods[i] = vjnm[i];
+//                        }
+//                        bool result = _env->RegisterNatives(jcls.unwrap(_env), methods, (jint)count) == JNI_OK;
+//                        if (result) {
+//                            auto & reg_native_method_map = jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map;
+//                            for (const auto & jnm : vjnm) {
+//                                reg_native_method_map[jnm.id()] = jnm;
+//                            }
+//                        }
+//                        return result;
+//                    } else {
+//
+//                        auto saved_vjnm_map = jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map;
+//
+//                        if (unregister_natives(jcls)) {
+//
+//                            for (const auto & jnm : vjnm) {
+//                                saved_vjnm_map[jnm.id()] = jnm;
+//                            }
+//
+//                            size_t count = saved_vjnm_map.size();
+//
+//                            JNINativeMethod methods[count];
+//                            int index = 0;
+//                            for (const auto & [k, v] : saved_vjnm_map) {
+//                                methods[index] = v;
+//                                index++;
+//                            }
+//
+//                            bool result = _env->RegisterNatives(jcls.unwrap(_env), methods, (jint)count) == JNI_OK;
+//                            if (result) {
+//                                auto & reg_native_method_map = jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map;
+//                                for (const auto & jnm : vjnm) {
+//                                    reg_native_method_map[jnm.id()] = jnm;
+//                                }
+//                            }
+//
+//                            return result;
+//                        } else {
+//                            return false;
+//                        }
+//                    }
+//                }
 
-                    if (new_reg_class) {
-                        jclass_name_native_methods_map[jcls.classname] = j_class_native_methods(jcls.classname);
-
-                        size_t count = vjnm.size();
-                        JNINativeMethod methods[count];
-                        for (int i = 0; i < count; i++) {
-                            methods[i] = vjnm[i];
-                        }
-                        bool result = _env->RegisterNatives(jcls.unwrap(_env), methods, (jint)count) == JNI_OK;
-                        if (result) {
-                            auto & reg_native_method_map = jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map;
-                            for (const auto & jnm : vjnm) {
-                                reg_native_method_map[jnm.id()] = jnm;
-                            }
-                        }
-                        return result;
-                    } else {
-
-                        auto saved_vjnm_map = jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map;
-
-                        if (unregister_natives(jcls)) {
-
-                            for (const auto & jnm : vjnm) {
-                                saved_vjnm_map[jnm.id()] = jnm;
-                            }
-
-                            size_t count = saved_vjnm_map.size();
-
-                            JNINativeMethod methods[count];
-                            int index = 0;
-                            for (const auto & [k, v] : saved_vjnm_map) {
-                                methods[index] = v;
-                                index++;
-                            }
-
-                            bool result = _env->RegisterNatives(jcls.unwrap(_env), methods, (jint)count) == JNI_OK;
-                            if (result) {
-                                auto & reg_native_method_map = jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map;
-                                for (const auto & jnm : vjnm) {
-                                    reg_native_method_map[jnm.id()] = jnm;
-                                }
-                            }
-
-                            return result;
-                        } else {
-                            return false;
-                        }
-                    }
-                }
-
-                bool unregister_natives(const j_class & jcls) const {
-                    bool result = _env->UnregisterNatives(jcls.unwrap(_env)) == JNI_OK;
-                    if (result) {
-                        jclass_name_native_methods_map.erase(jcls.classname);
-                    }
-                    return result;
-                }
+//                bool unregister_natives(const j_class & jcls) const {
+//                    bool result = _env->UnregisterNatives(jcls.unwrap(_env)) == JNI_OK;
+//                    if (result) {
+//                        jclass_name_native_methods_map.erase(jcls.classname);
+//                    }
+//                    return result;
+//                }
 
 
                 j_void call_static_void_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
@@ -669,7 +679,7 @@ namespace meta {
 #ifdef Xcode
                         if (_vm->AttachCurrentThread(reinterpret_cast<void**>(&_env), nullptr) >= 0)
 #else
-                            if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
+                        if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
 #endif
                         {
                             return j_env(_env);
@@ -698,7 +708,7 @@ namespace meta {
 
 #if DEBUG_ENABLED
                 class _debug_j_arg_placeholder {
-                    _debug_j_arg_placeholder() { }
+                    _debug_j_arg_placeholder() = delete;
                 };
 
                 using _debug_variant_type = std::conditional_t<
@@ -867,7 +877,7 @@ namespace meta {
             public:
                 using j_method<R, Args...>::j_method;
 
-                R call(const j_env & je) {
+                [[maybe_unused]] R call(const j_env & je) {
                     jclass jcls = j_method<R, Args...>::_jcls.unwrap(je);
                     jmethodID jmethod = unwrap(je);
 
@@ -947,7 +957,7 @@ namespace meta {
 
 
 #if _LIBCPP_STD_VER >= 20
-            template <meta::class_utility::literal_string T>
+            template <meta::class_utility::string_literal T>
 #else
             template <typename T>
 #endif
@@ -982,36 +992,39 @@ namespace meta {
 
 
 
-#pragma mark - jni interface callback
+
+
+#pragma mark - jni helper
+
+            std::unordered_map<jobject, std::any> j_object_method_pointer_map;
+
 
 #if _LIBCPP_STD_VER >= 20
             template <typename R, typename ... Args>
-            struct j_interface : j_object_type<"com.cosmojulis.meta.JniHelperInterface"> {
+            struct j_helper : j_object_type<"com.cosmojulis.meta.JniHelper"> {
 #else
-            class j_com_cosmojulis_meta_JniHelperInterface { };
+            class j_com_cosmojulis_meta_JniHelper { };
             template <typename R, typename ... Args>
-            struct j_interface : j_object_type<j_com_cosmojulis_meta_JniHelperInterface> {
+            struct j_helper : j_object_type<j_com_cosmojulis_meta_JniHelper> {
 #endif
-                static inline const std::string sig() {
-                    return std::string("L") + meta::string::join(meta::string::split(classname(), "."), "/") + ";";
+
+                j_helper(const std::function<std::conditional_t<std::is_same_v<R, j_void>, void, R>(Args...)> & func = nullptr) {
+                    if (func != nullptr)
+                        j_object_method_pointer_map[_jo] = func;
                 }
 
-                j_interface() {
-                    LOGV("sl2577 j_interface init classname = %s", classname().c_str());
-                }
+//                const std::string method_sig() {
+//                    return j_method<R, Args...>::method_sig();
+//                }
 
-                const std::string method_sig() {
-                    return j_method<R, Args...>::method_sig();
-                }
 
-                // TODO register native class method
-                R callback(JNIEnv * env, jobject obj) {
+//                R callback(JNIEnv * env, jobjectArray arr) {
+//
+//                }
 
-                }
-
-                friend R callback(j_interface<R, Args...> & ji, JNIEnv * env, jobject obj) {
-                    return ji.callback(env, obj);
-                }
+//                friend R callback(j_helper<R, Args...> & ji, JNIEnv * env, jobject obj) {
+//                    return ji.callback(env, obj);
+//                }
             };
 
 
@@ -1072,8 +1085,11 @@ namespace meta {
                 j_method<R, Args...> _jmethod;
 
             };
+
         }
+
     }
+
 }
 
 
@@ -1088,6 +1104,34 @@ void JNI_OnUnload(JavaVM * vm, void * reserved) {
 }
 
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectArray a) {
+    using namespace meta::jni::helper;
+
+    auto _env = j_env(env);
+
+    jobject remove = nullptr;
+    for (const auto & [k,v] : j_object_method_pointer_map) {
+        if (_env.is_same_object(k, thiz)) {
+            auto fa = j_object_method_pointer_map[k];
+
+            // TODO: unpack arr to ...
+            // fa(...)
+
+            remove = k;
+            break;
+        }
+    }
+    if (remove != nullptr) {
+        j_object_method_pointer_map.erase(remove);
+        LOGV("sl2577 remove handler");
+    } else {
+        LOGV("sl2577 j_object_map_size %d", j_object_method_pointer_map.size());
+    }
+
+    LOGV("sl2577 callback implement");
+}
 
 
 
