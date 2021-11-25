@@ -56,29 +56,21 @@
 using namespace meta::jni::helper;
 
 
-template<meta::class_utility::literal_string lit>
-void Print() {
-    // The size of the string is available as a constant expression.
-    constexpr auto size = sizeof(lit.value);
-    // and so is the string's content.
-    constexpr auto contents = lit.value;
+// dexmaker 注册 callback 签名函数
+template <typename ... Args>
+void callback(const std::function<void(Args...)> & callback) {
     
-    
-    std::cout << "Size: " << size << ", Contents: " << contents << std::endl;
 }
 
+
+
 int main(int argc, const char * argv[]) {
-    Print<"literal string">(); // Prints "Size: 15, Contents: literal string"
-
-
-    
-    constexpr char a[15] = "literal string";
-    
-    Print<a>();
-    
-    return 0;
 //    auto jc = j_call<j_void, j_boolean, j_string>(j_object(), "method", true, "hello world");
 //    std::cout << j_object().classname() << std::endl;
+
+    
+    
+    return 0;
     
     auto jc = j_call<j_void,
     j_boolean,
@@ -93,11 +85,11 @@ int main(int argc, const char * argv[]) {
     >
     (j_object(), "method",
      true,
-     0x1,
+     0b1011'0101,
      'c',
      2,
      4,
-     8,
+     8'000'000,
      0.1,
      0.2,
      "hello world"
@@ -119,7 +111,7 @@ int main(int argc, const char * argv[]) {
 //    >
 //    ("com.app.Activity", "method",
 //     true,
-//     0x1,
+//     0b10110101,
 //     'c',
 //     2,
 //     4,

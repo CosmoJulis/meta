@@ -9,6 +9,7 @@
 #define arg_log_hpp
 
 #include <string>
+#include "utility.hpp"
 
 namespace meta {
 
@@ -27,23 +28,29 @@ struct list {
 
     template <typename _T>
     struct _impl<_T> {
-        static inline std::string _type_name() {
-            if constexpr (std::is_const_v<_T> && std::is_reference_v<_T>) {
-                return std::string() + "const " + typeid(_T).name() + " &";
+        
+        static inline const std::string _actual_type_name() {
+            return meta::class_utility::classname<_T>();
+        }
+        
+        static inline const std::string _type_name() {
+            if constexpr (std::is_const_v<_T>) {
+                return std::string() + "const " + _actual_type_name();
             }
-            else if (std::is_const_v<_T>) {
-                return std::string() + "const " + typeid(_T).name();
-            }
-            else if (std::is_reference_v<_T>) {
-                return std::string() + typeid(_T).name() + " &";
+            else if constexpr (std::is_reference_v<_T>) {
+                if constexpr (std::is_const_v<std::remove_reference_t<_T>>) {
+                    return std::string() + "const " + _actual_type_name() + " &";
+                } else {
+                    return std::string() + _actual_type_name() + " &";
+                }
             }
             else {
-                return typeid(_T).name();
+                return _actual_type_name();
             }
         }
     };
 
-    static inline std::string log = [](){
+    static inline const std::string log = [](){
         return _impl<Args...>::_type_name();
     }();
 };

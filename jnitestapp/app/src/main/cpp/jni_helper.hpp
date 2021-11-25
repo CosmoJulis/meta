@@ -1072,11 +1072,8 @@ namespace meta {
                 j_method<R, Args...> _jmethod;
 
             };
-
         }
-
     }
-
 }
 
 

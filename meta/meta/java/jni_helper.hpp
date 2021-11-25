@@ -201,7 +201,7 @@ namespace meta {
             };
 
 #if _LIBCPP_STD_VER >= 20
-            template <meta::class_utility::literal_string T>
+            template <meta::class_utility::string_literal T>
 #else
             template <typename T = void>
 #endif
@@ -698,7 +698,7 @@ namespace meta {
 
 #if DEBUG_ENABLED
                 class _debug_j_arg_placeholder {
-                    _debug_j_arg_placeholder() { }
+                    _debug_j_arg_placeholder() = delete;
                 };
 
                 using _debug_variant_type = std::conditional_t<
@@ -867,7 +867,7 @@ namespace meta {
             public:
                 using j_method<R, Args...>::j_method;
 
-                R call(const j_env & je) {
+                [[maybe_unused]] R call(const j_env & je) {
                     jclass jcls = j_method<R, Args...>::_jcls.unwrap(je);
                     jmethodID jmethod = unwrap(je);
 
@@ -947,7 +947,7 @@ namespace meta {
                 
                 
 #if _LIBCPP_STD_VER >= 20
-            template <meta::class_utility::literal_string T>
+            template <meta::class_utility::string_literal T>
 #else
             template <typename T>
 #endif

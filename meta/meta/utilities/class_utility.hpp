@@ -35,15 +35,15 @@ namespace class_utility {
 
 #if _LIBCPP_STD_VER >= 20
     template<size_t N>
-    struct literal_string {
-        constexpr literal_string(const char (&str)[N]) {
+    struct string_literal {
+        constexpr string_literal(const char (&str)[N]) {
             std::copy_n(str, N, value);
         }
         char value[N];
     };
 
-    template<literal_string str>
-    constexpr const char * literal_string_v = str.value;
+    template<string_literal str>
+    constexpr const char * string_literal_v = str.value;
 #endif
 
 }
