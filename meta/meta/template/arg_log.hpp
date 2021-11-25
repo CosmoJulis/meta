@@ -55,6 +55,9 @@ struct list {
     }();
 };
 
+template <typename ... Args>
+static inline const std::string list_log = list<Args...>::log;
+
 
 }
 

@@ -10,6 +10,7 @@
 #include "java/jni_helper.hpp"
 #include "utilities/utility.hpp"
 #include <version>
+#include <any>
 
 //using namespace std;
 //
@@ -64,11 +65,13 @@ void callback(const std::function<void(Args...)> & callback) {
 
 
 
+
+
 int main(int argc, const char * argv[]) {
 //    auto jc = j_call<j_void, j_boolean, j_string>(j_object(), "method", true, "hello world");
 //    std::cout << j_object().classname() << std::endl;
 
-    
+
     
     return 0;
     
