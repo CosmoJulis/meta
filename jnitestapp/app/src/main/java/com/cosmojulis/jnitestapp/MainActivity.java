@@ -43,11 +43,10 @@ public class MainActivity extends AppCompatActivity {
     public native void test();
 
     public static void javaMethod(JniHelper jhi) {
-//        jhi.callback(1, 2, "string");
-//        jhi.callback();
-//        jhi.hello(1, 2, 3);
-//        jhi.hello();
-//        jniHelperClass.getMethod("hello").invoke(null);
+//        Integer i = 2;
+//        System.out.println("sl2577 " +         i.getClass());
+        jhi.callback(5);
+//        jhi.callback(false);
     }
 
 }

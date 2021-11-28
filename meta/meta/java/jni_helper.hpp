@@ -361,12 +361,15 @@ namespace meta {
             class j_class {
             public:
 
+                j_class(const jclass & cls);
                 j_class(const std::string & name = "") : classname(name), sig(meta::string::join(meta::string::split(name, "."), "/")) { }
 
                 std::string classname;
                 std::string sig;
 
                 jclass unwrap(const j_env & env) const;
+            private:
+                jclass _class;
 
             };
         
@@ -465,90 +468,17 @@ namespace meta {
                     return _env->IsSameObject(lhs, rhs);
                 }
 
-//                bool register_native(const j_class & jcls, const j_native_method & jnm) const {
-//                    std::vector<j_native_method> vjnm;
-//                    vjnm.push_back(jnm);
-//                    return register_natives(jcls, vjnm);
-//                }
+                jsize get_array_length(const jobjectArray & joa) const {
+                    return _env->GetArrayLength(joa);
+                }
                 
-//                bool register_natives(const j_class & jcls, const std::vector<j_native_method> & vjnm) const {
-//                    bool uncontains = false;
-//                    bool new_reg_class = false;
-//                    for (const auto & jnm : vjnm) {
-//                        if (jclass_name_native_methods_map.contains(jcls.classname)) {
-//                            if (jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map.contains(jnm.id())) {
-//                            } else {
-//                                uncontains = true;
-//                                break;
-//                            }
-//                        } else {
-//                            new_reg_class = true;
-//                            break;
-//                        }
-//                    }
-//
-//                    if (!uncontains) {
-//                        return true;
-//                    }
-//
-//                    if (new_reg_class) {
-//                        jclass_name_native_methods_map[jcls.classname] = j_class_native_methods(jcls.classname);
-//
-//                        size_t count = vjnm.size();
-//                        JNINativeMethod methods[count];
-//                        for (int i = 0; i < count; i++) {
-//                            methods[i] = vjnm[i];
-//                        }
-//                        bool result = _env->RegisterNatives(jcls.unwrap(_env), methods, (jint)count) == JNI_OK;
-//                        if (result) {
-//                            auto & reg_native_method_map = jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map;
-//                            for (const auto & jnm : vjnm) {
-//                                reg_native_method_map[jnm.id()] = jnm;
-//                            }
-//                        }
-//                        return result;
-//                    } else {
-//
-//                        auto saved_vjnm_map = jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map;
-//
-//                        if (unregister_natives(jcls)) {
-//
-//                            for (const auto & jnm : vjnm) {
-//                                saved_vjnm_map[jnm.id()] = jnm;
-//                            }
-//
-//                            size_t count = saved_vjnm_map.size();
-//
-//                            JNINativeMethod methods[count];
-//                            int index = 0;
-//                            for (const auto & [k, v] : saved_vjnm_map) {
-//                                methods[index] = v;
-//                                index++;
-//                            }
-//
-//                            bool result = _env->RegisterNatives(jcls.unwrap(_env), methods, (jint)count) == JNI_OK;
-//                            if (result) {
-//                                auto & reg_native_method_map = jclass_name_native_methods_map[jcls.classname].registed_native_method_id_map;
-//                                for (const auto & jnm : vjnm) {
-//                                    reg_native_method_map[jnm.id()] = jnm;
-//                                }
-//                            }
-//
-//                            return result;
-//                        } else {
-//                            return false;
-//                        }
-//                    }
-//                }
+                jobject get_object_array_element(const jobjectArray & joa, jint index) const {
+                    return _env->GetObjectArrayElement(joa, index);
+                }
                 
-//                bool unregister_natives(const j_class & jcls) const {
-//                    bool result = _env->UnregisterNatives(jcls.unwrap(_env)) == JNI_OK;
-//                    if (result) {
-//                        jclass_name_native_methods_map.erase(jcls.classname);
-//                    }
-//                    return result;
-//                }
-
+                jclass get_object_class(const jobject & jobj) const {
+                    return _env->GetObjectClass(jobj);
+                }
                 
                 j_void call_static_void_method(const jclass & jcls, const jmethodID & jmethod, const jvalue * args) const {
                     _env->CallStaticVoidMethodA(jcls, jmethod, args);
@@ -647,6 +577,10 @@ namespace meta {
             };
 
 
+
+
+                
+
             class j_vm {
             public:
                 static j_vm & shared() {
@@ -656,6 +590,8 @@ namespace meta {
 
                 void load(JavaVM * vm) {
                     j_vm::shared()._vm = vm;
+                    
+
                 }
 
                 void unload() {
@@ -693,7 +629,6 @@ namespace meta {
                 JavaVM * _vm;
 
             };
-
 
 
 
@@ -976,6 +911,16 @@ namespace meta {
                 _jstr = j_vm::shared().env().new_string_utf(value);
             }
                 
+            j_class::j_class(const jclass & cls) : _class(cls) {
+                const auto & _env = j_vm::shared().env();
+                const auto & env = _env.unwrap();
+                jclass cls_wrap = _env.get_object_class(cls);
+                jmethodID jm = env->GetMethodID(cls_wrap, "getName", "()Ljava/lang/String;");
+                jstring jname = (jstring)env->CallObjectMethod(cls, jm);
+                classname = _env.get_string_utf_chars(jname);
+                sig = meta::string::join(meta::string::split(classname, "."), "/");
+            }
+
             jclass j_class::unwrap(const j_env & env) const {
                 if (jclass_pointer_map.contains(classname))
                 {
@@ -996,7 +941,6 @@ namespace meta {
                 
 #pragma mark - jni helper
                 
-            std::unordered_map<jobject, std::any> j_object_method_pointer_map;
 
 
 #if _LIBCPP_STD_VER >= 20
@@ -1007,24 +951,15 @@ namespace meta {
             template <typename R, typename ... Args>
             struct j_helper : j_object_type<j_com_cosmojulis_meta_JniHelper> {
 #endif
-      
+                static auto & get_object_method_pointer_map() {
+                    static auto singleton = std::unordered_map<jobject, std::function<std::conditional_t<std::is_same_v<R, j_void>, void, R>(Args...)>>();
+                    return singleton;
+                }
+                
                 j_helper(const std::function<std::conditional_t<std::is_same_v<R, j_void>, void, R>(Args...)> & func = nullptr) {
                     if (func != nullptr)
-                        j_object_method_pointer_map[_jo] = func;
+                        get_object_method_pointer_map()[_jo] = func;
                 }
-                                
-//                const std::string method_sig() {
-//                    return j_method<R, Args...>::method_sig();
-//                }
-
-
-//                R callback(JNIEnv * env, jobjectArray arr) {
-//
-//                }
-
-//                friend R callback(j_helper<R, Args...> & ji, JNIEnv * env, jobject obj) {
-//                    return ji.callback(env, obj);
-//                }
             };
                 
                 
@@ -1103,6 +1038,26 @@ void JNI_OnUnload(JavaVM * vm, void * reserved) {
     meta::jni::helper::j_vm::shared().unload();
 }
 
+    
+    
+template <typename R, typename ... Args>
+void find_method_pointer_callback(const meta::jni::helper::j_env & _env, const jobject & thiz, const Args & ... args) {
+    auto & map = meta::jni::helper::j_helper<R, Args...>::get_object_method_pointer_map();
+    
+    jobject to_remove_jobj = nullptr;
+    for (const auto & [k, v] : map) {
+        if (_env.is_same_object(k, thiz)) {
+            auto func = map[k];
+            func(args...);
+            to_remove_jobj = k;
+            break;
+        }
+    }
+    
+    if (to_remove_jobj != nullptr) {
+        map.erase(to_remove_jobj);
+    }
+}
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -1110,28 +1065,104 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
     using namespace meta::jni::helper;
     
     auto _env = j_env(env);
+    
+    int count = _env.get_array_length(a);
+        
+    if (count == 0) {
+        find_method_pointer_callback<j_void>(_env, thiz);
+        return;
+    }
+    
+    
+    if (count == 1) {
 
-    jobject remove = nullptr;
-    for (const auto & [k,v] : j_object_method_pointer_map) {
-        if (_env.is_same_object(k, thiz)) {
-            auto fa = j_object_method_pointer_map[k];
+        jobject jobj = _env.get_object_array_element(a, 0);
+        jclass jcls = _env.get_object_class(jobj);
+        j_class _jcls = j_class(jcls);
+        LOGV("sl2577 jcls name: %s", _jcls.classname.c_str());
 
-            // TODO: unpack arr to ...
-            // fa(...)
-            
-            remove = k;
-            break;
+        if (_jcls.classname == "java.lang.Boolean") {
+            find_method_pointer_callback<j_void, j_boolean>(_env, thiz, j_call<j_boolean>(jobj, "booleanValue").execute());
         }
+        else if (_jcls.classname == "java.lang.Byte") {
+            find_method_pointer_callback<j_void, j_byte>(_env, thiz, j_call<j_byte>(jobj, "byteValue").execute());
+        }
+        else if (_jcls.classname == "java.lang.Char") {
+
+        }
+        else if (_jcls.classname == "java.lang.Short") {
+
+        }
+        else if (_jcls.classname == "java.lang.Integer") {
+            jmethodID jm = env->GetMethodID(_jcls.unwrap(env), "intValue", "()I");
+            jint ji = env->CallIntMethod(jobj, jm);
+            LOGV("sl2577 ji = %d", ji);
+            find_method_pointer_callback<j_void, j_int>(_env, thiz, ji);
+        }
+        else if (_jcls.classname == "java.lang.Long") {
+
+        }
+        else if (_jcls.classname == "java.lang.Float") {
+
+        }
+        else if (_jcls.classname == "java.lang.Double") {
+
+        }
+
+
+        
+//
+//        if (1 == 1) {
+//            auto & map = j_helper<j_void, j_int>::get_object_method_pointer_map();
+//
+//        }
+        
+        auto & map = j_helper<j_void>::get_object_method_pointer_map();
+        for (const auto & [k, v] : map) {
+            if (_env.is_same_object(k, thiz)) {
+                auto func = map[k];
+                func();
+                // TODO: tag remove jo
+                break;
+            }
+        }
+        
+        // remove
+        return;
+        
     }
-    if (remove != nullptr) {
-        j_object_method_pointer_map.erase(remove);
-        LOGV("sl2577 remove handler");
-    } else {
-        LOGV("sl2577 j_object_map_size %d", j_object_method_pointer_map.size());
+        
+        
+    for (int i = 0; i < count; i++) {
+        jobject obj = env->GetObjectArrayElement(a, i);
+        jclass jcls = env->GetObjectClass(obj);
+        jmethodID mid_getName = env->GetMethodID(jcls, "toString", "()Ljava/lang/String;");
+        jstring name = (jstring)env->CallObjectMethod(obj, mid_getName);
+        const char * str = env->GetStringUTFChars(name, nullptr);
+        LOGV("sl2577 index: %d, str: %s", i, str);
     }
+
+//    for (const auto & [k,v] : j_object_method_pointer_map) {
+//        if (_env.is_same_object(k, thiz)) {
+//            auto fa = j_object_method_pointer_map[k];
+//
+//            // TODO: unpack arr to ...
+//            // fa(...)
+//
+//            remove = k;
+//            break;
+//        }
+//    }
+//    if (remove != nullptr) {
+//        j_object_method_pointer_map.erase(remove);
+//        LOGV("sl2577 remove handler");
+//    } else {
+//        LOGV("sl2577 j_object_map_size %d", j_object_method_pointer_map.size());
+//    }
     
     LOGV("sl2577 callback implement");
 }
+
 
 
 
