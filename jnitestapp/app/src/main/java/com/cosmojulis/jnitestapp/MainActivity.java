@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     public static void javaMethod(JniHelper jhi) {
 //        Integer i = 2;
 //        System.out.println("sl2577 " +         i.getClass());
-        jhi.callback(5);
+        jhi.callback("hello world");
 //        jhi.callback(false);
     }
 

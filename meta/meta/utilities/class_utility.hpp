@@ -20,7 +20,7 @@ namespace class_utility {
     static inline const std::string classname() {
         int status;
         /* TODO: portablity test
-         * test compiler:
+         * tested compiler:
          *              gcc
          *              llvm-gcc
          *              clang

@@ -1094,6 +1094,7 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
     if (count == 1) {
         jobject jobj = _env.get_object_array_element(a, 0);
         jclass jcls = _env.get_object_class(jobj);
+
         j_class _jcls = j_class(jcls);
         LOGV("sl2577 jcls name: %s", _jcls.classname.c_str());
 
@@ -1110,6 +1111,10 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
 
         }
         else if (_jcls.classname == "java.lang.Integer") {
+            auto _jm = j_method<j_int>("java.lang.Integer", "intValue");
+            jint _ji = j_call(jobj, _jm).execute();
+            LOGV("sl2577 _ji = %d", _ji);
+
             jmethodID jm = env->GetMethodID(_jcls.unwrap(env), "intValue", "()I");
             jint ji = env->CallIntMethod(jobj, jm);
             LOGV("sl2577 ji = %d", ji);

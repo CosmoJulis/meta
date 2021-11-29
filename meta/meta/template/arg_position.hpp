@@ -64,14 +64,33 @@ struct index_of {
     
     struct _placeholder { };
     
-    using ArgsType = std::conditional_t
+    using args_type = std::conditional_t
                             <
                                 sizeof...(Args) == 0,
                                 _impl<T, -2, _placeholder>,
                                 _impl<T, -2, _placeholder, Args...>
                             >;
     
-    static inline constexpr int index = ArgsType::getIndex();
+    static inline constexpr int index = args_type::getIndex();
+};
+
+
+template <int index, typename ... Args>
+struct of {
+    
+    static_assert(index < sizeof...(Args), "Index out of bounds with args.");
+    
+    template <int _index, int _idx, typename _T, typename ... _Args>
+    struct _impl {
+        using _type = std::conditional_t<_index == _idx, _T, typename _impl<_index, _idx+1, _Args...>::_type>;
+    };
+    
+    template <int _index, int _idx, typename _T>
+    struct _impl<_index, _idx, _T> {
+        using _type = _T;
+    };
+        
+    using type = typename _impl<index, 0, Args...>::_type;
 };
 
 

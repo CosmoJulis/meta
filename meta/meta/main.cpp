@@ -67,34 +67,67 @@ void callback(const std::function<void(Args...)> & callback) {
 
 
 
+//class j_base_object {
+//public:
+//    static inline const std::string classname() {
+//        return j_base_object().name();
+//    }
+//
+//    virtual std::string name() const {
+//        return "java.lang.Object";
+//    }
+//};
+//
+//template <meta::class_utility::string_literal T>
+//class j_derive_object : public j_base_object {
+//public:
+//    static inline const std::string classname() {
+//        return j_derive_object().name();
+//    }
+//
+//    std::string name() const override {
+//        return T.value;
+//    }
+//};
+//
+//
+//
+//void test(const j_base_object & m) {
+//    std::cout << std::remove_cvref_t<decltype(m)>::classname() << std::endl;
+//    std::cout << m.name() << std::endl;
+//}
+
 int main(int argc, const char * argv[]) {
 
 
-    
-    auto jc = j_call<j_void,
-    j_boolean,
-    j_byte,
-    j_char,
-    j_short,
-    j_int,
-    j_long,
-    j_float,
-    j_double,
-    j_string
-    >
-    (j_object(), "method",
-     true,
-     0b1011'0101,
-     'c',
-     2,
-     4,
-     8'000'000,
-     0.1,
-     0.2,
-     "hello world"
-     );
 
-    auto jm = j_method<j_void, j_boolean>("class", "m", true);
+    
+    
+//    auto jc = j_call<j_void,
+//    j_boolean,
+//    j_byte,
+//    j_char,
+//    j_short,
+//    j_int,
+//    j_long,
+//    j_float,
+//    j_double,
+//    j_string
+//    >
+//    (j_base_object(), "method",
+//     true,
+//     0b1011'0101,
+//     'c',
+//     2,
+//     4,
+//     8'000'000,
+//     0.1,
+//     0.2,
+//     "hello world"
+//     );
+
+    auto jm = j_static_method<j_void, j_boolean, j_object>("java.lang.String", "m", true, j_derive_object<"java.lang.Myclass">());
+    std::cout << jm.fullname() << std::endl;
 
 
 //    auto jsc = j_static_call<j_void,
