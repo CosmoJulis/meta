@@ -200,6 +200,7 @@ namespace meta {
                 }
             };
 
+            class j_string;
             struct j_base_object : j_type {
             public:
                 virtual inline const std::string classname() const {
@@ -217,6 +218,12 @@ namespace meta {
                 jobject unwrap() const {
                     return _jo;
                 }
+
+                operator jobject() const {
+                    return _jo;
+                }
+
+                operator j_string() const;
 
                 operator jvalue() const {
                     return jvalue{.l=_jo};
@@ -959,7 +966,7 @@ struct j_interface : j_derive_object<"com.cosmojulis.meta.JniInterface">
 #pragma mark - jni delay
 
             j_base_object::j_base_object(const std::string & name) : _classname(name) {
-                LOGV("sl2577 j_object init classname = %s", classname().c_str());
+                LOGV("jni_helper j_object<%s> init", classname().c_str());
                 const auto & _env = j_vm::shared().env();
                 auto jm = j_method<j_void>(classname(), "<init>");
                 _jo = _env.new_object(jm.jni_class().unwrap(_env), jm.unwrap(_env));
@@ -970,7 +977,14 @@ struct j_interface : j_derive_object<"com.cosmojulis.meta.JniInterface">
                 _classname = _env.get_object_classname(jobj);
             }
 
-
+            j_base_object::operator j_string() const {
+                const auto & _env = j_vm::shared().env();
+                if (_env.get_object_classname(_jo) == "java.lang.String") {
+                    return j_string((jstring)_jo);
+                } else {
+                    throw "Can not cast to jstring.";
+                }
+            }
 
             j_string::j_string(const char * v) : value(v) {
                 _jo = j_vm::shared().env().new_string_utf(value);
@@ -1046,7 +1060,6 @@ void find_method_pointer_callback(const meta::jni::helper::j_env & _env, const j
 }
 
 
-
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjectArray a) {
@@ -1064,41 +1077,54 @@ Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjec
 
     if (count == 1) {
 
+        jobject first_jobj = _env.get_object_array_element(a, 0);
+        std::string first_classname = _env.get_object_classname(first_jobj);
+
+        LOGV("jni_helper first_classname %s", first_classname.c_str());
+
+        if (first_classname == "java.lang.Boolean") {
+            find_method_pointer_callback<j_void, j_boolean>(_env, thiz, j_call<j_boolean>(first_jobj, "booleanValue").execute());
+        }
+        else if (first_classname == "java.lang.Byte") {
+            find_method_pointer_callback<j_void, j_byte>(_env, thiz, j_call<j_byte>(first_jobj, "byteValue").execute());
+        }
+        else if (first_classname == "java.lang.Char") {
+            find_method_pointer_callback<j_void, j_char>(_env, thiz, j_call<j_char>(first_jobj, "charValue").execute());
+        }
+        else if (first_classname == "java.lang.Short") {
+            find_method_pointer_callback<j_void, j_short>(_env, thiz, j_call<j_short>(first_jobj, "shortValue").execute());
+        }
+        else if (first_classname == "java.lang.Integer") {
+            find_method_pointer_callback<j_void, j_int>(_env, thiz, j_call<j_int>(first_jobj, "intValue").execute());
+        }
+        else if (first_classname == "java.lang.Long") {
+            find_method_pointer_callback<j_void, j_long>(_env, thiz, j_call<j_long>(first_jobj, "longValue").execute());
+        }
+        else if (first_classname == "java.lang.Float") {
+            find_method_pointer_callback<j_void, j_float>(_env, thiz, j_call<j_float>(first_jobj, "floatValue").execute());
+        }
+        else if (first_classname == "java.lang.Double") {
+            find_method_pointer_callback<j_void, j_double>(_env, thiz, j_call<j_double>(first_jobj, "doubleValue").execute());
+        }
+        else if (first_classname == "java.lang.String") {
+            find_method_pointer_callback<j_void, j_string>(_env, thiz, (jstring)first_jobj);
+        }
+        else {
+            find_method_pointer_callback<j_void, j_object>(_env, thiz, first_jobj);
+        }
+        return;
+    }
+
+    if (count == 2) {
         jobject jobj = _env.get_object_array_element(a, 0);
         std::string classname = _env.get_object_classname(jobj);
 
-        LOGV("sl2577 jcls name: %s", classname.c_str());
 
-        if (classname == "java.lang.Boolean") {
-            find_method_pointer_callback<j_void, j_boolean>(_env, thiz, j_call<j_boolean>(jobj, "booleanValue").execute());
-        }
-        else if (classname == "java.lang.Byte") {
-            find_method_pointer_callback<j_void, j_byte>(_env, thiz, j_call<j_byte>(jobj, "byteValue").execute());
-        }
-        else if (classname == "java.lang.Char") {
-            find_method_pointer_callback<j_void, j_char>(_env, thiz, j_call<j_char>(jobj, "charValue").execute());
-        }
-        else if (classname == "java.lang.Short") {
-            find_method_pointer_callback<j_void, j_short>(_env, thiz, j_call<j_short>(jobj, "shortValue").execute());
-        }
-        else if (classname == "java.lang.Integer") {
-            find_method_pointer_callback<j_void, j_int>(_env, thiz, j_call<j_int>(jobj, "intValue").execute());
-        }
-        else if (classname == "java.lang.Long") {
-            find_method_pointer_callback<j_void, j_long>(_env, thiz, j_call<j_long>(jobj, "longValue").execute());
-        }
-        else if (classname == "java.lang.Float") {
-            find_method_pointer_callback<j_void, j_float>(_env, thiz, j_call<j_float>(jobj, "floatValue").execute());
-        }
-        else if (classname == "java.lang.Double") {
-            find_method_pointer_callback<j_void, j_double>(_env, thiz, j_call<j_double>(jobj, "doubleValue").execute());
-        }
-        else if (classname == "java.lang.String") {
-            find_method_pointer_callback<j_void, j_string>(_env, thiz, (jstring)jobj);
-        }
-        else {
-            find_method_pointer_callback<j_void, j_object>(_env, thiz, jobj);
-        }
+
+        return;
+    }
+
+    if (count == 3) {
         return;
     }
 }
@@ -1107,4 +1133,5 @@ Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjec
 
 
 #endif /* jni_helper_hpp */
+
 
