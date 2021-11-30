@@ -47,9 +47,6 @@ struct Or { };
 
 
 #pragma mark - is base of
-
-
-
 template <typename L, typename Base, typename T, typename ... Args>
 struct _base_of {
     static inline constexpr bool value = [](){
@@ -61,10 +58,10 @@ struct _base_of {
     }();
 };
 
-        template <typename L, typename Base, typename T>
-        struct _base_of<L, Base, T> {
-            static inline constexpr bool value = std::is_base_of_v<Base, T>;
-        };
+template <typename L, typename Base, typename T>
+struct _base_of<L, Base, T> {
+    static inline constexpr bool value = std::is_base_of_v<Base, T>;
+};
 
 template <typename Base, typename ... Args>
 static inline constexpr bool all_base_of_v = _base_of<And, Base, Args...>::value;
@@ -76,11 +73,13 @@ static inline constexpr bool any_base_of_v = _base_of<Or, Base, Args...>::value;
 #pragma mark - is const
 template <typename L, typename T, typename ... Args>
 struct _const {
-    static inline constexpr bool value =
-        std::is_same_v<L, And> ?
-            _const<L, T>::value && _const<L, Args...>::value
-            :
-            _const<L, T>::value || _const<L, Args...>::value;
+    static inline constexpr bool value = [](){
+        if constexpr (std::is_same_v<L, And>) {
+            return _const<L, T>::value && _const<L, Args...>::value;
+        } else {
+            return _const<L, T>::value || _const<L, Args...>::value;
+        }
+    }();
 };
 
 template <typename L, typename T>
@@ -98,11 +97,13 @@ static inline constexpr bool any_const_v = _const<Or, Args...>::value;
 #pragma mark - is reference
 template <typename L, typename T, typename ... Args>
 struct _reference {
-    static inline constexpr bool value =
-        std::is_same_v<L, And> ?
-            _reference<L, T>::value && _reference<L, Args...>::value
-            :
-            _reference<L, T>::value || _reference<L, Args...>::value;
+    static inline constexpr bool value = [](){
+        if constexpr (std::is_same_v<L, And>) {
+            return _reference<L, T>::value && _reference<L, Args...>::value;
+        } else {
+            return _reference<L, T>::value || _reference<L, Args...>::value;
+        }
+    }();
 };
 
 template <typename L, typename T>
@@ -120,11 +121,13 @@ static inline constexpr bool any_reference_v = _reference<Or, Args...>::value;
 #pragma mark - is pointer
 template <typename L, typename T, typename ... Args>
 struct _pointer {
-    static inline constexpr bool value =
-        std::is_same_v<L, And> ?
-            _pointer<L, T>::value && _pointer<L, Args...>::value
-            :
-            _pointer<L, T>::value || _pointer<L, Args...>::value;
+    static inline constexpr bool value = [](){
+        if constexpr (std::is_same_v<L, And>) {
+            return _pointer<L, T>::value && _pointer<L, Args...>::value;
+        } else {
+            return _pointer<L, T>::value || _pointer<L, Args...>::value;
+        }
+    }();
 };
 
 template <typename L, typename T>

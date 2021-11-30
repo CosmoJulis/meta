@@ -19,6 +19,8 @@ namespace arg {
 template <typename ... Args>
 struct list {
     
+    static_assert(sizeof...(Args) > 0, "Args is empty.");
+    
     template <typename _T, typename ... _Args>
     struct _impl {
         static inline std::string _type_name() {
@@ -50,9 +52,9 @@ struct list {
         }
     };
 
-    static inline const std::string log = [](){
+    static inline const std::string log() {
         return _impl<Args...>::_type_name();
-    }();
+    };
 };
 
 template <typename ... Args>

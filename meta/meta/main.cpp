@@ -97,8 +97,29 @@ void callback(const std::function<void(Args...)> & callback) {
 //    std::cout << m.name() << std::endl;
 //}
 
+class A {
+public:
+    int i;
+    A(int _i) : i([&_i](){
+        std::cout << "A i" << std::endl;
+        return _i * 2;
+    }()) { }
+};
+
+class B : public A {
+public:
+    B(int c) : A([&c](){
+        std::cout << "B c" << std::endl;
+        return c * 2;
+    }()) {
+        
+    }
+};
+
+
 int main(int argc, const char * argv[]) {
 
+    B a = B(1);
 
 
     

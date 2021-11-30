@@ -5,7 +5,7 @@ package com.cosmojulis.meta;
 
 import java.util.ArrayList;
 
-public class JniHelper {
+public class JniInterface {
     // a is Serializable
 
     public native <T> void callback(T...a);
