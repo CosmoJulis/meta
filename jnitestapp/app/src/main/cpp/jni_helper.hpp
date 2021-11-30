@@ -1091,6 +1091,9 @@ void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const 
 
     if (to_remove_jobj != nullptr) {
         map.erase(to_remove_jobj);
+    } else {
+        assert(false);
+        std::cout << "Not found map func." << std::endl;
     }
 }
 
@@ -1167,10 +1170,10 @@ Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjec
         return;
     }
 
-//    if (count == 3) {
-//        magic_call<0, 3, j_void>(m_env, thiz, a);
-//        return;
-//    }
+    if (count == 3) {
+        magic_call<0, 3, j_void>(m_env, thiz, a);
+        return;
+    }
 
     throw "No impl args count above 3.";
 }

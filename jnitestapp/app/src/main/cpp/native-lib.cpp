@@ -19,12 +19,11 @@ Java_com_cosmojulis_jnitestapp_MainActivity_stringFromJNI(
 
 extern "C" JNIEXPORT void  JNICALL
 Java_com_cosmojulis_jnitestapp_MainActivity_test(JNIEnv * env, jobject) {
-
 //    auto jsc = j_static_call<j_void, j_object>("com.cosmojulis.jnitestapp.MainActivity", "javaMethod", j_interface<j_void, j_int>([](int a){
 //        LOGV("sl2577 jhelp callback %d", a);
 //    }));
-    auto jsc = j_static_call<j_void, j_object>("com.cosmojulis.jnitestapp.MainActivity", "javaMethod", j_interface<j_void, j_int, j_string>([](int i, std::string a){
-        LOGV("sl2577 jhelp callback %d, %s", i, a.c_str());
+    auto jsc = j_static_call<j_void, j_object>("com.cosmojulis.jnitestapp.MainActivity", "javaMethod", j_interface<j_void, j_int, j_string, j_double>([](int i, std::string a, double d){
+        LOGV("sl2577 jhelp callback %d, %s, %lf", i, a.c_str(), d);
     }));
     jsc.execute();
 
