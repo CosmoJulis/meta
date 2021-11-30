@@ -13,6 +13,10 @@
 #include <vector>
 #include <any>
 
+
+using namespace meta::jni::helper;
+
+
 //using namespace std;
 //
 //template <typename T>
@@ -55,126 +59,26 @@
 //};
 
 
-using namespace meta::jni::helper;
 
-
-// dexmaker 注册 callback 签名函数
-template <typename ... Args>
-void callback(const std::function<void(Args...)> & callback) {
-    
+template <int I = 0, int C = 3, typename ... Args>
+void add_class(bool d) {
+    if constexpr (I == C) {
+        std::cout << meta::arg::list_log<Args...> << std::endl;
+    } else {
+        if (d) {
+            add_class<I + 1, C, double, Args...>(std::rand()%2 == 0);
+        } else {
+            add_class<I + 1, C, float, Args...>(std::rand()%2 == 0);
+        }
+    }
 }
 
 
 
 
-//class j_base_object {
-//public:
-//    static inline const std::string classname() {
-//        return j_base_object().name();
-//    }
-//
-//    virtual std::string name() const {
-//        return "java.lang.Object";
-//    }
-//};
-//
-//template <meta::class_utility::string_literal T>
-//class j_derive_object : public j_base_object {
-//public:
-//    static inline const std::string classname() {
-//        return j_derive_object().name();
-//    }
-//
-//    std::string name() const override {
-//        return T.value;
-//    }
-//};
-//
-//
-//
-//void test(const j_base_object & m) {
-//    std::cout << std::remove_cvref_t<decltype(m)>::classname() << std::endl;
-//    std::cout << m.name() << std::endl;
-//}
-
-class A {
-public:
-    int i;
-    A(int _i) : i([&_i](){
-        std::cout << "A i" << std::endl;
-        return _i * 2;
-    }()) { }
-};
-
-class B : public A {
-public:
-    B(int c) : A([&c](){
-        std::cout << "B c" << std::endl;
-        return c * 2;
-    }()) {
-        
-    }
-};
-
-
 int main(int argc, const char * argv[]) {
-
-    B a = B(1);
-
-
     
-    
-//    auto jc = j_call<j_void,
-//    j_boolean,
-//    j_byte,
-//    j_char,
-//    j_short,
-//    j_int,
-//    j_long,
-//    j_float,
-//    j_double,
-//    j_string
-//    >
-//    (j_base_object(), "method",
-//     true,
-//     0b1011'0101,
-//     'c',
-//     2,
-//     4,
-//     8'000'000,
-//     0.1,
-//     0.2,
-//     "hello world"
-//     );
-
-    auto jm = j_static_method<j_void, j_boolean, j_object>("java.lang.String", "m", true, j_derive_object<"java.lang.Myclass">());
-    std::cout << jm.fullname() << std::endl;
-
-
-//    auto jsc = j_static_call<j_void,
-//    j_boolean,
-//    j_byte,
-//    j_char,
-//    j_short,
-//    j_int,
-//    j_long,
-//    j_float,
-//    j_double,
-//    j_string
-//    >
-//    ("com.app.Activity", "method",
-//     true,
-//     0b10110101,
-//     'c',
-//     2,
-//     4,
-//     8,
-//     0.1,
-//     0.2,
-//     "hello world"
-//     );
-//
-//
+    add_class<0, 3>(std::rand()%2 == 0);
     
     return 0;
 }
