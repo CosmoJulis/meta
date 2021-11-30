@@ -571,14 +571,14 @@ namespace meta {
                 }
 
                 void unload() {
-                    j_env _env = env();
+                    j_env m_env = this->env();
                     for (auto & [k,v] : jclass_pointer_map) {
-                        _env.delete_global_ref((jobject)v);
+                        m_env.delete_global_ref((jobject)v);
                     }
                     jclass_pointer_map.clear();
 
                     for (auto & [k,v] : jmethod_id_pointer_map) {
-                        _env.delete_global_ref((jobject)v);
+                        m_env.delete_global_ref((jobject)v);
                     }
                     jmethod_id_pointer_map.clear();
                 }
@@ -662,7 +662,7 @@ namespace meta {
 
 #if DEBUG_ENABLED
                                 using T0 = std::remove_cvref_t<decltype(args)>;
-                                constexpr int arg_index = meta::arg::index_of<T0, Args...>::index;
+                                constexpr int arg_index = meta::arg::index<T0, Args...>::value;
                                 if constexpr (arg_index >= 0) {
                                     _debug_vvt.emplace_back(_debug_variant_type(std::in_place_index<arg_index>, args));
                                 } else {
@@ -919,11 +919,11 @@ struct j_interface : j_derive_object<"com.cosmojulis.meta.JniInterface">
 
                 R execute() {
 #ifdef Xcode
-                    j_env env;
+                    j_env m_env;
 #else
-                    j_env env = j_vm::shared().env();
+                    j_env m_env = j_vm::shared().env();
 #endif
-                    return _jsmethod.call(env);
+                    return _jsmethod.call(m_env);
                 }
 
             private:
@@ -947,11 +947,11 @@ struct j_interface : j_derive_object<"com.cosmojulis.meta.JniInterface">
 
                 R execute() {
 #ifdef Xcode
-                    j_env env;
+                    j_env m_env;
 #else
-                    j_env env = j_vm::shared().env();
+                    j_env m_env = j_vm::shared().env();
 #endif
-                    return _jmethod.call(env, _jobj);
+                    return _jmethod.call(m_env, _jobj);
                 }
 
             private:
@@ -967,19 +967,19 @@ struct j_interface : j_derive_object<"com.cosmojulis.meta.JniInterface">
 
             j_base_object::j_base_object(const std::string & name) : _classname(name) {
                 LOGV("jni_helper j_object<%s> init", classname().c_str());
-                const auto & _env = j_vm::shared().env();
+                const auto & m_env = j_vm::shared().env();
                 auto jm = j_method<j_void>(classname(), "<init>");
-                _jo = _env.new_object(jm.jni_class().unwrap(_env), jm.unwrap(_env));
+                _jo = m_env.new_object(jm.jni_class().unwrap(m_env), jm.unwrap(m_env));
             }
 
             j_base_object::j_base_object(const jobject & jobj) : _jo(jobj) {
-                const auto & _env = j_vm::shared().env();
-                _classname = _env.get_object_classname(jobj);
+                const auto & m_env = j_vm::shared().env();
+                _classname = m_env.get_object_classname(jobj);
             }
 
             j_base_object::operator j_string() const {
-                const auto & _env = j_vm::shared().env();
-                if (_env.get_object_classname(_jo) == "java.lang.String") {
+                const auto & m_env = j_vm::shared().env();
+                if (m_env.get_object_classname(_jo) == "java.lang.String") {
                     return j_string((jstring)_jo);
                 } else {
                     throw "Can not cast to jstring.";
@@ -1019,6 +1019,41 @@ struct j_interface : j_derive_object<"com.cosmojulis.meta.JniInterface">
             }
 
 
+            template <typename R>
+            R get_value(const jobject & jobj) {
+                if constexpr (std::is_same_v<R, j_boolean>) {
+                    return j_call<R>(jobj, "booleanValue").execute();
+                }
+                else if constexpr (std::is_same_v<R, j_byte>) {
+                    return j_call<R>(jobj, "byteValue").execute();
+                }
+                else if constexpr (std::is_same_v<R, j_char>) {
+                    return j_call<R>(jobj, "charValue").execute();
+                }
+                else if constexpr (std::is_same_v<R, j_short>) {
+                    return j_call<R>(jobj, "shortValue").execute();
+                }
+                else if constexpr (std::is_same_v<R, j_int>) {
+                    return j_call<R>(jobj, "intValue").execute();
+                }
+                else if constexpr (std::is_same_v<R, j_long>) {
+                    return j_call<R>(jobj, "longValue").execute();
+                }
+                else if constexpr (std::is_same_v<R, j_float>) {
+                    return j_call<R>(jobj, "floatValue").execute();
+                }
+                else if constexpr (std::is_same_v<R, j_double>) {
+                    return j_call<R>(jobj, "doubleValue").execute();
+                }
+                else if constexpr (std::is_same_v<R, j_string>) {
+                    return j_string(jstring(jobj));
+                }
+                else {
+                    return j_object(jobj);
+                }
+            }
+
+
 
         }
 
@@ -1041,12 +1076,12 @@ void JNI_OnUnload(JavaVM * vm, void * reserved) {
 
 
 template <typename R, typename ... Args>
-void find_method_pointer_callback(const meta::jni::helper::j_env & _env, const jobject & thiz, const Args & ... args) {
+void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const jobject & thiz, const Args & ... args) {
     auto & map = meta::jni::helper::j_interface<R, Args...>::get_object_method_pointer_map();
 
     jobject to_remove_jobj = nullptr;
     for (const auto & [k, v] : map) {
-        if (_env.is_same_object(k, thiz)) {
+        if (m_env.is_same_object(k, thiz)) {
             auto func = map[k];
             func(args...);
             to_remove_jobj = k;
@@ -1060,78 +1095,87 @@ void find_method_pointer_callback(const meta::jni::helper::j_env & _env, const j
 }
 
 
+
+
+template <int I, int C, typename R, typename ... Args>
+void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, const jobjectArray & a, const Args & ... args) {
+    using namespace meta::jni::helper;
+
+    if constexpr (I == C) {
+        find_method_pointer_callback<R, Args...>(m_env, thiz, args...);
+    }
+    else {
+
+        jobject jobj = m_env.get_object_array_element(a, I);
+        std::string jobj_classname = m_env.get_object_classname(jobj);
+
+        if (jobj_classname == "java.lang.Boolean") {
+            magic_call<I + 1, C, R, Args..., j_boolean>(m_env, thiz, a, args..., get_value<j_boolean>(jobj));
+        }
+        else if (jobj_classname == "java.lang.Byte") {
+            magic_call<I + 1, C, R, Args..., j_byte>(m_env, thiz, a, args..., get_value<j_byte>(jobj));
+        }
+        else if (jobj_classname == "java.lang.Char") {
+            magic_call<I + 1, C, R, Args..., j_char>(m_env, thiz, a, args..., get_value<j_char>(jobj));
+        }
+        else if (jobj_classname == "java.lang.Short") {
+            magic_call<I + 1, C, R, Args..., j_short>(m_env, thiz, a, args..., get_value<j_short>(jobj));
+        }
+        else if (jobj_classname == "java.lang.Integer") {
+            magic_call<I + 1, C, R, Args..., j_int>(m_env, thiz, a, args..., get_value<j_int>(jobj));
+        }
+        else if (jobj_classname == "java.lang.Long") {
+            magic_call<I + 1, C, R, Args..., j_long>(m_env, thiz, a, args..., get_value<j_long>(jobj));
+        }
+        else if (jobj_classname == "java.lang.Float") {
+            magic_call<I + 1, C, R, Args..., j_float>(m_env, thiz, a, args..., get_value<j_float>(jobj));
+        }
+        else if (jobj_classname == "java.lang.Double") {
+            magic_call<I + 1, C, R, Args..., j_double>(m_env, thiz, a, args..., get_value<j_double>(jobj));
+        }
+        else if (jobj_classname == "java.lang.String") {
+            magic_call<I + 1, C, R, Args..., j_string>(m_env, thiz, a, args..., get_value<j_string>(jobj));
+        }
+        else {
+            magic_call<I + 1, C, R, Args..., j_object>(m_env, thiz, a, args..., get_value<j_object>(jobj));
+        }
+    }
+}
+
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjectArray a) {
     using namespace meta::jni::helper;
 
-    auto _env = j_env(env);
+    auto m_env = j_env(env);
 
-    int count = _env.get_array_length(a);
+    int count = m_env.get_array_length(a);
 
     if (count == 0) {
-        find_method_pointer_callback<j_void>(_env, thiz);
+        magic_call<0, 0, j_void>(m_env, thiz, a);
         return;
     }
 
-
     if (count == 1) {
-
-        jobject first_jobj = _env.get_object_array_element(a, 0);
-        std::string first_classname = _env.get_object_classname(first_jobj);
-
-        LOGV("jni_helper first_classname %s", first_classname.c_str());
-
-        if (first_classname == "java.lang.Boolean") {
-            find_method_pointer_callback<j_void, j_boolean>(_env, thiz, j_call<j_boolean>(first_jobj, "booleanValue").execute());
-        }
-        else if (first_classname == "java.lang.Byte") {
-            find_method_pointer_callback<j_void, j_byte>(_env, thiz, j_call<j_byte>(first_jobj, "byteValue").execute());
-        }
-        else if (first_classname == "java.lang.Char") {
-            find_method_pointer_callback<j_void, j_char>(_env, thiz, j_call<j_char>(first_jobj, "charValue").execute());
-        }
-        else if (first_classname == "java.lang.Short") {
-            find_method_pointer_callback<j_void, j_short>(_env, thiz, j_call<j_short>(first_jobj, "shortValue").execute());
-        }
-        else if (first_classname == "java.lang.Integer") {
-            find_method_pointer_callback<j_void, j_int>(_env, thiz, j_call<j_int>(first_jobj, "intValue").execute());
-        }
-        else if (first_classname == "java.lang.Long") {
-            find_method_pointer_callback<j_void, j_long>(_env, thiz, j_call<j_long>(first_jobj, "longValue").execute());
-        }
-        else if (first_classname == "java.lang.Float") {
-            find_method_pointer_callback<j_void, j_float>(_env, thiz, j_call<j_float>(first_jobj, "floatValue").execute());
-        }
-        else if (first_classname == "java.lang.Double") {
-            find_method_pointer_callback<j_void, j_double>(_env, thiz, j_call<j_double>(first_jobj, "doubleValue").execute());
-        }
-        else if (first_classname == "java.lang.String") {
-            find_method_pointer_callback<j_void, j_string>(_env, thiz, (jstring)first_jobj);
-        }
-        else {
-            find_method_pointer_callback<j_void, j_object>(_env, thiz, first_jobj);
-        }
+        magic_call<0, 1, j_void>(m_env, thiz, a);
         return;
     }
 
     if (count == 2) {
-        jobject jobj = _env.get_object_array_element(a, 0);
-        std::string classname = _env.get_object_classname(jobj);
-
-
-
+        magic_call<0, 2, j_void>(m_env, thiz, a);
         return;
     }
 
-    if (count == 3) {
-        return;
-    }
+//    if (count == 3) {
+//        magic_call<0, 3, j_void>(m_env, thiz, a);
+//        return;
+//    }
+
+    throw "No impl args count above 3.";
 }
 
 
 
 
 #endif /* jni_helper_hpp */
-
-

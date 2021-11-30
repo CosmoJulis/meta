@@ -59,14 +59,22 @@ using namespace meta::jni::helper;
 //};
 
 
+template <int I, typename ... Args>
+void test() {
+    if constexpr (I == 0) {
+        std::cout << meta::arg::list_log<Args...> << std::endl;
+        return;
+    } else {
+        test<I - 1, Args..., int>();
+    }
+}
 
 
 int main(int argc, const char * argv[]) {
     
 
-    auto c = meta::arg::of<2, std::string, int, double>::get_value("std::string", 1, 0.2);
-    std::cout << meta::arg::list_log<decltype(c)> << std::endl;
-    std::cout << c << std::endl;
+    test<5, double>();
+
     
     
     return 0;

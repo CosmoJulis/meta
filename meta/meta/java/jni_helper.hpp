@@ -662,7 +662,7 @@ public:
                 
 #if DEBUG_ENABLED
                 using T0 = std::remove_cvref_t<decltype(args)>;
-                constexpr int arg_index = meta::arg::index<T0, Args...>::index;
+                constexpr int arg_index = meta::arg::index<T0, Args...>::value;
                 if constexpr (arg_index >= 0) {
                     _debug_vvt.emplace_back(_debug_variant_type(std::in_place_index<arg_index>, args));
                 } else {
@@ -1078,7 +1078,7 @@ void JNI_OnUnload(JavaVM * vm, void * reserved) {
 template <typename R, typename ... Args>
 void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const jobject & thiz, const Args & ... args) {
     auto & map = meta::jni::helper::j_interface<R, Args...>::get_object_method_pointer_map();
-    
+        
     jobject to_remove_jobj = nullptr;
     for (const auto & [k, v] : map) {
         if (m_env.is_same_object(k, thiz)) {
@@ -1091,6 +1091,9 @@ void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const 
     
     if (to_remove_jobj != nullptr) {
         map.erase(to_remove_jobj);
+    } else {
+        assert(false);
+        std::cout << "Not found map func." << std::endl;
     }
 }
 
@@ -1110,34 +1113,34 @@ void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, co
         std::string jobj_classname = m_env.get_object_classname(jobj);
         
         if (jobj_classname == "java.lang.Boolean") {
-            magic_call<I + 1, C, R, j_boolean, Args...>(m_env, thiz, a, get_value<j_boolean>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_boolean>(m_env, thiz, a, args..., get_value<j_boolean>(jobj));
         }
         else if (jobj_classname == "java.lang.Byte") {
-            magic_call<I + 1, C, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_byte>(m_env, thiz, a, args..., get_value<j_byte>(jobj));
         }
         else if (jobj_classname == "java.lang.Char") {
-            magic_call<I + 1, C, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_char>(m_env, thiz, a, args..., get_value<j_char>(jobj));
         }
         else if (jobj_classname == "java.lang.Short") {
-            magic_call<I + 1, C, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_short>(m_env, thiz, a, args..., get_value<j_short>(jobj));
         }
         else if (jobj_classname == "java.lang.Integer") {
-            magic_call<I + 1, C, R, j_int, Args...>(m_env, thiz, a, get_value<j_int>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_int>(m_env, thiz, a, args..., get_value<j_int>(jobj));
         }
         else if (jobj_classname == "java.lang.Long") {
-            magic_call<I + 1, C, R, j_long, Args...>(m_env, thiz, a, get_value<j_long>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_long>(m_env, thiz, a, args..., get_value<j_long>(jobj));
         }
         else if (jobj_classname == "java.lang.Float") {
-            magic_call<I + 1, C, R, j_float, Args...>(m_env, thiz, a, get_value<j_float>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_float>(m_env, thiz, a, args..., get_value<j_float>(jobj));
         }
         else if (jobj_classname == "java.lang.Double") {
-            magic_call<I + 1, C, R, j_double, Args...>(m_env, thiz, a, get_value<j_double>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_double>(m_env, thiz, a, args..., get_value<j_double>(jobj));
         }
         else if (jobj_classname == "java.lang.String") {
-            magic_call<I + 1, C, R, j_string, Args...>(m_env, thiz, a, get_value<j_string>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_string>(m_env, thiz, a, args..., get_value<j_string>(jobj));
         }
         else {
-            magic_call<I + 1, C, R, j_object, Args...>(m_env, thiz, a, get_value<j_object>(jobj), args...);
+            magic_call<I + 1, C, R, Args..., j_object>(m_env, thiz, a, args..., get_value<j_object>(jobj));
         }
     }
 }
@@ -1161,16 +1164,16 @@ Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjec
         magic_call<0, 1, j_void>(m_env, thiz, a);
         return;
     }
-    
+
     if (count == 2) {
         magic_call<0, 2, j_void>(m_env, thiz, a);
         return;
     }
 
-    if (count == 3) {
-        magic_call<0, 3, j_void>(m_env, thiz, a);
-        return;
-    }
+//    if (count == 3) {
+//        magic_call<0, 3, j_void>(m_env, thiz, a);
+//        return;
+//    }
     
     throw "No impl args count above 3.";
 }
