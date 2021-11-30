@@ -8,6 +8,8 @@
 #ifndef arg_position_hpp
 #define arg_position_hpp
 
+#include <type_traits>
+
 /*
  * TODO: ignore const
  *       ignore reference
@@ -26,7 +28,7 @@ namespace arg {
  *  -1 不存在
  */
 template <typename T, typename ... Args>
-struct index_of {
+struct index {
     
     template <typename _T, int _index, typename _F, typename ... _Args>
     struct _impl {
@@ -71,7 +73,7 @@ struct index_of {
                                 _impl<T, -2, _placeholder, Args...>
                             >;
     
-    static inline constexpr int index = args_type::getIndex();
+    static inline constexpr int value = args_type::getIndex();
 };
 
 
@@ -82,16 +84,39 @@ struct of {
     
     template <int _index, int _idx, typename _T, typename ... _Args>
     struct _impl {
+        
         using _type = std::conditional_t<_index == _idx, _T, typename _impl<_index, _idx+1, _Args...>::_type>;
+        
+        static inline const _type & _get_value(const _T & t, const _Args & ... args) {
+            if constexpr (_index == _idx) {
+                return t;
+            } else {
+                return _impl<_index, _idx + 1, _Args...>::_get_value(args...);
+            }
+        }
+        
     };
     
     template <int _index, int _idx, typename _T>
     struct _impl<_index, _idx, _T> {
+        
         using _type = _T;
+        
+        static inline const _type & _get_value(const _T & t) {
+            return t;
+        }
     };
         
     using type = typename _impl<index, 0, Args...>::_type;
+    
+    static inline const type & get_value(const Args & ... args) {
+        return _impl<index, 0, Args...>::_get_value(args...);
+    }
 };
+
+
+
+
 
 
 }

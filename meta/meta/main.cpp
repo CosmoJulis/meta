@@ -60,25 +60,14 @@ using namespace meta::jni::helper;
 
 
 
-template <int I = 0, int C = 3, typename ... Args>
-void add_class(bool d) {
-    if constexpr (I == C) {
-        std::cout << meta::arg::list_log<Args...> << std::endl;
-    } else {
-        if (d) {
-            add_class<I + 1, C, double, Args...>(std::rand()%2 == 0);
-        } else {
-            add_class<I + 1, C, float, Args...>(std::rand()%2 == 0);
-        }
-    }
-}
-
-
-
 
 int main(int argc, const char * argv[]) {
     
-    add_class<0, 3>(std::rand()%2 == 0);
+
+    auto c = meta::arg::of<2, std::string, int, double>::get_value("std::string", 1, 0.2);
+    std::cout << meta::arg::list_log<decltype(c)> << std::endl;
+    std::cout << c << std::endl;
+    
     
     return 0;
 }

@@ -662,7 +662,7 @@ public:
                 
 #if DEBUG_ENABLED
                 using T0 = std::remove_cvref_t<decltype(args)>;
-                constexpr int arg_index = meta::arg::index_of<T0, Args...>::index;
+                constexpr int arg_index = meta::arg::index<T0, Args...>::index;
                 if constexpr (arg_index >= 0) {
                     _debug_vvt.emplace_back(_debug_variant_type(std::in_place_index<arg_index>, args));
                 } else {
@@ -1095,40 +1095,49 @@ void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const 
 }
 
 
-template <typename R, typename ... Args>
-void call(const meta::jni::helper::j_env & m_env, const jobject & thiz, const std::string & first_classname, const jobject & first_jobj, const Args & ... args) {
-    using namespace meta::jni::helper;
 
-    if constexpr (sizeof...(Args) == 0) {
-        if (first_classname == "java.lang.Boolean") {
-            find_method_pointer_callback<j_void, j_boolean>(m_env, thiz, get_value<j_boolean>(first_jobj));
+
+template <int I, int C, typename R, typename ... Args>
+void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, const jobjectArray & a, const Args & ... args) {
+    using namespace meta::jni::helper;
+    
+    if constexpr (I == C) {
+        find_method_pointer_callback<R, Args...>(m_env, thiz, args...);
+    }
+    else {
+        
+        jobject jobj = m_env.get_object_array_element(a, I);
+        std::string jobj_classname = m_env.get_object_classname(jobj);
+        
+        if (jobj_classname == "java.lang.Boolean") {
+            magic_call<I + 1, C, R, j_boolean, Args...>(m_env, thiz, a, get_value<j_boolean>(jobj), args...);
         }
-        else if (first_classname == "java.lang.Byte") {
-            find_method_pointer_callback<j_void, j_byte>(m_env, thiz, get_value<j_byte>(first_jobj));
+        else if (jobj_classname == "java.lang.Byte") {
+            magic_call<I + 1, C, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
         }
-        else if (first_classname == "java.lang.Char") {
-            find_method_pointer_callback<j_void, j_char>(m_env, thiz, get_value<j_char>(first_jobj));
+        else if (jobj_classname == "java.lang.Char") {
+            magic_call<I + 1, C, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
         }
-        else if (first_classname == "java.lang.Short") {
-            find_method_pointer_callback<j_void, j_short>(m_env, thiz, get_value<j_short>(first_jobj));
+        else if (jobj_classname == "java.lang.Short") {
+            magic_call<I + 1, C, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
         }
-        else if (first_classname == "java.lang.Integer") {
-            find_method_pointer_callback<j_void, j_int>(m_env, thiz, get_value<j_int>(first_jobj));
+        else if (jobj_classname == "java.lang.Integer") {
+            magic_call<I + 1, C, R, j_int, Args...>(m_env, thiz, a, get_value<j_int>(jobj), args...);
         }
-        else if (first_classname == "java.lang.Long") {
-            find_method_pointer_callback<j_void, j_long>(m_env, thiz, get_value<j_long>(first_jobj));
+        else if (jobj_classname == "java.lang.Long") {
+            magic_call<I + 1, C, R, j_long, Args...>(m_env, thiz, a, get_value<j_long>(jobj), args...);
         }
-        else if (first_classname == "java.lang.Float") {
-            find_method_pointer_callback<j_void, j_float>(m_env, thiz, get_value<j_float>(first_jobj));
+        else if (jobj_classname == "java.lang.Float") {
+            magic_call<I + 1, C, R, j_float, Args...>(m_env, thiz, a, get_value<j_float>(jobj), args...);
         }
-        else if (first_classname == "java.lang.Double") {
-            find_method_pointer_callback<j_void, j_double>(m_env, thiz, get_value<j_double>(first_jobj));
+        else if (jobj_classname == "java.lang.Double") {
+            magic_call<I + 1, C, R, j_double, Args...>(m_env, thiz, a, get_value<j_double>(jobj), args...);
         }
-        else if (first_classname == "java.lang.String") {
-            find_method_pointer_callback<j_void, j_string>(m_env, thiz, get_value<j_string>(first_jobj));
+        else if (jobj_classname == "java.lang.String") {
+            magic_call<I + 1, C, R, j_string, Args...>(m_env, thiz, a, get_value<j_string>(jobj), args...);
         }
         else {
-            find_method_pointer_callback<j_void, j_object>(m_env, thiz, get_value<j_object>(first_jobj));
+            magic_call<I + 1, C, R, j_object, Args...>(m_env, thiz, a, get_value<j_object>(jobj), args...);
         }
     }
 }
@@ -1144,384 +1153,26 @@ Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjec
     int count = m_env.get_array_length(a);
 
     if (count == 0) {
-        find_method_pointer_callback<j_void>(m_env, thiz);
+        magic_call<0, 0, j_void>(m_env, thiz, a);
         return;
     }
 
-
     if (count == 1) {
-
-        jobject first_jobj = m_env.get_object_array_element(a, 0);
-        std::string first_classname = m_env.get_object_classname(first_jobj);
-
-        call<j_void>(m_env, thiz, first_classname, first_jobj);
-        
+        magic_call<0, 1, j_void>(m_env, thiz, a);
         return;
     }
     
     if (count == 2) {
-        jobject first_jobj = m_env.get_object_array_element(a, 0);
-        std::string first_classname = m_env.get_object_classname(first_jobj);
+        magic_call<0, 2, j_void>(m_env, thiz, a);
+        return;
+    }
 
-        jobject second_jobj = m_env.get_object_array_element(a, 1);
-        std::string second_classname = m_env.get_object_classname(second_jobj);
-        
-        if (first_classname == "java.lang.Boolean") {
-            
-            using first_type = j_boolean;
-            
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-        }
-        else if (first_classname == "java.lang.Byte") {
-            
-            using first_type = j_byte;
-
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-        }
-        else if (first_classname == "java.lang.Char") {
-            
-            using first_type = j_char;
-
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-        }
-        else if (first_classname == "java.lang.Short") {
-            
-            using first_type = j_short;
-
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-        }
-        else if (first_classname == "java.lang.Integer") {
-            
-            using first_type = j_int;
-
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-        }
-        else if (first_classname == "java.lang.Long") {
-            
-            using first_type = j_long;
-
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-            
-        }
-        else if (first_classname == "java.lang.Float") {
-            
-            using first_type = j_float;
-
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-        }
-        else if (first_classname == "java.lang.Double") {
-            
-            using first_type = j_double;
-
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-        }
-        else if (first_classname == "java.lang.String") {
-            
-            using first_type = j_string;
-
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-        }
-        else {
-            
-            using first_type = j_object;
-
-            if (second_classname == "java.lang.Boolean") {
-                find_method_pointer_callback<j_void, first_type, j_boolean>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_boolean>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Byte") {
-                find_method_pointer_callback<j_void, first_type, j_byte>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_byte>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Char") {
-                find_method_pointer_callback<j_void, first_type, j_char>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_char>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Short") {
-                find_method_pointer_callback<j_void, first_type, j_short>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_short>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Integer") {
-                find_method_pointer_callback<j_void, first_type, j_int>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_int>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Long") {
-                find_method_pointer_callback<j_void, first_type, j_long>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_long>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Float") {
-                find_method_pointer_callback<j_void, first_type, j_float>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_float>(second_jobj));
-            }
-            else if (second_classname == "java.lang.Double") {
-                find_method_pointer_callback<j_void, first_type, j_double>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_double>(second_jobj));
-            }
-            else if (second_classname == "java.lang.String") {
-                find_method_pointer_callback<j_void, first_type, j_string>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_string>(second_jobj));
-            }
-            else {
-                find_method_pointer_callback<j_void, first_type, j_object>(m_env, thiz, get_value<first_type>(first_jobj), get_value<j_object>(second_jobj));
-            }
-        }
-        
+    if (count == 3) {
+        magic_call<0, 3, j_void>(m_env, thiz, a);
         return;
     }
     
-    throw "No impl args count above 2.";
+    throw "No impl args count above 3.";
 }
 
 
