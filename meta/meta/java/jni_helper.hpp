@@ -450,7 +450,7 @@ public:
         return _env->GetObjectClass(jobj);
     }
     
-    inline const std::string get_object_classname(const jobject & jobj) const {
+    const std::string get_object_classname(const jobject & jobj) const {
         jclass jcls = get_object_class(jobj);
         jclass cls_class = find_class("java/lang/Class");
         jmethodID jm = _env->GetMethodID(cls_class, "getName", "()Ljava/lang/String;");
@@ -687,7 +687,7 @@ public:
         }
     }
     
-    inline const std::string method_sig() const {
+    const std::string method_sig() const {
         std::string _s = "(";
         _s += _args_sig;
         _s += ")";
@@ -697,7 +697,7 @@ public:
     
     
     // 返回类型使用不参与构造使用 java.lang.Object
-    inline const std::string fullname() const {
+    const std::string fullname() const {
         std::string _fn = "<" + _jcls.classname + "> ";
         _fn += reture_sig();
         _fn += " ";
@@ -842,7 +842,7 @@ public:
         return r;
     }
     
-    inline std::string fullname() const {
+    std::string fullname() const {
         std::string _fn = "<" + j_method<R, Args...>::classname() + "> ";
         _fn += "static ";
         _fn += R::sig();
@@ -1077,7 +1077,7 @@ void JNI_OnUnload(JavaVM * vm, void * reserved) {
 
 template <typename R, typename ... Args>
 void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const jobject & thiz, const Args & ... args) {
-    auto & map = meta::jni::helper::j_interface<R, Args...>::get_object_method_pointer_map();
+    auto & map = meta::jni::helper::j_interface<R, Args...>::get_object_method_pointer_map(); // TODO: change to std::variable or std::any
         
     jobject to_remove_jobj = nullptr;
     for (const auto & [k, v] : map) {
