@@ -59,21 +59,60 @@ using namespace meta::jni::helper;
 //};
 
 
-template <int I, typename ... Args>
-void test() {
-    if constexpr (I == 0) {
-        std::cout << meta::arg::list_log<Args...> << std::endl;
-        return;
-    } else {
-        test<I - 1, Args..., int>();
+class A {
+public:
+    A() {
+        std::cout << "A Construct\n";
     }
+    
+    A(const A & t) {
+        std::cout << "A Copy\n";
+    }
+    
+    A(A && t) {
+        std::cout << "A Move\n";
+    }
+};
+
+class B {
+public:
+    B() {
+        std::cout << "B Construct\n";
+    }
+    
+    B(const B & t) {
+        std::cout << "B Copy\n";
+    }
+    
+    B(B && t) {
+        std::cout << "B Move\n";
+    }
+};
+
+class C {
+public:
+    C() {
+        std::cout << "C Construct\n";
+    }
+    
+    C(const C & t) {
+        std::cout << "C Copy\n";
+    }
+    
+    C(C && t) {
+        std::cout << "C Move\n";
+    }
+};
+
+template <int index, typename ... Args>
+void test(Args && ... args) {
+    auto a = meta::arg::of<index, Args...>::get_value(std::forward<Args>(args)...);
+    std::cout << "return 0\n";
 }
 
-
 int main(int argc, const char * argv[]) {
-    
-
-    test<5, double>();
+    auto b = B();
+    test<100>(A(), b, C());
 
     
     

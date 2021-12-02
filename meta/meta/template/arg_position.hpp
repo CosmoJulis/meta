@@ -87,6 +87,14 @@ struct of {
         
         using _type = std::conditional_t<_index == _idx, _T, typename _impl<_index, _idx+1, _Args...>::_type>;
         
+        static inline _type && _get_value(_T && t, _Args && ... args) {
+            if constexpr (_index == _idx) {
+                return std::forward<_T>(t);
+            } else {
+                return _impl<_index, _idx + 1, _Args...>::_get_value(std::forward<_Args>(args)...);
+            }
+        }
+        
         static inline const _type & _get_value(const _T & t, const _Args & ... args) {
             if constexpr (_index == _idx) {
                 return t;
@@ -102,12 +110,20 @@ struct of {
         
         using _type = _T;
         
+        static inline _type && _get_value(_T && t) {
+            return std::forward<_T>(t);
+        }
+        
         static inline const _type & _get_value(const _T & t) {
             return t;
         }
     };
         
     using type = typename _impl<index, 0, Args...>::_type;
+    
+    static inline type && get_value(Args && ... args) {
+        return _impl<index, 0, Args...>::_get_value(std::forward<Args>(args)...);
+    }
     
     static inline const type & get_value(const Args & ... args) {
         return _impl<index, 0, Args...>::_get_value(args...);

@@ -315,6 +315,7 @@
 					"$(inherited)",
 					/usr/local/Cellar/boost/1.76.0/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -333,6 +334,7 @@
 					"$(inherited)",
 					/usr/local/Cellar/boost/1.76.0/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
