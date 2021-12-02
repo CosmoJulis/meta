@@ -95,7 +95,7 @@ struct of {
             }
         }
         
-        static inline const _type & _get_value(const _T & t, const _Args & ... args) {
+        static inline const _type _get_value(const _T & t, const _Args & ... args) {
             if constexpr (_index == _idx) {
                 return t;
             } else {
@@ -114,7 +114,7 @@ struct of {
             return std::forward<_T>(t);
         }
         
-        static inline const _type & _get_value(const _T & t) {
+        static inline const _type _get_value(const _T & t) {
             return t;
         }
     };
@@ -125,7 +125,7 @@ struct of {
         return _impl<index, 0, Args...>::_get_value(std::forward<Args>(args)...);
     }
     
-    static inline const type & get_value(const Args & ... args) {
+    static inline const type get_value(const Args & ... args) {
         return _impl<index, 0, Args...>::_get_value(args...);
     }
 };

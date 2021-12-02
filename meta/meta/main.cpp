@@ -106,13 +106,13 @@ public:
 
 template <int index, typename ... Args>
 void test(Args && ... args) {
-    auto a = meta::arg::of<index, Args...>::get_value(std::forward<Args>(args)...);
+    const auto & a = meta::arg::of<index, Args...>::get_value(std::forward<Args>(args)...);
     std::cout << "return 0\n";
 }
 
 int main(int argc, const char * argv[]) {
     auto b = B();
-    test<100>(A(), b, C());
+    test<0>(A(), b, C());
 
     
     

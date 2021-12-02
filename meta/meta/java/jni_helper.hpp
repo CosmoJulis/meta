@@ -1155,25 +1155,25 @@ Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjec
 
     int count = m_env.get_array_length(a);
 
-    if (count == 0) {
-        magic_call<0, j_void>(m_env, thiz, a);
-        return;
-    }
-
-    if (count == 1) {
-        magic_call<1, j_void>(m_env, thiz, a);
-        return;
-    }
-
-    if (count == 2) {
-        magic_call<2, j_void>(m_env, thiz, a);
-        return;
-    }
-
-    if (count == 3) {
-        magic_call<3, j_void>(m_env, thiz, a);
-        return;
-    }
+//    if (count == 0) {
+//        magic_call<0, j_void>(m_env, thiz, a);
+//        return;
+//    }
+//
+//    if (count == 1) {
+//        magic_call<1, j_void>(m_env, thiz, a);
+//        return;
+//    }
+//
+//    if (count == 2) {
+//        magic_call<2, j_void>(m_env, thiz, a);
+//        return;
+//    }
+//
+//    if (count == 3) {
+//        magic_call<3, j_void>(m_env, thiz, a);
+//        return;
+//    }
     
     throw "No impl args count above 3.";
 }
