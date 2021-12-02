@@ -12,9 +12,7 @@
 #include <string>
 
 
-namespace meta {
-
-namespace string {
+namespace meta::string {
 
     static inline const std::vector<std::string> split(const std::string & s, const std::string & split)
     {
@@ -41,8 +39,6 @@ namespace string {
         }
         return ret;
     }
-
-}
 
 }
 

@@ -16,9 +16,7 @@
  *       ignore const | reference
  */
 
-namespace meta {
-
-namespace arg {
+namespace meta::arg {
 
 
 /*
@@ -134,8 +132,6 @@ struct of {
 
 
 
-
-}
 
 }
 

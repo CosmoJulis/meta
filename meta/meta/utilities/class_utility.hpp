@@ -12,9 +12,7 @@
 #include <version>
 
 
-namespace meta {
-
-namespace class_utility {
+namespace meta::class_utility {
 
     template <typename T>
     static inline const std::string classname() {
@@ -46,7 +44,6 @@ namespace class_utility {
     constexpr const char * string_literal_v = str.value;
 #endif
 
-}
 
 }
 

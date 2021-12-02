@@ -17,11 +17,7 @@
  *  fix
  */
 
-namespace meta {
-
-namespace arg {
-
-namespace is {
+namespace meta::arg::is {
 
 #pragma mark - is vector
 template <typename T, typename Allocator>
@@ -141,10 +137,6 @@ static inline constexpr bool all_pointer_v = _pointer<And, Args...>::value;
 template <typename ... Args>
 static inline constexpr bool any_pointer_v = _pointer<Or, Args...>::value;
 
-
-}
-
-}
 
 }
 
