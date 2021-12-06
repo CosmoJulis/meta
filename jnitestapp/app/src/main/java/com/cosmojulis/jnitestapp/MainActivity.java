@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.widget.TextView;
 
 import com.cosmojulis.jnitestapp.databinding.ActivityMainBinding;
+import com.cosmojulis.meta.JniHelper;
 import com.cosmojulis.meta.JniInterface;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,9 +33,13 @@ public class MainActivity extends AppCompatActivity {
 
 
         new Handler().postDelayed(() -> {
-            test();
 //            test();
-
+            test(new JniInterface() {
+                @Override
+                public void callback(int a, double b, String str) {
+                    System.out.println("sl2577 a " + a + ", b " + b + ", str " + str);
+                }
+            });
         }, 2000);
     }
 
@@ -42,8 +47,9 @@ public class MainActivity extends AppCompatActivity {
 
     public native void test();
 
-    public static void javaMethod(JniInterface jhi) {
-        jhi.callback(5, "hello world", 0.2);
-    }
+    public native void test(JniInterface jhi);
 
+    public static void javaMethod(JniHelper jhi) {
+        jhi.callback(5, "hello world");
+    }
 }

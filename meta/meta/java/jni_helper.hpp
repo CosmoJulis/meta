@@ -877,11 +877,11 @@ public:
 
 #if _LIBCPP_STD_VER >= 20
 template <typename R, typename ... Args>
-struct j_interface : j_derive_object<"com.cosmojulis.meta.JniInterface">
+struct j_helper : j_derive_object<"com.cosmojulis.meta.JniHelper">
 #else
-class j_com_cosmojulis_meta_JniInterface { };
+class j_com_cosmojulis_meta_JniHelper { };
 template <typename R, typename ... Args>
-struct j_interface : j_derive_object<j_com_cosmojulis_meta_JniInterface>
+struct j_helper : j_derive_object<j_com_cosmojulis_meta_JniHelper>
 #endif
 {
     static auto & get_object_method_pointer_map() {
@@ -889,7 +889,7 @@ struct j_interface : j_derive_object<j_com_cosmojulis_meta_JniInterface>
         return singleton;
     }
     
-    j_interface(const std::function<std::conditional_t<std::is_same_v<R, j_void>, void, R>(Args...)> & func = nullptr) {
+    j_helper(const std::function<std::conditional_t<std::is_same_v<R, j_void>, void, R>(Args...)> & func = nullptr) {
         if (func != nullptr)
             get_object_method_pointer_map()[_jo] = func;
     }
@@ -1067,7 +1067,7 @@ void JNI_OnUnload(JavaVM * vm, void * reserved) {
 
 template <typename R, typename ... Args>
 void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const jobject & thiz, const Args & ... args) {
-    auto & map = meta::jni::helper::j_interface<R, Args...>::get_object_method_pointer_map(); // TODO: change to std::variable or std::any
+    auto & map = meta::jni::helper::j_helper<R, Args...>::get_object_method_pointer_map(); // TODO: change to std::variable or std::any
         
     jobject to_remove_jobj = nullptr;
     for (const auto & [k, v] : map) {
@@ -1138,7 +1138,7 @@ void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, co
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjectArray a) {
+Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectArray a) {
     using namespace meta::jni::helper;
 
     auto m_env = j_env(env);
@@ -1150,15 +1150,15 @@ Java_com_cosmojulis_meta_JniInterface_callback(JNIEnv *env, jobject thiz, jobjec
         return;
     }
 
-    if (count == 1) {
-        magic_call<1, j_void>(m_env, thiz, a);
-        return;
-    }
-
-    if (count == 2) {
-        magic_call<2, j_void>(m_env, thiz, a);
-        return;
-    }
+//    if (count == 1) {
+//        magic_call<1, j_void>(m_env, thiz, a);
+//        return;
+//    }
+//
+//    if (count == 2) {
+//        magic_call<2, j_void>(m_env, thiz, a);
+//        return;
+//    }
 
 //    if (count == 3) {
 //        magic_call<3, j_void>(m_env, thiz, a);

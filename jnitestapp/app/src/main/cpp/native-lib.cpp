@@ -17,29 +17,22 @@ Java_com_cosmojulis_jnitestapp_MainActivity_stringFromJNI(
 }
 
 
-extern "C" JNIEXPORT void  JNICALL
-Java_com_cosmojulis_jnitestapp_MainActivity_test(JNIEnv * env, jobject) {
-//    auto jsc = j_static_call<j_void, j_object>("com.cosmojulis.jnitestapp.MainActivity", "javaMethod", j_interface<j_void, j_int>([](int a){
-//        LOGV("sl2577 jhelp callback %d", a);
-//    }));
-    auto jsc = j_static_call<j_void, j_object>("com.cosmojulis.jnitestapp.MainActivity", "javaMethod", j_interface<j_void, j_int, j_string, j_double>([](int i, std::string a, double d){
-        LOGV("sl2577 jhelp callback %d, %s, %lf", i, a.c_str(), d);
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_cosmojulis_jnitestapp_MainActivity_test__(JNIEnv *env, jobject thiz) {
+    auto jsc = j_static_call<j_void, j_object>("com.cosmojulis.jnitestapp.MainActivity", "javaMethod", j_helper<j_void, j_int, j_string>([](int i, std::string a){
+        LOGV("sl2577 jhelp callback %d, %s", i, a.c_str());
     }));
     jsc.execute();
-
-//    const char * jniclsname = "com/cosmojulis/jnitestapp/MainActivity";
-//    jclass  jc = env->FindClass(jniclsname);
-//
-//    jmethodID jm = env->GetStaticMethodID(jc, "javaMethod",
-//                                          "(Lcom/cosmojulis/meta/JniHelperInterface;)V");
-//
-//
-//    jclass jh = env->FindClass("com/cosmojulis/meta/JniHelper");
-//    jmethodID nm = env->GetMethodID(jh, "<init>", "()V");
-//    jobject jhobj = env->NewObject(jh, nm);
-//
-//    env->CallStaticVoidMethod(jc, jm, jhobj);
-
-
 }
 
+// TODO: array
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_cosmojulis_jnitestapp_MainActivity_test__Lcom_cosmojulis_meta_JniInterface_2(JNIEnv *env,
+                                                                                      jobject thiz,
+                                                                                      jobject jhi) {
+    auto jc = j_call<j_void, j_int, j_double, j_string>(j_object(jhi), "callback", 1, 0.5, "hell world");
+    jc.execute();
+}
