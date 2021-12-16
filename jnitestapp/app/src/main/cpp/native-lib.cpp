@@ -30,9 +30,20 @@ Java_com_cosmojulis_jnitestapp_MainActivity_test__(JNIEnv *env, jobject thiz) {
 // TODO: array
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_cosmojulis_jnitestapp_MainActivity_test__Lcom_cosmojulis_meta_JniInterface_2(JNIEnv *env,
-                                                                                      jobject thiz,
-                                                                                      jobject jhi) {
+Java_com_cosmojulis_jnitestapp_MainActivity_test__Lcom_cosmojulis_meta_JniInterface_2
+(JNIEnv *env,
+ jobject thiz,
+ jobject jhi) {
+
     auto jc = j_call<j_void, j_int, j_double, j_string>(j_object(jhi), "callback", 1, 0.5, "hell world");
     jc.execute();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_cosmojulis_jnitestapp_MainActivity_test__ILcom_cosmojulis_meta_JniInterface_2(JNIEnv *env,
+                                                                                       jobject thiz,
+                                                                                       jint a,
+                                                                                       jobject jhi) {
+    // TODO: implement test()
 }

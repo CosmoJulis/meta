@@ -33,21 +33,25 @@ public class MainActivity extends AppCompatActivity {
 
 
         new Handler().postDelayed(() -> {
-//            test();
-            test(new JniInterface() {
-                @Override
-                public void callback(int a, double b, String str) {
-                    System.out.println("sl2577 a " + a + ", b " + b + ", str " + str);
-                }
-            });
+            test();
+
+//            test(new JniInterface() {
+//                @Override
+//                public <T> void callback(T... a) {
+//                    for (T i:a) {
+//                        System.out.println("sl2577 " + i);
+//                    }
+//                }
+//            });
+
         }, 2000);
     }
 
     public native String stringFromJNI();
 
     public native void test();
-
     public native void test(JniInterface jhi);
+    public native void test(int a, JniInterface jhi);
 
     public static void javaMethod(JniHelper jhi) {
         jhi.callback(5, "hello world");

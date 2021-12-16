@@ -43,99 +43,172 @@ struct Or { };
 
 
 #pragma mark - is base of
-template <typename L, typename Base, typename T, typename ... Args>
-struct _base_of {
+
+template <typename L, typename Base, typename ... Args>
+struct base_of {
+    
+    template <typename _L, typename _Base, typename _T, typename ... _Args>
+    struct _impl {
+        static inline constexpr bool value = [](){
+            if constexpr (std::is_same_v<_L, And>) {
+                return _impl<_L, _Base, _T>::value && _impl<_L, _Base, _Args...>::value;
+            } else {
+                return _impl<_L, _Base, _T>::value || _impl<_L, _Base, _Args...>::value;
+            }
+        }();
+    };
+
+    template <typename _L, typename _Base, typename _T>
+    struct _impl<_L, _Base, _T> {
+        static inline constexpr bool value = std::is_base_of_v<_Base, _T>;
+    };
+    
     static inline constexpr bool value = [](){
-        if constexpr (std::is_same_v<L, And>) {
-            return _base_of<L, Base, T>::value && _base_of<L, Base, Args...>::value;
+        if constexpr (sizeof...(Args) > 1) {
+            return _impl<L, Base, Args...>::value;
         } else {
-            return _base_of<L, Base, T>::value || _base_of<L, Base, Args...>::value;
+            return true;
         }
     }();
 };
 
-template <typename L, typename Base, typename T>
-struct _base_of<L, Base, T> {
-    static inline constexpr bool value = std::is_base_of_v<Base, T>;
+template <typename Base, typename ... Args>
+static inline constexpr bool all_base_of_v = base_of<And, Base, Args...>::value;
+
+template <typename Base, typename ... Args>
+static inline constexpr bool any_base_of_v = base_of<Or, Base, Args...>::value;
+
+
+
+#pragma mark - is same
+
+template <typename L, typename ... Args>
+struct same {
+
+    template <typename _L, typename _Same, typename _T, typename ... _Args>
+    struct _impl {
+        static inline constexpr bool value = [](){
+            if constexpr (std::is_same_v<_L, And>) {
+                return _impl<_L, _Same, _T>::value && _impl<_L, _Same, _Args...>::value;
+            } else {
+                return _impl<_L, _Same, _T>::value || _impl<_L, _Same, _Args...>::value;
+            }
+        }();
+    };
+
+    template <typename _L, typename _Same, typename _T>
+    struct _impl<_L, _Same, _T> {
+        static inline constexpr bool value = std::is_same_v<_Same, _T>;
+    };
+    
+    static inline constexpr bool value = [](){
+        if constexpr (sizeof...(Args) > 1) {
+            return _impl<L, Args...>::value;
+        } else {
+            return true;
+        }
+    }();
 };
 
-template <typename Base, typename ... Args>
-static inline constexpr bool all_base_of_v = _base_of<And, Base, Args...>::value;
+template <typename ... Args>
+static inline constexpr bool all_same_v = same<And, Args...>::value;
 
-template <typename Base, typename ... Args>
-static inline constexpr bool any_base_of_v = _base_of<Or, Base, Args...>::value;
+template <typename ... Args>
+static inline constexpr bool any_same_v = same<Or, Args...>::value;
+
+
 
 
 #pragma mark - is const
-template <typename L, typename T, typename ... Args>
-struct _const {
-    static inline constexpr bool value = [](){
-        if constexpr (std::is_same_v<L, And>) {
-            return _const<L, T>::value && _const<L, Args...>::value;
-        } else {
-            return _const<L, T>::value || _const<L, Args...>::value;
-        }
-    }();
+template <typename L, typename ... Args>
+struct const_ {
+    template <typename _L, typename _T, typename ... _Args>
+    struct _impl {
+        static inline constexpr bool value = [](){
+            if constexpr (std::is_same_v<_L, And>) {
+                return _impl<_L, _T>::value && _impl<_L, _Args...>::value;
+            } else {
+                return _impl<_L, _T>::value || _impl<_L, _Args...>::value;
+            }
+        }();
+    };
+
+    template <typename _L, typename _T>
+    struct _impl<_L, _T> {
+        static inline constexpr bool value = std::is_const_v<_T>;
+    };
+    
+    static inline constexpr bool value = _impl<L, Args...>::value;
 };
 
-template <typename L, typename T>
-struct _const<L, T> {
-    static inline constexpr bool value = std::is_const_v<T>;
-};
 
 template <typename ... Args>
-static inline constexpr bool all_const_v = _const<And, Args...>::value;
+static inline constexpr bool all_const_v = const_<And, Args...>::value;
 
 template <typename ... Args>
-static inline constexpr bool any_const_v = _const<Or, Args...>::value;
+static inline constexpr bool any_const_v = const_<Or, Args...>::value;
+
 
 
 #pragma mark - is reference
-template <typename L, typename T, typename ... Args>
-struct _reference {
-    static inline constexpr bool value = [](){
-        if constexpr (std::is_same_v<L, And>) {
-            return _reference<L, T>::value && _reference<L, Args...>::value;
-        } else {
-            return _reference<L, T>::value || _reference<L, Args...>::value;
-        }
-    }();
-};
+template <typename L, typename ... Args>
+struct reference {
+    template <typename _L, typename _T, typename ... _Args>
+    struct _impl {
+        static inline constexpr bool value = [](){
+            if constexpr (std::is_same_v<_L, And>) {
+                return _impl<_L, _T>::value && _impl<_L, _Args...>::value;
+            } else {
+                return _impl<_L, _T>::value || _impl<_L, _Args...>::value;
+            }
+        }();
+    };
 
-template <typename L, typename T>
-struct _reference<L, T> {
-    static inline constexpr bool value = std::is_reference_v<T>;
+    template <typename _L, typename _T>
+    struct _impl<_L, _T> {
+        static inline constexpr bool value = std::is_reference_v<_T>;
+    };
+    
+    static inline constexpr bool value = _impl<L, Args...>::value;
 };
 
 template <typename ... Args>
-static inline constexpr bool all_reference_v = _reference<And, Args...>::value;
+static inline constexpr bool all_reference_v = reference<And, Args...>::value;
 
 template <typename ... Args>
-static inline constexpr bool any_reference_v = _reference<Or, Args...>::value;
+static inline constexpr bool any_reference_v = reference<Or, Args...>::value;
+
+
 
 
 #pragma mark - is pointer
-template <typename L, typename T, typename ... Args>
-struct _pointer {
-    static inline constexpr bool value = [](){
-        if constexpr (std::is_same_v<L, And>) {
-            return _pointer<L, T>::value && _pointer<L, Args...>::value;
-        } else {
-            return _pointer<L, T>::value || _pointer<L, Args...>::value;
-        }
-    }();
+template <typename L, typename ... Args>
+struct pointer {
+    template <typename _L, typename _T, typename ... _Args>
+    struct _impl {
+        static inline constexpr bool value = [](){
+            if constexpr (std::is_same_v<_L, And>) {
+                return _impl<_L, _T>::value && _impl<_L, _Args...>::value;
+            } else {
+                return _impl<_L, _T>::value || _impl<_L, _Args...>::value;
+            }
+        }();
+    };
+
+    template <typename _L, typename _T>
+    struct _impl<_L, _T> {
+        static inline constexpr bool value = std::is_pointer_v<_T>;
+    };
+    
+    static inline constexpr bool value = _impl<L, Args...>::value;
 };
 
-template <typename L, typename T>
-struct _pointer<L, T> {
-    static inline constexpr bool value = std::is_pointer_v<T>;
-};
 
 template <typename ... Args>
-static inline constexpr bool all_pointer_v = _pointer<And, Args...>::value;
+static inline constexpr bool all_pointer_v = pointer<And, Args...>::value;
 
 template <typename ... Args>
-static inline constexpr bool any_pointer_v = _pointer<Or, Args...>::value;
+static inline constexpr bool any_pointer_v = pointer<Or, Args...>::value;
 
 
 }

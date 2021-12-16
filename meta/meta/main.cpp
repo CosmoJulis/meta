@@ -111,9 +111,6 @@ void test(Args && ... args) {
 }
 
 int main(int argc, const char * argv[]) {
-    auto b = B();
-    test<0>(A(), b, C());
-
     
     
     return 0;

@@ -294,7 +294,25 @@ public:
     }
 };
     
+
+template <typename T>
+class j_base_array : public j_base_object {
+public:
+    static_assert(std::is_base_of_v<j_type, T>, "Not an jtype.");
     
+    
+    
+};
+
+
+template <typename ... Args>
+using j_array = std::conditional_t<meta::arg::is::all_same_v<Args...>, j_base_array<typename meta::arg::of<0, Args...>::type>, j_base_array<j_base_object>>;
+
+
+    /* j_array TODO
+     * j_array<T> same class [T
+     * j_array<T, Args...> not same class [java/lang/Object;
+     */
     
     //            template <typename T>
     //            struct j_array {
@@ -1088,8 +1106,6 @@ void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const 
 }
 
 
-
-
 template <int C, typename R, typename ... Args>
 void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, const jobjectArray & a, const Args & ... args) {
     using namespace meta::jni::helper;
@@ -1159,13 +1175,13 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
 //        magic_call<2, j_void>(m_env, thiz, a);
 //        return;
 //    }
-
+//
 //    if (count == 3) {
 //        magic_call<3, j_void>(m_env, thiz, a);
 //        return;
 //    }
     
-    throw "No impl args count above 3.";
+    throw "No atuo impl args count at " + std::to_string(count);
 }
 
 

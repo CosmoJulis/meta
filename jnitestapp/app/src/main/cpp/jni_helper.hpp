@@ -1088,7 +1088,36 @@ void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const 
 }
 
 
-
+int jobject_classname_index(const std::string & jobj_classname) {
+    if (jobj_classname == "java.lang.Boolean") {
+        return 0;
+    }
+    else if (jobj_classname == "java.lang.Byte") {
+        return 1;
+    }
+    else if (jobj_classname == "java.lang.Char") {
+        return 2;
+    }
+    else if (jobj_classname == "java.lang.Short") {
+        return 3;
+    }
+    else if (jobj_classname == "java.lang.Integer") {
+        return 4;
+    }
+    else if (jobj_classname == "java.lang.Long") {
+        return 5;
+    }
+    else if (jobj_classname == "java.lang.Float") {
+        return 6;
+    }
+    else if (jobj_classname == "java.lang.Double") {
+        return 7;
+    }
+    else if (jobj_classname == "java.lang.String") {
+        return 8;
+    }
+    return -1;
+}
 
 template <int C, typename R, typename ... Args>
 void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, const jobjectArray & a, const Args & ... args) {
@@ -1102,35 +1131,38 @@ void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, co
         jobject jobj = m_env.get_object_array_element(a, C - 1);
         std::string jobj_classname = m_env.get_object_classname(jobj);
 
-        if (jobj_classname == "java.lang.Boolean") {
-            magic_call<C - 1, R, j_boolean, Args...>(m_env, thiz, a, get_value<j_boolean>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.Byte") {
-            magic_call<C - 1, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.Char") {
-            magic_call<C - 1, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.Short") {
-            magic_call<C - 1, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.Integer") {
-            magic_call<C - 1, R, j_int, Args...>(m_env, thiz, a, get_value<j_int>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.Long") {
-            magic_call<C - 1, R, j_long, Args...>(m_env, thiz, a, get_value<j_long>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.Float") {
-            magic_call<C - 1, R, j_float, Args...>(m_env, thiz, a, get_value<j_float>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.Double") {
-            magic_call<C - 1, R, j_double, Args...>(m_env, thiz, a, get_value<j_double>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.String") {
-            magic_call<C - 1, R, j_string, Args...>(m_env, thiz, a, get_value<j_string>(jobj), args...);
-        }
-        else {
-            magic_call<C - 1, R, j_object, Args...>(m_env, thiz, a, get_value<j_object>(jobj), args...);
+        int i = jobject_classname_index(jobj_classname);
+        switch (i) {
+            case 0:
+                magic_call<C - 1, R, j_boolean, Args...>(m_env, thiz, a, get_value<j_boolean>(jobj), args...);
+                break;
+            case 1:
+                magic_call<C - 1, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
+                break;
+            case 2:
+                magic_call<C - 1, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
+                break;
+            case 3:
+                magic_call<C - 1, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
+                break;
+            case 4:
+                magic_call<C - 1, R, j_int, Args...>(m_env, thiz, a, get_value<j_int>(jobj), args...);
+                break;
+            case 5:
+                magic_call<C - 1, R, j_long, Args...>(m_env, thiz, a, get_value<j_long>(jobj), args...);
+                break;
+            case 6:
+                magic_call<C - 1, R, j_float, Args...>(m_env, thiz, a, get_value<j_float>(jobj), args...);
+                break;
+            case 7:
+                magic_call<C - 1, R, j_double, Args...>(m_env, thiz, a, get_value<j_double>(jobj), args...);
+                break;
+            case 8:
+                magic_call<C - 1, R, j_string, Args...>(m_env, thiz, a, get_value<j_string>(jobj), args...);
+                break;
+            default:
+                magic_call<C - 1, R, j_object, Args...>(m_env, thiz, a, get_value<j_object>(jobj), args...);
+                break;
         }
     }
 }
