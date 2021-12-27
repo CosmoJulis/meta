@@ -35,6 +35,8 @@ static inline constexpr bool vector_v = _vector<T, Allocator>::value;
 
 
 
+
+
 #pragma mark - variadic template is
 
 #pragma mark - Logic

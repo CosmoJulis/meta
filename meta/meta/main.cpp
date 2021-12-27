@@ -110,7 +110,27 @@ void test(Args && ... args) {
     std::cout << "return 0\n";
 }
 
+
+
+//template <typename ... Args>
+//struct template_class {
+//    template <typename _T, typename ... _Args>
+//    struct _impl {
+//        static inline constexpr bool value = false;
+//    };
+//    
+//    template <typename _T, typename ... _Args>
+//    struct _impl<_T<_Args...>> {
+//        static inline constexpr bool value = true;
+//    };
+//    
+//
+//}
+
+
 int main(int argc, const char * argv[]) {
+    
+    
     
     
     return 0;

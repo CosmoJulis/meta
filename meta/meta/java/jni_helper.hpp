@@ -244,6 +244,10 @@ public:
     j_derive_object() : j_base_object(classname()) { }
     
     virtual inline const std::string classname() const {
+        return get_classname();
+    }
+    
+    static inline const std::string get_classname() {
 #if _LIBCPP_STD_VER >= 20
         return T.value;
 #else
@@ -261,7 +265,12 @@ public:
         return meta::string::join(vi, ".");
 #endif
     }
+    
 };
+
+
+
+
 
 
 #if _LIBCPP_STD_VER >= 20
@@ -293,16 +302,27 @@ public:
         return jvalue{.l=_jo};
     }
 };
-    
+
 
 template <typename T>
-class j_base_array : public j_base_object {
+#if _LIBCPP_STD_VER >= 20
+class j_base_array : public j_derive_object<"java.lang.Array">
+#else
+class j_java_lang_Array { };
+class j_base_array : public j_derive_object<j_java_lang_Array>
+#endif
+{
 public:
     static_assert(std::is_base_of_v<j_type, T>, "Not an jtype.");
-    
-    
-    
+    virtual inline const std::string classname() const {
+        if constexpr (std::is_base_of_v<j_base_object, T>) {
+            return T::get_classname();
+        }
+    }
+    // TODO: add j_base_array sig function
 };
+
+
 
 
 template <typename ... Args>
