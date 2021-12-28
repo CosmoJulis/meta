@@ -20,6 +20,12 @@
 namespace meta::arg::is {
 
 #pragma mark - is template
+/*
+ *  not work for
+ *      template <int c> { } not type template class
+ *      neither
+ *      template <typename T, int c> { } mix template class
+ */
 template <typename T>
 struct template_class {
     template <typename _T>
