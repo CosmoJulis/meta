@@ -19,21 +19,31 @@
 
 namespace meta::arg::is {
 
+
+#pragma mark - is class template
+template <template<typename...> typename C, typename T>
+struct class_template {
+    template <typename _T>
+    struct _impl {
+        static inline constexpr bool value = false;
+    };
+    
+    template <typename _T>
+    struct _impl<C<_T>> {
+        static inline constexpr bool value = true;
+    };
+    
+    template <typename _T>
+    struct _impl<C<_T, std::allocator<T>>> {
+        static inline constexpr bool value = true;
+    };
+    
+    static inline constexpr bool value = _impl<T>::value;
+};
+
 #pragma mark - is vector
-template <typename T, typename Allocator>
-struct _vector {
-    static inline constexpr bool value = false;
-};
-
-template <typename T, typename Allocator>
-struct _vector<std::vector<T>, Allocator> {
-    static inline constexpr bool value = true;
-};
-
-template <typename T, typename Allocator = std::allocator<T>>
-static inline constexpr bool vector_v = _vector<T, Allocator>::value;
-
-
+template <typename T>
+static inline constexpr bool vector_v = class_template<std::vector, T>::value;
 
 
 

@@ -303,12 +303,12 @@ public:
     }
 };
 
+class j_java_lang_Array { };
 
 template <typename T>
 #if _LIBCPP_STD_VER >= 20
 class j_base_array : public j_derive_object<"java.lang.Array">
 #else
-class j_java_lang_Array { };
 class j_base_array : public j_derive_object<j_java_lang_Array>
 #endif
 {
