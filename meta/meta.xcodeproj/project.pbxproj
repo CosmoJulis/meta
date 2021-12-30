@@ -304,12 +304,12 @@
 		68099FFE273D1E480032D78D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++2a";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z8327FKAVC;
 				ENABLE_HARDENED_RUNTIME = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				HEADER_SEARCH_PATHS = "${BOOST_INCLUDE}";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -323,12 +323,12 @@
 		68099FFF273D1E480032D78D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++2a";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z8327FKAVC;
 				ENABLE_HARDENED_RUNTIME = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				HEADER_SEARCH_PATHS = "${BOOST_INCLUDE}";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

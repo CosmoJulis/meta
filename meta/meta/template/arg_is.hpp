@@ -43,7 +43,7 @@ template <template<typename...> typename C, typename T, typename ... Args>
 struct class_template {
     template <typename _T, typename ... _Args>
     struct _impl : std::false_type { };
-
+    
     template <typename _T, typename ... _Args>
     struct _impl<C<_T, _Args...>> : std::true_type { };
     

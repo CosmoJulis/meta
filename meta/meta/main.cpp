@@ -110,12 +110,36 @@ void test(Args && ... args) {
     std::cout << "return 0\n";
 }
 
+template <typename T>
+struct AA {
+    using value_type = T;
+};
 
+struct BB : AA<int> {
+    
+};
+
+#include <type_traits>
+#include <experimental/type_traits>
+
+
+
+template <typename T>
+using has_value_type = decltype(T::x);
+
+template <typename T>
+using no_value_type = decltype(&T::x);
+
+template <typename T>
+using tttest = std::disjunction<std::experimental::is_detected<has_value_type, T>,
+                              std::experimental::is_detected<no_value_type, T>>;
 
 
 int main(int argc, const char * argv[]) {
+    j_array<j_derive_object<"java.lang.String">> jis;
+    std::cout << jis.sig() << std::endl;
 
 
-
+    
     return 0;
 }

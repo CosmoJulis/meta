@@ -241,9 +241,15 @@ template <typename T>
 class j_derive_object : public j_base_object {
 public:
     
+//#if _LIBCPP_STD_VER >= 20
+//    static inline const meta::class_utility::string_literal literal = T;
+//#else
+//    typedef T value_type;
+//#endif
+    
     j_derive_object() : j_base_object(classname()) { }
     
-    virtual inline const std::string classname() const {
+    inline const std::string classname() const override {
         return get_classname();
     }
     
@@ -265,8 +271,25 @@ public:
         return meta::string::join(vi, ".");
 #endif
     }
-    
 };
+
+
+//template <typename T>
+//struct is_j_derive_object {
+//
+//    template <typename _T>
+//    struct _impl : std::false_type { };
+//
+//#if _LIBCPP_STD_VER >= 20
+//    template <meta::class_utility::string_literal _T>
+//#else
+//    template <typename _T>
+//#endif
+//    struct _impl<j_derive_object<_T>> : std::true_type { };
+//
+//    static inline constexpr bool value = _impl<T>::value;
+//};
+
 
 
 
@@ -314,12 +337,20 @@ class j_base_array : public j_derive_object<j_java_lang_Array>
 {
 public:
     static_assert(std::is_base_of_v<j_type, T>, "Not an jtype.");
-    virtual inline const std::string classname() const {
-        if constexpr (std::is_base_of_v<j_base_object, T>) {
-            return T::get_classname();
+    
+    inline const std::string sig() const override {
+        if constexpr (std::is_same_v<T, j_base_object>) {
+            return "[Ljava/lang/Object";
+        }
+        else if constexpr (std::is_base_of_v<j_base_object, T>) {
+            return std::string("[L") + meta::string::join(meta::string::split(T::get_classname(), "."), "/") + ";";
+        }
+        else {
+            return "[" + T::sig();
         }
     }
-    // TODO: add j_base_array sig function
+    
+
 };
 
 
@@ -1000,9 +1031,12 @@ private:
 
 j_base_object::j_base_object(const std::string & name) : _classname(name) {
     LOGV("jni_helper j_object<%s> init", classname().c_str());
+#ifdef Xcode
+#else
     const auto & m_env = j_vm::shared().env();
     auto jm = j_method<j_void>(classname(), "<init>");
     _jo = m_env.new_object(jm.jni_class().unwrap(m_env), jm.unwrap(m_env));
+#endif
 }
 
 j_base_object::j_base_object(const jobject & jobj) : _jo(jobj) {
