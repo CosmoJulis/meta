@@ -59,85 +59,13 @@ using namespace meta::jni::helper;
 //};
 
 
-class A {
-public:
-    A() {
-        std::cout << "A Construct\n";
-    }
-    
-    A(const A & t) {
-        std::cout << "A Copy\n";
-    }
-    
-    A(A && t) {
-        std::cout << "A Move\n";
-    }
-};
-
-class B {
-public:
-    B() {
-        std::cout << "B Construct\n";
-    }
-    
-    B(const B & t) {
-        std::cout << "B Copy\n";
-    }
-    
-    B(B && t) {
-        std::cout << "B Move\n";
-    }
-};
-
-class C {
-public:
-    C() {
-        std::cout << "C Construct\n";
-    }
-    
-    C(const C & t) {
-        std::cout << "C Copy\n";
-    }
-    
-    C(C && t) {
-        std::cout << "C Move\n";
-    }
-};
-
-template <int index, typename ... Args>
-void test(Args && ... args) {
-    const auto & a = meta::arg::of<index, Args...>::get_value(std::forward<Args>(args)...);
-    std::cout << "return 0\n";
-}
-
-template <typename T>
-struct AA {
-    using value_type = T;
-};
-
-struct BB : AA<int> {
-    
-};
-
-#include <type_traits>
-#include <experimental/type_traits>
 
 
-
-template <typename T>
-using has_value_type = decltype(T::x);
-
-template <typename T>
-using no_value_type = decltype(&T::x);
-
-template <typename T>
-using tttest = std::disjunction<std::experimental::is_detected<has_value_type, T>,
-                              std::experimental::is_detected<no_value_type, T>>;
 
 
 int main(int argc, const char * argv[]) {
-    j_array<j_derive_object<"java.lang.String">> jis;
-    std::cout << jis.sig() << std::endl;
+
+    
 
 
     

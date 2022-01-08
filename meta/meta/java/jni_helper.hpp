@@ -355,7 +355,6 @@ public:
 
 
 
-
 template <typename ... Args>
 using j_array = std::conditional_t<meta::arg::is::all_same_v<Args...>, j_base_array<typename meta::arg::of<0, Args...>::type>, j_base_array<j_base_object>>;
 
