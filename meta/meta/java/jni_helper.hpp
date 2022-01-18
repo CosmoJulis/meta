@@ -703,7 +703,6 @@ public:
                   !meta::arg::is::any_pointer_v<R, Args...>,
                   "Unsupported basic types, try j_type");
     
-    
     static_assert([](){
         if constexpr (sizeof...(Args) == 0) {
             return true;
@@ -1223,12 +1222,12 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
 //        magic_call<1, j_void>(m_env, thiz, a);
 //        return;
 //    }
-//
+
 //    if (count == 2) {
 //        magic_call<2, j_void>(m_env, thiz, a);
 //        return;
 //    }
-//
+
 //    if (count == 3) {
 //        magic_call<3, j_void>(m_env, thiz, a);
 //        return;

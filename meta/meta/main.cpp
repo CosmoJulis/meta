@@ -58,16 +58,15 @@ using namespace meta::jni::helper;
 //    Bar(int a) { }
 //};
 
-
+class A { };
+class B : A { };
+class C : A { };
 
 
 
 
 int main(int argc, const char * argv[]) {
-
     
-
-
     
     return 0;
 }

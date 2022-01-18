@@ -88,7 +88,7 @@ struct base_of {
     };
     
     static inline constexpr bool value = [](){
-        if constexpr (sizeof...(Args) > 1) {
+        if constexpr (sizeof...(Args) >= 1) {
             return _impl<L, Base, Args...>::value;
         } else {
             return true;

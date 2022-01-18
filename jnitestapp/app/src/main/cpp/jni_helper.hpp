@@ -241,9 +241,19 @@ namespace meta::jni::helper {
     class j_derive_object : public j_base_object {
     public:
 
+//#if _LIBCPP_STD_VER >= 20
+//    static inline const meta::class_utility::string_literal literal = T;
+//#else
+//    typedef T value_type;
+//#endif
+
         j_derive_object() : j_base_object(classname()) { }
 
-        virtual inline const std::string classname() const {
+        inline const std::string classname() const override {
+            return get_classname();
+        }
+
+        static inline const std::string get_classname() {
 #if _LIBCPP_STD_VER >= 20
             return T.value;
 #else
@@ -262,6 +272,28 @@ namespace meta::jni::helper {
 #endif
         }
     };
+
+
+//template <typename T>
+//struct is_j_derive_object {
+//
+//    template <typename _T>
+//    struct _impl : std::false_type { };
+//
+//#if _LIBCPP_STD_VER >= 20
+//    template <meta::class_utility::string_literal _T>
+//#else
+//    template <typename _T>
+//#endif
+//    struct _impl<j_derive_object<_T>> : std::true_type { };
+//
+//    static inline constexpr bool value = _impl<T>::value;
+//};
+
+
+
+
+
 
 
 #if _LIBCPP_STD_VER >= 20
@@ -294,7 +326,43 @@ namespace meta::jni::helper {
         }
     };
 
+    class j_java_lang_Array { };
 
+    template <typename T>
+#if _LIBCPP_STD_VER >= 20
+    class j_base_array : public j_derive_object<"java.lang.Array">
+#else
+    class j_base_array : public j_derive_object<j_java_lang_Array>
+#endif
+    {
+    public:
+        static_assert(std::is_base_of_v<j_type, T>, "Not an jtype.");
+
+        inline const std::string sig() const override {
+            if constexpr (std::is_same_v<T, j_base_object>) {
+                return "[Ljava/lang/Object";
+            }
+            else if constexpr (std::is_base_of_v<j_base_object, T>) {
+                return std::string("[L") + meta::string::join(meta::string::split(T::get_classname(), "."), "/") + ";";
+            }
+            else {
+                return "[" + T::sig();
+            }
+        }
+
+
+    };
+
+
+
+    template <typename ... Args>
+    using j_array = std::conditional_t<meta::arg::is::all_same_v<Args...>, j_base_array<typename meta::arg::of<0, Args...>::type>, j_base_array<j_base_object>>;
+
+
+    /* j_array TODO
+     * j_array<T> same class [T
+     * j_array<T, Args...> not same class [java/lang/Object;
+     */
 
     //            template <typename T>
     //            struct j_array {
@@ -962,9 +1030,12 @@ struct j_helper : j_derive_object<"com.cosmojulis.meta.JniHelper">
 
     j_base_object::j_base_object(const std::string & name) : _classname(name) {
         LOGV("jni_helper j_object<%s> init", classname().c_str());
+#ifdef Xcode
+#else
         const auto & m_env = j_vm::shared().env();
         auto jm = j_method<j_void>(classname(), "<init>");
         _jo = m_env.new_object(jm.jni_class().unwrap(m_env), jm.unwrap(m_env));
+#endif
     }
 
     j_base_object::j_base_object(const jobject & jobj) : _jo(jobj) {
@@ -1088,37 +1159,6 @@ void find_method_pointer_callback(const meta::jni::helper::j_env & m_env, const 
 }
 
 
-int jobject_classname_index(const std::string & jobj_classname) {
-    if (jobj_classname == "java.lang.Boolean") {
-        return 0;
-    }
-    else if (jobj_classname == "java.lang.Byte") {
-        return 1;
-    }
-    else if (jobj_classname == "java.lang.Char") {
-        return 2;
-    }
-    else if (jobj_classname == "java.lang.Short") {
-        return 3;
-    }
-    else if (jobj_classname == "java.lang.Integer") {
-        return 4;
-    }
-    else if (jobj_classname == "java.lang.Long") {
-        return 5;
-    }
-    else if (jobj_classname == "java.lang.Float") {
-        return 6;
-    }
-    else if (jobj_classname == "java.lang.Double") {
-        return 7;
-    }
-    else if (jobj_classname == "java.lang.String") {
-        return 8;
-    }
-    return -1;
-}
-
 template <int C, typename R, typename ... Args>
 void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, const jobjectArray & a, const Args & ... args) {
     using namespace meta::jni::helper;
@@ -1131,38 +1171,35 @@ void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, co
         jobject jobj = m_env.get_object_array_element(a, C - 1);
         std::string jobj_classname = m_env.get_object_classname(jobj);
 
-        int i = jobject_classname_index(jobj_classname);
-        switch (i) {
-            case 0:
-                magic_call<C - 1, R, j_boolean, Args...>(m_env, thiz, a, get_value<j_boolean>(jobj), args...);
-                break;
-            case 1:
-                magic_call<C - 1, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
-                break;
-            case 2:
-                magic_call<C - 1, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
-                break;
-            case 3:
-                magic_call<C - 1, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
-                break;
-            case 4:
-                magic_call<C - 1, R, j_int, Args...>(m_env, thiz, a, get_value<j_int>(jobj), args...);
-                break;
-            case 5:
-                magic_call<C - 1, R, j_long, Args...>(m_env, thiz, a, get_value<j_long>(jobj), args...);
-                break;
-            case 6:
-                magic_call<C - 1, R, j_float, Args...>(m_env, thiz, a, get_value<j_float>(jobj), args...);
-                break;
-            case 7:
-                magic_call<C - 1, R, j_double, Args...>(m_env, thiz, a, get_value<j_double>(jobj), args...);
-                break;
-            case 8:
-                magic_call<C - 1, R, j_string, Args...>(m_env, thiz, a, get_value<j_string>(jobj), args...);
-                break;
-            default:
-                magic_call<C - 1, R, j_object, Args...>(m_env, thiz, a, get_value<j_object>(jobj), args...);
-                break;
+        if (jobj_classname == "java.lang.Boolean") {
+            magic_call<C - 1, R, j_boolean, Args...>(m_env, thiz, a, get_value<j_boolean>(jobj), args...);
+        }
+        else if (jobj_classname == "java.lang.Byte") {
+            magic_call<C - 1, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
+        }
+        else if (jobj_classname == "java.lang.Char") {
+            magic_call<C - 1, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
+        }
+        else if (jobj_classname == "java.lang.Short") {
+            magic_call<C - 1, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
+        }
+        else if (jobj_classname == "java.lang.Integer") {
+            magic_call<C - 1, R, j_int, Args...>(m_env, thiz, a, get_value<j_int>(jobj), args...);
+        }
+        else if (jobj_classname == "java.lang.Long") {
+            magic_call<C - 1, R, j_long, Args...>(m_env, thiz, a, get_value<j_long>(jobj), args...);
+        }
+        else if (jobj_classname == "java.lang.Float") {
+            magic_call<C - 1, R, j_float, Args...>(m_env, thiz, a, get_value<j_float>(jobj), args...);
+        }
+        else if (jobj_classname == "java.lang.Double") {
+            magic_call<C - 1, R, j_double, Args...>(m_env, thiz, a, get_value<j_double>(jobj), args...);
+        }
+        else if (jobj_classname == "java.lang.String") {
+            magic_call<C - 1, R, j_string, Args...>(m_env, thiz, a, get_value<j_string>(jobj), args...);
+        }
+        else {
+            magic_call<C - 1, R, j_object, Args...>(m_env, thiz, a, get_value<j_object>(jobj), args...);
         }
     }
 }
@@ -1197,7 +1234,7 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
 //        return;
 //    }
 
-    throw "No impl args count above 3.";
+    throw "No atuo impl args count at " + std::to_string(count);
 }
 
 
