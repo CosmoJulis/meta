@@ -37,6 +37,7 @@
 		68B2E0552744A78A00384069 /* jni.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jni.h; sourceTree = "<group>"; };
 		68B2E0562744A82200384069 /* jni_md.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jni_md.h; sourceTree = "<group>"; };
 		68E8257E274228880005E2E5 /* arg.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg.hpp; sourceTree = "<group>"; };
+		68FC62C7279698D200A8E102 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +123,7 @@
 				68B2E0562744A82200384069 /* jni_md.h */,
 				68B2E0552744A78A00384069 /* jni.h */,
 				6817A55A273EBA5F0001DF76 /* jni_helper.hpp */,
+				68FC62C7279698D200A8E102 /* README.md */,
 			);
 			path = java;
 			sourceTree = "<group>";

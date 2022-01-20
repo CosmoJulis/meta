@@ -249,6 +249,11 @@ namespace meta::jni::helper {
 
         j_derive_object() : j_base_object(classname()) { }
 
+        j_derive_object(const jobject & jobj) : j_base_object(jobj) {
+            _classname = classname();
+        }
+
+
         inline const std::string classname() const override {
             return get_classname();
         }
@@ -340,7 +345,7 @@ namespace meta::jni::helper {
 
         inline const std::string sig() const override {
             if constexpr (std::is_same_v<T, j_base_object>) {
-                return "[Ljava/lang/Object";
+                return "[Ljava/lang/Object;";
             }
             else if constexpr (std::is_base_of_v<j_base_object, T>) {
                 return std::string("[L") + meta::string::join(meta::string::split(T::get_classname(), "."), "/") + ";";
@@ -350,6 +355,11 @@ namespace meta::jni::helper {
             }
         }
 
+#if _LIBCPP_STD_VER >= 20
+        j_base_array(const jobject & jobj) : j_derive_object<"java.lang.Array">(jobj) { }
+#else
+        j_base_array(const jobject & jobj) : j_derive_object<j_java_lang_Array>(jobj) { }
+#endif
 
     };
 
@@ -703,7 +713,6 @@ namespace meta::jni::helper {
                 !meta::arg::is::any_pointer_v<R, Args...>,
                 "Unsupported basic types, try j_type");
 
-
         static_assert([](){
             if constexpr (sizeof...(Args) == 0) {
                 return true;
@@ -1030,8 +1039,7 @@ struct j_helper : j_derive_object<"com.cosmojulis.meta.JniHelper">
 
     j_base_object::j_base_object(const std::string & name) : _classname(name) {
         LOGV("jni_helper j_object<%s> init", classname().c_str());
-#ifdef Xcode
-#else
+#ifndef Xcode
         const auto & m_env = j_vm::shared().env();
         auto jm = j_method<j_void>(classname(), "<init>");
         _jo = m_env.new_object(jm.jni_class().unwrap(m_env), jm.unwrap(m_env));
@@ -1039,8 +1047,10 @@ struct j_helper : j_derive_object<"com.cosmojulis.meta.JniHelper">
     }
 
     j_base_object::j_base_object(const jobject & jobj) : _jo(jobj) {
+#ifndef Xcode
         const auto & m_env = j_vm::shared().env();
         _classname = m_env.get_object_classname(jobj);
+#endif
     }
 
     j_base_object::operator j_string() const {
@@ -1064,6 +1074,7 @@ struct j_helper : j_derive_object<"com.cosmojulis.meta.JniHelper">
         _jo = jstr;
         value = j_vm::shared().env().get_string_utf_chars(jstr);
     }
+
 
     j_class::j_class(const jclass & cls) : _class(cls) {
         classname = j_call<j_string>(cls, "getName").execute();
@@ -1214,6 +1225,7 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
 
     int count = m_env.get_array_length(a);
 
+#ifndef Xcode
     if (count == 0) {
         magic_call<0, j_void>(m_env, thiz, a);
         return;
@@ -1228,6 +1240,7 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
         magic_call<2, j_void>(m_env, thiz, a);
         return;
     }
+#endif
 
 //    if (count == 3) {
 //        magic_call<3, j_void>(m_env, thiz, a);

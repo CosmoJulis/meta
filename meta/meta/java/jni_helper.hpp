@@ -249,6 +249,11 @@ public:
     
     j_derive_object() : j_base_object(classname()) { }
     
+    j_derive_object(const jobject & jobj) : j_base_object(jobj) {
+        _classname = classname();
+    }
+
+    
     inline const std::string classname() const override {
         return get_classname();
     }
@@ -340,7 +345,7 @@ public:
     
     inline const std::string sig() const override {
         if constexpr (std::is_same_v<T, j_base_object>) {
-            return "[Ljava/lang/Object";
+            return "[Ljava/lang/Object;";
         }
         else if constexpr (std::is_base_of_v<j_base_object, T>) {
             return std::string("[L") + meta::string::join(meta::string::split(T::get_classname(), "."), "/") + ";";
@@ -350,6 +355,18 @@ public:
         }
     }
     
+    // TODO: make_array
+    template <typename ... Args>
+    j_base_array(const Args & ... args) {
+        
+    }
+    
+    
+#if _LIBCPP_STD_VER >= 20
+    j_base_array(const jobject & jobj) : j_derive_object<"java.lang.Array">(jobj) { }
+#else
+    j_base_array(const jobject & jobj) : j_derive_object<j_java_lang_Array>(jobj) { }
+#endif
 
 };
 
@@ -358,6 +375,13 @@ public:
 template <typename ... Args>
 using j_array = std::conditional_t<meta::arg::is::all_same_v<Args...>, j_base_array<typename meta::arg::of<0, Args...>::type>, j_base_array<j_base_object>>;
 
+
+// TODO: make_array
+template <typename ... Args>
+j_object make_array(const Args & ... args) {
+    j_object obj;
+    return obj;
+}
 
     /* j_array TODO
      * j_array<T> same class [T
@@ -1029,8 +1053,7 @@ private:
 
 j_base_object::j_base_object(const std::string & name) : _classname(name) {
     LOGV("jni_helper j_object<%s> init", classname().c_str());
-#ifdef Xcode
-#else
+#ifndef Xcode
     const auto & m_env = j_vm::shared().env();
     auto jm = j_method<j_void>(classname(), "<init>");
     _jo = m_env.new_object(jm.jni_class().unwrap(m_env), jm.unwrap(m_env));
@@ -1038,8 +1061,10 @@ j_base_object::j_base_object(const std::string & name) : _classname(name) {
 }
 
 j_base_object::j_base_object(const jobject & jobj) : _jo(jobj) {
+#ifndef Xcode
     const auto & m_env = j_vm::shared().env();
     _classname = m_env.get_object_classname(jobj);
+#endif
 }
 
 j_base_object::operator j_string() const {
@@ -1063,6 +1088,7 @@ j_string::j_string(const jstring & jstr) {
     _jo = jstr;
     value = j_vm::shared().env().get_string_utf_chars(jstr);
 }
+
 
 j_class::j_class(const jclass & cls) : _class(cls) {
     classname = j_call<j_string>(cls, "getName").execute();
@@ -1213,20 +1239,22 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
 
     int count = m_env.get_array_length(a);
 
+#ifndef Xcode
     if (count == 0) {
         magic_call<0, j_void>(m_env, thiz, a);
         return;
     }
 
-//    if (count == 1) {
-//        magic_call<1, j_void>(m_env, thiz, a);
-//        return;
-//    }
+    if (count == 1) {
+        magic_call<1, j_void>(m_env, thiz, a);
+        return;
+    }
 
-//    if (count == 2) {
-//        magic_call<2, j_void>(m_env, thiz, a);
-//        return;
-//    }
+    if (count == 2) {
+        magic_call<2, j_void>(m_env, thiz, a);
+        return;
+    }
+#endif
 
 //    if (count == 3) {
 //        magic_call<3, j_void>(m_env, thiz, a);

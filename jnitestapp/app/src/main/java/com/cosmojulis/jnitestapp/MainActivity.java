@@ -10,6 +10,12 @@ import com.cosmojulis.jnitestapp.databinding.ActivityMainBinding;
 import com.cosmojulis.meta.JniHelper;
 import com.cosmojulis.meta.JniInterface;
 
+import java.io.Console;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'jnitestapp' library on application startup.
@@ -18,6 +24,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ActivityMainBinding binding;
+
+    public static String getSignature(Method m){
+        String sig;
+        try {
+            Field gSig = Method.class.getDeclaredField("signature");
+            gSig.setAccessible(true);
+            sig = (String) gSig.get(m);
+            if(sig!=null) return sig;
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+//            e.printStackTrace();
+        }
+
+        StringBuilder sb = new StringBuilder("(");
+        for(Class<?> c : m.getParameterTypes())
+            sb.append((sig=Array.newInstance(c, 0).toString())
+                    .substring(1, sig.indexOf('@')));
+        return sb.append(')')
+                .append(
+                        m.getReturnType()==void.class?"V":
+                                (sig=Array.newInstance(m.getReturnType(), 0).toString()).substring(1, sig.indexOf('@'))
+                )
+                .toString();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,16 +62,20 @@ public class MainActivity extends AppCompatActivity {
 
 
         new Handler().postDelayed(() -> {
-            test();
 
-//            test(new JniInterface() {
-//                @Override
-//                public <T> void callback(T... a) {
-//                    for (T i:a) {
-//                        System.out.println("sl2577 " + i);
-//                    }
-//                }
-//            });
+            ArrayList<Object> arr = new ArrayList<Object>();
+            arr.add("hello");
+            arr.add(2);
+
+            test(5, arr.toArray(), new JniInterface() {
+                @Override
+                public <T> void callback(T... arr) {
+                    System.out.println();
+                    for (Object i:arr) {
+                        System.out.println("sl2577 " + i);
+                    }
+                }
+            });
 
         }, 2000);
     }
@@ -50,10 +83,13 @@ public class MainActivity extends AppCompatActivity {
     public native String stringFromJNI();
 
     public native void test();
-    public native void test(JniInterface jhi);
+    public native void testClassTest();
+
+    public native void test(int a, Object[] arr, JniInterface jhi);
     public native void test(int a, JniInterface jhi);
 
-    public static void javaMethod(JniHelper jhi) {
+    public static void javaMethod(int i, JniHelper jhi) {
+        System.out.println("i = " + i);
         jhi.callback(5, "hello world");
     }
 }

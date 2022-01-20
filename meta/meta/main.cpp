@@ -66,7 +66,11 @@ class C : A { };
 
 
 int main(int argc, const char * argv[]) {
-    
+    int a;
+    jobject jhi;
+    LOGV("sl2577 i = %d", a);
+    auto jc = j_call<j_void, j_array<j_int, j_double, j_string>>(j_object(jhi), "callback", make_array(1, 2.0, "hello"));
+    jc.execute();
     
     return 0;
 }
