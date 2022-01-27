@@ -355,17 +355,18 @@ public:
         }
     }
     
-    // TODO: make_array
-    template <typename ... Args>
-    j_base_array(const Args & ... args) {
-        
-    }
-    
     
 #if _LIBCPP_STD_VER >= 20
     j_base_array(const jobject & jobj) : j_derive_object<"java.lang.Array">(jobj) { }
+    
+    template <typename ... Args>
+    j_base_array(const Args & ... args) : j_derive_object<"java.lang.Array">(make_array(args...)) { }
+    
 #else
     j_base_array(const jobject & jobj) : j_derive_object<j_java_lang_Array>(jobj) { }
+    
+    template <typename ... Args>
+    j_base_array(const Args & ... args) : j_derive_object<j_java_lang_Array>(make_array(args...)) { }
 #endif
 
 };
@@ -375,13 +376,6 @@ public:
 template <typename ... Args>
 using j_array = std::conditional_t<meta::arg::is::all_same_v<Args...>, j_base_array<typename meta::arg::of<0, Args...>::type>, j_base_array<j_base_object>>;
 
-
-// TODO: make_array
-template <typename ... Args>
-j_object make_array(const Args & ... args) {
-    j_object obj;
-    return obj;
-}
 
     /* j_array TODO
      * j_array<T> same class [T
@@ -525,7 +519,15 @@ public:
         return _env->IsSameObject(lhs, rhs);
     }
     
-    jsize get_array_length(const jobjectArray & joa) const {
+    jobjectArray new_object_array(const size_t & len, const jclass & jcls, const jobject & obj) {
+        return _env->NewObjectArray((jsize)len, jcls, obj);
+    }
+    
+    void set_object_array_element(const jobjectArray & arr, const size_t & index, jobject val) {
+        _env->SetObjectArrayElement(arr, (jsize)index, val);
+    }
+    
+    size_t get_array_length(const jobjectArray & joa) const {
         return _env->GetArrayLength(joa);
     }
     
@@ -1047,9 +1049,39 @@ private:
 };
 
 
-
-
 #pragma mark - jni delay
+
+
+template <typename ... Args>
+j_object make_array(const Args & ... args) {
+#ifndef Xcode
+    size_t len = sizeof...(args);
+    const auto & m_env = j_vm::shared().env();
+    const jclass & elementCls = m_env.find_class("java.lang.Object");
+    jobjectArray objArr = m_env.new_object_array(len, elementCls, null);
+
+    size_t index = 0;
+    (void)std::initializer_list<nullptr_t>{
+        ([&index, &args, &m_env, &objArr] {
+            // TODO: make_array wrap basic type to object;
+            // TODO: fix env
+            jclass integerClass = env->FindClass("java/lang/Integer");
+            jmethodID integerConstructor = env->GetMethodID(integerClass, "<init>", "(I)V");
+            jobject wrappedInt = env->NewObject(integerClass, integerConstructor, static_cast<jint>(res));
+            env->SetObjectArrayElement(results, 0, wrappedInt);
+            
+            m_env.set_object_array_element(objArr, index, args);
+            index++;
+        }(), nullptr)...
+    };
+    
+    return objArr;
+#else
+    j_object obj;
+    return obj;
+#endif
+}
+
 
 j_base_object::j_base_object(const std::string & name) : _classname(name) {
     LOGV("jni_helper j_object<%s> init", classname().c_str());

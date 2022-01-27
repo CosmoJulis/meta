@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
             arr.add("hello");
             arr.add(2);
 
+
             test(5, arr.toArray(), new JniInterface() {
                 @Override
                 public <T> void callback(T... arr) {
