@@ -9,33 +9,31 @@
 #define console_stack_hpp
 
 #include <stack>
-#include "console_instruction.hpp"
+#include "console_register.hpp"
 
 namespace meta::console {
 
 class Stack {
 public:
-
-    static Stack & get_manager() {
-        static Stack * ps = new Stack();
-        return *ps;
-    }
     
-    std::stack<Reg> reg_stack;
     
     void push(const Reg & reg) {
-        reg_stack.push(reg);
+        _reg_stack.push(reg);
     }
-
-//    void push(const std::string & s) {
-//        push(s);
-//    }
     
     Reg & pop() {
-        Reg & r = reg_stack.top();
-        reg_stack.pop();
+        Reg & r = _reg_stack.top();
+        _reg_stack.pop();
         return r;
     }
+    
+    size_t size() const {
+        return _reg_stack.size();
+    }
+    
+private:
+    
+    std::stack<Reg> _reg_stack;
 };
 
 

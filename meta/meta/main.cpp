@@ -64,7 +64,7 @@ using namespace meta::jni::helper;
 
 
 
-class Person : public meta::console::object {
+class Person : public meta::console::Object {
 public:
     int age;
     float height;
@@ -103,53 +103,40 @@ public:
 //};
 
 
-void runloop();
-
-
 int main(int argc, const char * argv[]) {
     
     using namespace meta::console;
     
     // set 0 name "hello world"
-    Stack & mgr = Stack::get_manager();
-    mgr.push(Code::SET);
-    mgr.push(0);
-    mgr.push("name");
-    mgr.push("hello world");
+    Manager & mgr = Manager::shared();
+    Stack first;
+    first.push(Code::SET);
+    first.push(0);
+    first.push("name");
+    first.push(Code::GET);
+    first.push(0);
+    first.push("name");
+    mgr.push(first);
     
     
     // show get 0 name
-//    mgr.push(Code::SHOW);
-//    mgr.push(Code::GET);
-//    mgr.push(0);
-//    mgr.push("name");
+//    Stack second;
+//    second.push(Code::SHOW);
+//    second.push(Code::GET);
+//    second.push(0);
+//    second.push("name");
+//    mgr.push(second);
+    
 
     
-    runloop();
+    mgr.execute();
+    
+    
+
     
     return 0;
 }
 
 
-void runloop() {
-    using namespace meta::console;
-    Stack & mgr = Stack::get_manager();
-    while (mgr.reg_stack.size() > 0) {
-        std::stack<Reg> inst_stack;
-        
-        Reg r;
-        do {
-            r = mgr.pop();
-            inst_stack.push(r);
-        } while (r.type != INSTRUCTION);
-
-        while (inst_stack.size() > 0) {
-            Reg & r = inst_stack.top();
-            std::cout << r << std::endl;
-            inst_stack.pop();
-        }
-        
-    }
-}
 
 
