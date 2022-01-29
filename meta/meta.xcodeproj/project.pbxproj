@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		68099FFA273D1E480032D78D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68099FF9273D1E480032D78D /* main.cpp */; };
 		68724E9127A14E7400D64AF1 /* test_reflection_ts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68724E8F27A14E7400D64AF1 /* test_reflection_ts.cpp */; };
-		68724EB027A54DEE00D64AF1 /* console_run.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68724EAE27A54DEE00D64AF1 /* console_run.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,23 +32,15 @@
 		6816AB2B27A00128008AE19D /* console.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console.hpp; sourceTree = "<group>"; };
 		6817A552273EAEE10001DF76 /* boost_json_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = boost_json_helper.hpp; sourceTree = "<group>"; };
 		6817A55A273EBA5F0001DF76 /* jni_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jni_helper.hpp; sourceTree = "<group>"; };
+		6824DE0627A594FE00FFCD88 /* test.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = test.hpp; sourceTree = "<group>"; };
+		6824DE0927A599C000FFCD88 /* MyObject.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MyObject.hpp; sourceTree = "<group>"; };
 		6854C9ED274234AA000A8C0E /* arg_variation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_variation.hpp; sourceTree = "<group>"; };
-		68556B57279FFE16003865FD /* console_stack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_stack.hpp; sourceTree = "<group>"; };
 		68724E8F27A14E7400D64AF1 /* test_reflection_ts.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = test_reflection_ts.cpp; sourceTree = "<group>"; };
-		68724E9A27A5380C00D64AF1 /* console_register.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_register.hpp; sourceTree = "<group>"; };
-		68724EA027A5394700D64AF1 /* console_code.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_code.hpp; sourceTree = "<group>"; };
-		68724EA327A53A4000D64AF1 /* console_object.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_object.hpp; sourceTree = "<group>"; };
-		68724EA627A53F7D00D64AF1 /* console_manager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_manager.hpp; sourceTree = "<group>"; };
-		68724EA927A53F8D00D64AF1 /* console_queue.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_queue.hpp; sourceTree = "<group>"; };
-		68724EAE27A54DEE00D64AF1 /* console_run.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = console_run.cpp; sourceTree = "<group>"; };
-		68724EAF27A54DEE00D64AF1 /* console_run.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_run.hpp; sourceTree = "<group>"; };
 		687E13C6273FCBB400262D04 /* arg_is.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg_is.hpp; sourceTree = "<group>"; };
 		688D8FCA274B7EB8006AD92F /* class_utility.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = class_utility.hpp; sourceTree = "<group>"; };
 		688D8FCD274B811F006AD92F /* utility.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = utility.hpp; sourceTree = "<group>"; };
 		68B2E0552744A78A00384069 /* jni.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jni.h; sourceTree = "<group>"; };
 		68B2E0562744A82200384069 /* jni_md.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jni_md.h; sourceTree = "<group>"; };
-		68DC0AE1279AAC7800D0130F /* console_instruction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_instruction.hpp; sourceTree = "<group>"; };
-		68DC0AE4279AAC9100D0130F /* console_bytecode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_bytecode.hpp; sourceTree = "<group>"; };
 		68E8257E274228880005E2E5 /* arg.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg.hpp; sourceTree = "<group>"; };
 		68FC62C7279698D200A8E102 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -90,6 +81,7 @@
 				6809A00B273E920D0032D78D /* 3rd_helper */,
 				6809A007273E48740032D78D /* utilities */,
 				6809A000273D1E5C0032D78D /* template */,
+				6824DE0927A599C000FFCD88 /* MyObject.hpp */,
 				68099FF9273D1E480032D78D /* main.cpp */,
 				68724E9227A14E9900D64AF1 /* test */,
 			);
@@ -148,6 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				68724E8F27A14E7400D64AF1 /* test_reflection_ts.cpp */,
+				6824DE0627A594FE00FFCD88 /* test.hpp */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -156,16 +149,6 @@
 			isa = PBXGroup;
 			children = (
 				6816AB2B27A00128008AE19D /* console.hpp */,
-				68DC0AE4279AAC9100D0130F /* console_bytecode.hpp */,
-				68724EA027A5394700D64AF1 /* console_code.hpp */,
-				68DC0AE1279AAC7800D0130F /* console_instruction.hpp */,
-				68724EA627A53F7D00D64AF1 /* console_manager.hpp */,
-				68724EA327A53A4000D64AF1 /* console_object.hpp */,
-				68724EA927A53F8D00D64AF1 /* console_queue.hpp */,
-				68724E9A27A5380C00D64AF1 /* console_register.hpp */,
-				68724EAF27A54DEE00D64AF1 /* console_run.hpp */,
-				68724EAE27A54DEE00D64AF1 /* console_run.cpp */,
-				68556B57279FFE16003865FD /* console_stack.hpp */,
 			);
 			path = console;
 			sourceTree = "<group>";
@@ -228,7 +211,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				68099FFA273D1E480032D78D /* main.cpp in Sources */,
-				68724EB027A54DEE00D64AF1 /* console_run.cpp in Sources */,
 				68724E9127A14E7400D64AF1 /* test_reflection_ts.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

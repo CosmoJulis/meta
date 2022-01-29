@@ -8,6 +8,7 @@
 #include <iostream>
 #include "template/arg.hpp"
 #include "java/jni_helper.hpp"
+#include "console/console.hpp"
 #include "utilities/utility.hpp"
 #include <version>
 #include <vector>
@@ -15,6 +16,7 @@
 
 
 using namespace meta::jni::helper;
+using namespace meta::console;
 
 
 //using namespace std;
@@ -60,53 +62,14 @@ using namespace meta::jni::helper;
 
 
 
-#include "console/console.hpp"
 
+#include "MyObject.hpp"
 
-
-class Person : public meta::console::Object {
-public:
-    int age;
-    float height;
-    int name;
-    void set_age(int age) {
-        std::cout << "set_age(" << age << ")" << std::endl;
-    }
-    void set_height(float height) {
-        std::cout << "set_height(F" << height << ")" << std::endl;
-    }
-    void set_name(std::string name) {
-        std::cout << "set_name(" << name << ")" << std::endl;
-    }
-};
-    
-    
-//    void execute(const inst_code & code, const std::string & property) override {
-//
-//
-//        using namespace meta::console;
-//
-//        switch (c) {
-//            case i_age:
-//                set_age(stack_manager::get_manager().pop_number());
-//                break;
-//            case i_height:
-//                set_height(stack_manager::get_manager().pop_number());
-//                break;
-//            case i_name:
-//                set_name(stack_manager::get_manager().pop_string());
-//                break;
-//            default:
-//                throw "Nout found instruction " + std::to_string(c);
-//        }
-//    }
-//};
 
 
 int main(int argc, const char * argv[]) {
     
-    using namespace meta::console;
-    
+
     // set 0 name "hello world"
     Manager & mgr = Manager::shared();
     Stack first;
@@ -120,14 +83,22 @@ int main(int argc, const char * argv[]) {
     
     
     // show get 0 name
-//    Stack second;
-//    second.push(Code::SHOW);
-//    second.push(Code::GET);
-//    second.push(0);
-//    second.push("name");
-//    mgr.push(second);
+    Stack second;
+    second.push(Code::SHOW);
+    second.push(Code::GET);
+    second.push(0);
+    second.push("name");
+    mgr.push(second);
     
-
+    // repeat 10 show get 0 name
+    Stack third;
+    third.push(Code::REPEAT);
+    third.push(10);
+    third.push(Code::SHOW);
+    third.push(Code::GET);
+    third.push(0);
+    third.push("name");
+    mgr.push(third);
     
     mgr.execute();
     
