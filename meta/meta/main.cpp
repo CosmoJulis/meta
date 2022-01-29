@@ -58,117 +58,98 @@ using namespace meta::jni::helper;
 //    Bar(int a) { }
 //};
 
-class A { };
-class B : A { };
-class C : A { };
 
 
-#include "vm/vm.hpp"
-
-
-class function_binding {
-public:
-    std::unordered_map<std::string, std::any> binding_map;
-    
-    virtual void binding() = 0;
-    
-    void execute(const std::string & cmd_string, const std::string & name) {
-        if (binding_map.contains(cmd_string)) {
-            auto cmd = binding_map[cmd_string];
-
-        }
-    }
-};
-
-class F : public function_binding {
-public:
-    
-    
-    
-    void binding() override {
-        auto aaa = &F::set_name;
-        binding_map["set name"] = std::make_any<decltype(aaa)>(aaa);
-    };
-    
-    void set_name(const std::string & name) {
-        std::cout << "set name " << name << std::endl;
-    }
-};
+#include "console/console.hpp"
 
 
 
-class Person {
+class Person : public meta::console::object {
 public:
     int age;
-    int height;
+    float height;
     int name;
     void set_age(int age) {
         std::cout << "set_age(" << age << ")" << std::endl;
     }
-    void set_height(int height) {
-        std::cout << "set_height(" << height << ")" << std::endl;
+    void set_height(float height) {
+        std::cout << "set_height(F" << height << ")" << std::endl;
     }
     void set_name(std::string name) {
         std::cout << "set_name(" << name << ")" << std::endl;
     }
+};
     
-    static std::unordered_map<std::string, std::any> mapper() {
-        static std::unordered_map<std::string, std::any> umsa;
-        if (umsa.size() == 0) {
-            umsa["set_age"] = &Person::set_age;
-            umsa["set_name"] = &Person::set_name;
-        }
-        return umsa;
-    }
-};
-
-
-
-#if _LIBCPP_STD_VER >= 20
-template <meta::class_utility::string_literal T>
-#else
-template <typename T>
-#endif
-class get {
-    static inline const std::string name() {
-#if _LIBCPP_STD_VER >= 20
-        return T.value;
-#else
-        std::string actual_class_name = meta::class_utility::classname<T>();
-        
-        std::string define_class_name = *(meta::string::split(actual_class_name, "::").rbegin());
-        
-        return define_class_name;
-#endif
-    }
-};
-
-template <meta::class_utility::string_literal T, typename E>
-class dynamic_func {
-public:
-    E func_ptr;
-    dynamic_func(E e) : func_ptr(e) { }
     
-    void action(const std::function<E> & func) {
-        
-    }
-};
+//    void execute(const inst_code & code, const std::string & property) override {
+//
+//
+//        using namespace meta::console;
+//
+//        switch (c) {
+//            case i_age:
+//                set_age(stack_manager::get_manager().pop_number());
+//                break;
+//            case i_height:
+//                set_height(stack_manager::get_manager().pop_number());
+//                break;
+//            case i_name:
+//                set_name(stack_manager::get_manager().pop_string());
+//                break;
+//            default:
+//                throw "Nout found instruction " + std::to_string(c);
+//        }
+//    }
+//};
+
+
+void runloop();
 
 
 int main(int argc, const char * argv[]) {
-
-
-
-    auto set_age = &Person::set_age;
-    auto set_height = &Person::set_height;
-    std::cout << meta::arg::list_log<decltype(set_age)> << std::endl;
-    std::cout << meta::arg::list_log<decltype(set_height)> << std::endl;
-
-    dynamic_func<"set_age", decltype(set_age)> st(set_age);
-    Person p;
-
+    
+    using namespace meta::console;
+    
+    // set 0 name "hello world"
+    Stack & mgr = Stack::get_manager();
+    mgr.push(Code::SET);
+    mgr.push(0);
+    mgr.push("name");
+    mgr.push("hello world");
+    
+    
+    // show get 0 name
+//    mgr.push(Code::SHOW);
+//    mgr.push(Code::GET);
+//    mgr.push(0);
+//    mgr.push("name");
 
     
+    runloop();
     
     return 0;
 }
+
+
+void runloop() {
+    using namespace meta::console;
+    Stack & mgr = Stack::get_manager();
+    while (mgr.reg_stack.size() > 0) {
+        std::stack<Reg> inst_stack;
+        
+        Reg r;
+        do {
+            r = mgr.pop();
+            inst_stack.push(r);
+        } while (r.type != INSTRUCTION);
+
+        while (inst_stack.size() > 0) {
+            Reg & r = inst_stack.top();
+            std::cout << r << std::endl;
+            inst_stack.pop();
+        }
+        
+    }
+}
+
+
