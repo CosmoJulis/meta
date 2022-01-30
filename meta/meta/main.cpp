@@ -65,40 +65,42 @@ using namespace meta::console;
 
 #include "MyObject.hpp"
 
-
+std::unordered_map<int, MyObject> id_object_map;
 
 int main(int argc, const char * argv[]) {
     
+    auto a = MyObject(0);
+    id_object_map[0] = a;
 
-    // set 0 name "hello world"
     Manager & mgr = Manager::shared();
-    Stack first;
+
+    // set 0 get 0 name "hello world"
+    Statement first;
     first.push(Code::SET);
     first.push(0);
-    first.push("name");
     first.push(Code::GET);
     first.push(0);
     first.push("name");
+    first.push("hello world");
     mgr.push(first);
     
-    
     // show get 0 name
-    Stack second;
-    second.push(Code::SHOW);
-    second.push(Code::GET);
-    second.push(0);
-    second.push("name");
-    mgr.push(second);
+//    Statement second;
+//    second.push(Code::SHOW);
+//    second.push(Code::GET);
+//    second.push(0);
+//    second.push("name");
+//    mgr.push(second);
     
     // repeat 10 show get 0 name
-    Stack third;
-    third.push(Code::REPEAT);
-    third.push(10);
-    third.push(Code::SHOW);
-    third.push(Code::GET);
-    third.push(0);
-    third.push("name");
-    mgr.push(third);
+//    Stack third;
+//    third.push(Code::REPEAT);
+//    third.push(10);
+//    third.push(Code::SHOW);
+//    third.push(Code::GET);
+//    third.push(0);
+//    third.push("name");
+//    mgr.push(third);
     
     mgr.execute();
     

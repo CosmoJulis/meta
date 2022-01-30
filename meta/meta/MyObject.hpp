@@ -8,10 +8,13 @@
 #ifndef MyObject_hpp
 #define MyObject_hpp
 
-#include "console.hpp"
+#include "console_object.hpp"
 
 class MyObject : public meta::console::Object {
 public:
+
+    MyObject(int id = -1) : meta::console::Object(id) { }
+    
     int age;
     float height;
     int name;

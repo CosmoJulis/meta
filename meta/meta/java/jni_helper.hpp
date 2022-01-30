@@ -1269,7 +1269,7 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
 
     auto m_env = j_env(env);
 
-    int count = m_env.get_array_length(a);
+    size_t count = m_env.get_array_length(a);
 
 #ifndef Xcode
     if (count == 0) {
