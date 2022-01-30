@@ -75,14 +75,12 @@ int main(int argc, const char * argv[]) {
     Manager & mgr = Manager::shared();
 
     // set 0 get 0 name "hello world"
-    Statement first;
-    first.push(Code::SET);
-    first.push(0);
-    first.push(Code::GET);
-    first.push(0);
-    first.push("name");
-    first.push("hello world");
-    mgr.push(first);
+    mgr.push(Code::SET);
+    mgr.push(0);
+    mgr.push(Code::GET);
+    mgr.push(0);
+    mgr.push("name");
+    mgr.push("hello world");
     
     // show get 0 name
 //    Statement second;

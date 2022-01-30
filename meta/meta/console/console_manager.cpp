@@ -10,8 +10,8 @@
 
 using namespace meta::console;
 
-void Manager::perform(Statement & st) {
-    while (st.size() > 0) {
+//void Manager::perform(Statement & st) {
+//    while (st.size() > 0) {
 //        std::stack<Reg> inst_stack;
 //
 //        Reg r;
@@ -39,5 +39,5 @@ void Manager::perform(Statement & st) {
 //            default:
 //                break;
 //        }
-    }
-}
+//    }
+//}

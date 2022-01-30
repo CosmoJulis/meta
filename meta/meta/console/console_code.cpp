@@ -26,6 +26,9 @@ std::ostream & operator<<(std::ostream & os, const Code & c) {
         case REPEAT:
             os << "repeat";
             break;
+        case PAUSE:
+            os << "pause";
+            break;
         default:
             os << "unknown";
             break;

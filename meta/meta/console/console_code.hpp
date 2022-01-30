@@ -18,7 +18,7 @@ enum Code {
     GET,
     SHOW,
     REPEAT,
-//        pause,
+    PAUSE,
 //        play,
 //        step,
 //        clear,

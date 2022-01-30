@@ -8,8 +8,10 @@
 #ifndef console_manager_hpp
 #define console_manager_hpp
 
+#include <stack>
 #include <queue>
-#include "console_statement.hpp"
+#include "arg.hpp"
+#include "console_instruction.hpp"
 
 namespace meta::console {
 
@@ -21,34 +23,57 @@ public:
         return *pm;
     }
     
-    void push(const Statement & st) {
-        _queue.push(st);
-    }
-    
-    void pop() {
-        _queue.pop();
-    }
-    
-    Statement & currentStatement() {
-        return _queue.front();
-    }
-    
-    size_t size() const {
-        return _queue.size();
+    template <typename T>
+    void push(const T & t) {
+        if constexpr (std::is_same_v<T, Code>) {
+            add(Instruction(t));
+        }
+        else if constexpr (NumberSupportType<T>) {
+            top().push(Number(t));
+        }
+        else if constexpr (std::is_same_v<T, std::string>) {
+            top().push(t);
+        }
+        else {
+            throw "Type not match.";
+        }
+        popFullInstruction();
     }
     
     void execute() {
-        while (size() > 0) {
-            perform(currentStatement());
-            pop();
+        while (_queue.size() > 0) {
+            
         }
     }
 
 private:
     
-    std::queue<Statement> _queue;
+    void popFullInstruction() {
+        auto pi = _stack.top();
+        if (pi->isBranchFull()) {
+            _stack.pop();
+        }
+    }
     
-    void perform(Statement & s);
+    Instruction & top() const {
+        if (_stack.size() > 0) {
+            return *(_stack.top());
+        } else {
+            throw "Missing instruction.";
+        }
+    }
+    
+    void add(const Instruction & inst) {
+        auto pi = new Instruction(inst);
+        _stack.push(pi);
+        _queue.push(pi);
+    }
+    
+    std::stack<Instruction *> _stack;
+    std::queue<Instruction *> _queue;
+    
+    
+//    void perform(Statement & s);
     
 };
 

@@ -12,7 +12,6 @@
 #include "console_instruction.hpp"
 #include "console_manager.hpp"
 #include "console_object.hpp"
-#include "console_register.hpp"
 #include "console_statement.hpp"
 
 
