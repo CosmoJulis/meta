@@ -9,10 +9,10 @@
 #define console_hpp
 
 #include "console_code.hpp"
-#include "console_instruction.hpp"
+//#include "console_instruction.hpp"
 #include "console_manager.hpp"
 #include "console_object.hpp"
-#include "console_statement.hpp"
+//#include "console_statement.hpp"
 
 
 #endif /* console_hpp */

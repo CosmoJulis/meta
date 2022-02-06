@@ -7,7 +7,7 @@
 
 #include "console_code.hpp"
 
-using namespace meta::console;
+namespace meta::console {
 
 std::ostream & operator<<(std::ostream & os, const Code & c) {
     switch (c) {
@@ -34,4 +34,28 @@ std::ostream & operator<<(std::ostream & os, const Code & c) {
             break;
     }
     return os;
+}
+
+std::ostream & operator<<(std::ostream & os, const Type & t) {
+    switch (t) {
+        case NONE:
+            os << "none";
+            break;
+        case INSTRUCTION:
+            os << "instruction";
+            break;
+        case NUMBER:
+            os << "number";
+            break;
+        case STRING:
+            os << "string";
+            break;
+        default:
+            os << "unknown";
+            break;
+    }
+    return os;
+}
+
+
 }

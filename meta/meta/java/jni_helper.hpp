@@ -1231,15 +1231,15 @@ void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, co
         if (jobj_classname == "java.lang.Boolean") {
             magic_call<C - 1, R, j_boolean, Args...>(m_env, thiz, a, get_value<j_boolean>(jobj), args...);
         }
-        else if (jobj_classname == "java.lang.Byte") {
-            magic_call<C - 1, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.Char") {
-            magic_call<C - 1, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
-        }
-        else if (jobj_classname == "java.lang.Short") {
-            magic_call<C - 1, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
-        }
+//        else if (jobj_classname == "java.lang.Byte") {
+//            magic_call<C - 1, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
+//        }
+//        else if (jobj_classname == "java.lang.Char") {
+//            magic_call<C - 1, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
+//        }
+//        else if (jobj_classname == "java.lang.Short") {
+//            magic_call<C - 1, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
+//        }
         else if (jobj_classname == "java.lang.Integer") {
             magic_call<C - 1, R, j_int, Args...>(m_env, thiz, a, get_value<j_int>(jobj), args...);
         }
@@ -1286,12 +1286,12 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
         magic_call<2, j_void>(m_env, thiz, a);
         return;
     }
-#endif
 
-//    if (count == 3) {
-//        magic_call<3, j_void>(m_env, thiz, a);
-//        return;
-//    }
+    if (count == 3) {
+        magic_call<3, j_void>(m_env, thiz, a);
+        return;
+    }
+#endif
     
     throw "No atuo impl args count at " + std::to_string(count);
 }

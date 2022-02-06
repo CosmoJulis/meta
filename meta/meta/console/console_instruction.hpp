@@ -10,20 +10,38 @@
 
 #include <iostream>
 #include "console_code.hpp"
-#include "console_statement.hpp"
+//#include "console_statement.hpp"
 
 namespace meta::console {
 
 class Instruction {
 public:
     
-    Instruction(Code c) : code(c) { }
+    Instruction() { std::cout << "Instruction\n"; }
+    
+    Instruction(const Code & c) : code(c) { std::cout << "Instruction " << c << std::endl; }
+    
+    ~Instruction() { std::cout << "~Instruction\n"; }
     
     template <typename T>
     void push(const T & t) {
-        // TODO:
+//        if constexpr (std::is_same_v<T, int>) {
+//            
+//        }
+//        else if constexpr (std::is_same_v<T, Number>) {
+//
+//        }
+//        else if constexpr (std::is_same_v<T, std::string>) {
+//
+//        }
+//        else {
+//            std::cout << meta::arg::list_log<T> << std::endl;
+//            throw "Type not match.";
+//        }
         branch++;
     }
+    
+    void pop();
     
     void execute() {
         switch (code) {
@@ -48,7 +66,6 @@ public:
         }
     }
     
-    
     int branchCount() const {
         switch (code) {
             case SET:
@@ -66,104 +83,16 @@ public:
         }
     }
     
-    bool isBranchFull() const {
+    bool isFullBranch() const {
         return branch == branchCount();
     }
     
 protected:
     
-    int branch;
+    int branch = 0;
     Code code;
     
 };
-
-
-
-
-//struct Set :
-//    Reg id;
-//    Reg property;
-//    Reg value;
-//
-//    Set(Statement & st) {
-////        if (sr.size() < 3) {
-////            throw "arg count not match";
-////        }
-////        id = sr.top();
-////        sr.pop();
-////        property = sr.top();
-////        sr.pop();
-////        value = sr.top();
-////        sr.pop();
-//    }
-//
-//    void execute() override {
-//        // TEST:
-////        std::cout << "set " << id << "." << property << " " << value << std::endl;
-//    }
-//};
-
-
-//struct Get : Instruction<2> {
-//    Reg id;
-//    Reg property;
-//
-//    Get(Statement & st) {
-////        if (sr.size() < 2) {
-////            throw "arg count not match";
-////        }
-////        id = sr.top();
-////        sr.pop();
-////        property = sr.top();
-////        sr.pop();
-//    }
-//
-//    void execute() override {
-//        // TEST:
-////        std::cout << "get " << id << "." << property << std::endl;
-////        Stack & s = Manager::shared().currentStatement();
-////        s.push("name");
-//    }
-//
-//};
-
-//struct Show : Instruction<1> {
-//    Reg value;
-//
-//    Show(Statement & st) {
-////        if (sr.size() < 1) {
-////            throw "arg count not match";
-////        }
-////        value = sr.top();
-////        sr.pop();
-//    }
-//
-//    void execute() override {
-//        // TEST:
-////        std::cout << "show ";
-////        std::cout << value << std::endl;
-//    }
-//};
-
-//struct Repeat : Instruction<2> {
-//    Reg count;
-//
-//    Repeat(Statement & st) {
-////        if (sr.size() != 2) {
-////            throw "arg count not match";
-////        }
-////        count = sr.top();
-////        sr.pop();
-//    }
-//
-//    void execute() override {
-////        int n = count.number;
-////        for (int i = 0; i < n; i++) {
-////
-////        }
-//    }
-//};
-
 
 }
 
