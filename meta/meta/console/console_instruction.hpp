@@ -18,7 +18,10 @@ namespace meta::console {
 class Reg {
 public:
     
-    static Reg PLACE = Reg();
+    static Reg & PLACE() {
+        static Reg * r = new Reg();
+        return *r;
+    };
 
     
     template <typename T>

@@ -36,23 +36,21 @@ Reg Instruction::execute() {
     }
     
     switch (code) {
-        case SET:
+        case SET: {
             auto & obj = Object::find(_branchs[0]);
             if (_branchs[1].type() != STRING) {
                 throw "Key must be string.";
             }
             obj.set(_branchs[1].get_string(), _branchs[2]);
-            return <#expression#>;
-        case GET:
-            if (_branchs.front().type() == NUMBER) {
-                auto & obj = Object::find(int(_branchs.front().get_number()));
-                // return obj get name
+            return Reg::PLACE();
+        }
+        case GET: {
+            auto & obj = Object::find(_branchs[0]);
+            if (_branchs[1].type() != STRING) {
+                throw "Key must be string.";
             }
-            else if (_branchs.front().type() == STRING) {
-                auto & obj = Object::find(int(_branchs.front().get_number()));
-                // return obj get name
-            }
-            break;
+            return obj.get(_branchs[1].get_string());
+        }
         case SHOW:
             
             break;
@@ -65,6 +63,8 @@ Reg Instruction::execute() {
         default:
             break;
     }
+    
+    return Reg::PLACE();
 }
 
 }
