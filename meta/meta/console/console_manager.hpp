@@ -47,8 +47,10 @@ private:
 class Map {
 public:
     
-    int add(const Instruction & inst) {
+    int add(const Code & c) {
         int r = _icount;
+        Instruction inst = Instruction(c);
+        inst.setID(r);
         _map[_icount] = inst;
         _icount++;
         return r;
@@ -118,7 +120,7 @@ public:
     template <typename T>
     void push(const T t) {
         if constexpr (std::is_same_v<T, Code>) {
-            int inst_id = _map.add(Instruction(t));
+            int inst_id = _map.add(t);
             if (_stack.size() > 0) {
                 _stack.top_inst().push(inst_id);
             } else {
@@ -159,6 +161,8 @@ public:
         std::cout << "stack size: " << _stack.size() << std::endl;
         while (_queue.size() > 0) {
             std::cout << "queue pop\n";
+            auto & i = _map.get(_queue.front());
+            i.execute();
             _queue.pop();
         }
     }

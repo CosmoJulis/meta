@@ -36,6 +36,36 @@ std::ostream & operator<<(std::ostream & os, const Code & c) {
     return os;
 }
 
+int CodeBranch(const Code & c) {
+    switch (c) {
+        case SET:
+            return 3;
+        case GET:
+            return 2;
+        case SHOW:
+            return 1;
+        case REPEAT:
+            return 2;
+        case PAUSE:
+            return 0;
+        default:
+            return 0;
+    }
+}
+
+bool CodeBranchReduce(const Code & c) {
+    switch (c) {
+        case REPEAT:
+            return false;
+        default:
+            return true;
+    }
+}
+
+
+
+
+
 std::ostream & operator<<(std::ostream & os, const Type & t) {
     switch (t) {
         case NONE:

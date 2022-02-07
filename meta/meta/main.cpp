@@ -79,7 +79,6 @@ int main(int argc, const char * argv[]) {
     mgr.push("name");
     mgr.push("hello world");
 
-
     // show get 0 name
     mgr.push(Code::SHOW);
     mgr.push(Code::GET);

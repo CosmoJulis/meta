@@ -29,6 +29,15 @@ enum Code {
 
 std::ostream & operator<<(std::ostream & os, const Code & c);
 
+
+int CodeBranch(const Code & c);
+
+bool CodeBranchReduce(const Code & c);
+
+
+
+
+
 enum Type {
     NONE,
     INSTRUCTION,

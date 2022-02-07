@@ -9,13 +9,17 @@
 #define console_instruction_hpp
 
 #include <iostream>
+#include <vector>
 #include "console_code.hpp"
-//#include "console_statement.hpp"
+
 
 namespace meta::console {
 
-class Register {
+class Reg {
 public:
+    
+    static Reg PLACE = Reg();
+
     
     template <typename T>
     void set(const T & t) {
@@ -56,11 +60,11 @@ public:
     
 private:
     
-    int _inst_id;
+    int _inst_id = -1;
     Number _number;
     std::string _string;
     
-    Type _type;
+    Type _type = NONE;
 };
 
 class Instruction {
@@ -74,65 +78,31 @@ public:
     
     template <typename T>
     void push(const T & t) {
-        auto reg = Register();
-        reg.set(t);
-        _regs.push_back(reg);
-//        branch++;
+        auto b = Reg();
+        b.set(t);
+        _branchs.push_back(b);
     }
 
     void pop();
 
     
-    void execute() {
-        switch (code) {
-            case SET:
-                
-                break;
-            case GET:
-                
-                break;
-            case SHOW:
-                
-                break;
-            case REPEAT:
-                
-                break;
-            case PAUSE:
-                
-                break;
-            default:
-                break;
-        }
-    }
-    
-    int branchCount() const {
-        switch (code) {
-            case SET:
-                return 3;
-            case GET:
-                return 2;
-            case SHOW:
-                return 1;
-            case REPEAT:
-                return 2;
-            case PAUSE:
-                return 0;
-            default:
-                return 0;
-        }
-    }
+    Reg execute();
     
     bool isFullBranch() const {
-        return _regs.size() == branchCount();
+        return _branchs.size() == CodeBranch(code);
+    }
+    
+    void setID(int inst_id) {
+        _id = inst_id;
     }
     
 protected:
-    
-//    int branch = 0;
+
     Code code;
     
-    std::vector<Register> _regs;
+    std::vector<Reg> _branchs;
     
+    int _id = -1;
 };
 
 }
