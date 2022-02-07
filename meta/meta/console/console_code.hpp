@@ -38,6 +38,7 @@ enum Type {
 
 std::ostream & operator<<(std::ostream & os, const Type & t);
 
+
 template <typename T>
 static constexpr bool NumberSupportType =
     meta::arg::is::any_same_v<T,

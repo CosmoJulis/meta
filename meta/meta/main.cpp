@@ -81,22 +81,24 @@ int main(int argc, const char * argv[]) {
 
 
     // show get 0 name
-//    mgr.push(Code::SHOW);
-//    mgr.push(Code::GET);
-//    mgr.push(0);
-//    mgr.push("name");
+    mgr.push(Code::SHOW);
+    mgr.push(Code::GET);
+    mgr.push(0);
+    mgr.push("name");
 
     // repeat 10 show get 0 name
-//    mgr.push(Code::REPEAT);
-//    mgr.push(10);
-//    mgr.push(Code::SHOW);
-//    mgr.push(Code::GET);
-//    mgr.push(0);
-//    mgr.push("name");
+    mgr.push(Code::REPEAT);
+    mgr.push(10);
+    mgr.push(Code::SHOW);
+    mgr.push(Code::GET);
+    mgr.push(0);
+    mgr.push("name");
 
     mgr.execute();
     
-    
+
+    mgr.debug_log();
+
     return 0;
 }
 

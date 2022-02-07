@@ -11,6 +11,7 @@
 		68724E9127A14E7400D64AF1 /* test_reflection_ts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68724E8F27A14E7400D64AF1 /* test_reflection_ts.cpp */; };
 		688FEE1427AE385D00DF4F21 /* console_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 688FEE1227AE385D00DF4F21 /* console_manager.cpp */; };
 		688FEE1727AE3CC300DF4F21 /* console_code.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 688FEE1627AE3CC300DF4F21 /* console_code.cpp */; };
+		68E2920827B0FD34006AAF70 /* console_instruction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68E2920627B0FD34006AAF70 /* console_instruction.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -49,6 +50,7 @@
 		688FEE1627AE3CC300DF4F21 /* console_code.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = console_code.cpp; sourceTree = "<group>"; };
 		68B2E0552744A78A00384069 /* jni.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jni.h; sourceTree = "<group>"; };
 		68B2E0562744A82200384069 /* jni_md.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jni_md.h; sourceTree = "<group>"; };
+		68E2920627B0FD34006AAF70 /* console_instruction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = console_instruction.cpp; sourceTree = "<group>"; };
 		68E8257E274228880005E2E5 /* arg.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = arg.hpp; sourceTree = "<group>"; };
 		68FC62C7279698D200A8E102 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -160,6 +162,7 @@
 				68724EC127A63D2700D64AF1 /* console_code.hpp */,
 				688FEE1627AE3CC300DF4F21 /* console_code.cpp */,
 				688FEE1527AE397800DF4F21 /* console_instruction.hpp */,
+				68E2920627B0FD34006AAF70 /* console_instruction.cpp */,
 				688FEE0E27AE366F00DF4F21 /* console_object.hpp */,
 				68724EBE27A6396300D64AF1 /* console_manager.hpp */,
 				688FEE1227AE385D00DF4F21 /* console_manager.cpp */,
@@ -227,6 +230,7 @@
 				688FEE1427AE385D00DF4F21 /* console_manager.cpp in Sources */,
 				68099FFA273D1E480032D78D /* main.cpp in Sources */,
 				688FEE1727AE3CC300DF4F21 /* console_code.cpp in Sources */,
+				68E2920827B0FD34006AAF70 /* console_instruction.cpp in Sources */,
 				68724E9127A14E7400D64AF1 /* test_reflection_ts.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

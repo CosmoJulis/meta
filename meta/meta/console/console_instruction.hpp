@@ -14,34 +14,74 @@
 
 namespace meta::console {
 
+class Register {
+public:
+    
+    template <typename T>
+    void set(const T & t) {
+        if constexpr (std::is_same_v<T, int>) {
+            _type = INSTRUCTION;
+            _inst_id = t;
+        }
+        else if constexpr (std::is_same_v<T, Number>) {
+            _type = NUMBER;
+            _number = t;
+        }
+        else if constexpr (std::is_same_v<T, std::string>) {
+            _type = STRING;
+            _string = t;
+        }
+        else {
+            _type = NONE;
+            std::cout << meta::arg::list_log<T> << std::endl;
+            throw "Type not match.";
+        }
+    }
+    
+    Type type() const {
+        return _type;
+    }
+    
+    int get_inst_id() const {
+        return _inst_id;
+    }
+    
+    Number get_number() const {
+        return _number;
+    }
+    
+    std::string get_string() const {
+        return _string;
+    }
+    
+private:
+    
+    int _inst_id;
+    Number _number;
+    std::string _string;
+    
+    Type _type;
+};
+
 class Instruction {
 public:
     
-    Instruction() { std::cout << "Instruction\n"; }
+    Instruction() { }
     
-    Instruction(const Code & c) : code(c) { std::cout << "Instruction " << c << std::endl; }
+    Instruction(const Code & c) : code(c) { }
     
-    ~Instruction() { std::cout << "~Instruction\n"; }
+    ~Instruction() { }
     
     template <typename T>
     void push(const T & t) {
-//        if constexpr (std::is_same_v<T, int>) {
-//            
-//        }
-//        else if constexpr (std::is_same_v<T, Number>) {
-//
-//        }
-//        else if constexpr (std::is_same_v<T, std::string>) {
-//
-//        }
-//        else {
-//            std::cout << meta::arg::list_log<T> << std::endl;
-//            throw "Type not match.";
-//        }
-        branch++;
+        auto reg = Register();
+        reg.set(t);
+        _regs.push_back(reg);
+//        branch++;
     }
-    
+
     void pop();
+
     
     void execute() {
         switch (code) {
@@ -57,7 +97,6 @@ public:
             case REPEAT:
                 
                 break;
-                
             case PAUSE:
                 
                 break;
@@ -84,13 +123,15 @@ public:
     }
     
     bool isFullBranch() const {
-        return branch == branchCount();
+        return _regs.size() == branchCount();
     }
     
 protected:
     
-    int branch = 0;
+//    int branch = 0;
     Code code;
+    
+    std::vector<Register> _regs;
     
 };
 
