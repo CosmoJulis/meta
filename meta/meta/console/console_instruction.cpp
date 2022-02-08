@@ -52,8 +52,16 @@ Reg Instruction::execute() {
             return obj.get(_branchs[1].get_string());
         }
         case SHOW:
-            
-            break;
+            if (_branchs[0].type() == STRING) {
+                std::cout << _branchs[0].get_string() << std::endl;
+            }
+            else if (_branchs[0].type() == NUMBER) {
+                std::cout << _branchs[0].get_number() << std::endl;
+            }
+            else {
+                throw "Error with show value.";
+            }
+            return Reg::PLACE();
         case REPEAT:
             
             break;

@@ -72,27 +72,30 @@ int main(int argc, const char * argv[]) {
     Manager & mgr = Manager::shared();
 
     // set 0 get 0 name "hello world"
-    mgr.push(Code::SET);
-    mgr.push(0);
-    mgr.push(Code::GET);
-    mgr.push(0);
-    mgr.push("name");
-    mgr.push("hello world");
+//    mgr.push(Code::SET);
+//    mgr.push(0);
+//    mgr.push(Code::GET);
+//    mgr.push(0);
+//    mgr.push("name");
+//    mgr.push("hello world");
 
     // show get 0 name
-    mgr.push(Code::SHOW);
-    mgr.push(Code::GET);
-    mgr.push(0);
-    mgr.push("name");
+//    mgr.push(Code::SHOW);
+//    mgr.push(Code::GET);
+//    mgr.push(0);
+//    mgr.push("name");
 
     // repeat 10 show get 0 name
-    mgr.push(Code::REPEAT);
-    mgr.push(10);
-    mgr.push(Code::SHOW);
-    mgr.push(Code::GET);
-    mgr.push(0);
-    mgr.push("name");
+//    mgr.push(Code::REPEAT);
+//    mgr.push(10);
+//    mgr.push(Code::SHOW);
+//    mgr.push(Code::GET);
+//    mgr.push(0);
+//    mgr.push("name");
 
+    mgr.push(Code::SHOW);
+    mgr.push(true);
+    
     mgr.execute();
     
 

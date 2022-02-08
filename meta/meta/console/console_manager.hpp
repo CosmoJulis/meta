@@ -157,10 +157,8 @@ public:
     }
     
     void execute() {
-        std::cout << "queue size: " << _queue.size() << std::endl;
-        std::cout << "stack size: " << _stack.size() << std::endl;
         while (_queue.size() > 0) {
-            std::cout << "queue pop\n";
+//            std::cout << "queue pop\n";
             auto & i = _map.get(_queue.front());
             i.execute();
             _queue.pop();
