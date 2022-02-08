@@ -13,19 +13,43 @@
 class MyObject : public meta::console::Object {
 public:
 
-    MyObject(int id = -1) : meta::console::Object(id) { }
+    MyObject(int id = 0) : meta::console::Object(id) {
+        Pool::shared().obj_id_map[id] = std::shared_ptr<MyObject>(new MyObject(*this));
+    }
     
-    int age;
-    float height;
-    int name;
-    void set_age(int age) {
-        std::cout << "set_age(" << age << ")" << std::endl;
+    int age = 0;
+    float height = 0;
+    std::string name = "";
+
+    void set(const std::string & key, const Reg & value) override {
+        if (key == "age") {
+            age = value.get_number();
+            std::cout << "set age " << age << std::endl;
+        }
+        else if (key == "height") {
+            height = value.get_number();
+        }
+        else if (key == "name") {
+            name = value.get_string();
+        }
     }
-    void set_height(float height) {
-        std::cout << "set_height(F" << height << ")" << std::endl;
+    
+    Reg get(const std::string & key) override {
+        Reg r;
+        if (key == "age") {
+            r.set(Number(age));
+        }
+        else if (key == "height") {
+            r.set(Number(height));
+        }
+        else if (key == "name") {
+            r.set(name);
+        }
+        return r;
     }
-    void set_name(std::string name) {
-        std::cout << "set_name(" << name << ")" << std::endl;
+    
+    void log() override {
+        std::cout << "MyObject\n";
     }
 };
 

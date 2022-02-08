@@ -19,6 +19,10 @@ enum Code {
     GET,
     SHOW,
     REPEAT,
+    ADD,
+    SUB,
+    MUL,
+    DIV,
     PAUSE,
 //        play,
 //        step,
@@ -62,6 +66,8 @@ public:
     
     operator bool() const {
         switch (_type) {
+            case EMPTY:
+                throw "Add number uninitialized.";
             case BOOL:
                 return _bool;
             case INT:
@@ -77,6 +83,8 @@ public:
     
     operator int() const {
         switch (_type) {
+            case EMPTY:
+                throw "Add number uninitialized.";
             case BOOL:
                 return _bool;
             case INT:
@@ -92,6 +100,8 @@ public:
     
     operator long() const {
         switch (_type) {
+            case EMPTY:
+                throw "Add number uninitialized.";
             case BOOL:
                 return _bool;
             case INT:
@@ -107,6 +117,8 @@ public:
     
     operator float() const {
         switch (_type) {
+            case EMPTY:
+                throw "Add number uninitialized.";
             case BOOL:
                 return _bool;
             case INT:
@@ -122,6 +134,8 @@ public:
     
     operator double() const {
         switch (_type) {
+            case EMPTY:
+                throw "Add number uninitialized.";
             case BOOL:
                 return _bool;
             case INT:
@@ -139,9 +153,9 @@ public:
     
     Number(const bool & n) : _type(BOOL), _bool(n) { }
     
-    Number(const int & n) : _type(INT), _int(n) { }
+    Number(const int32_t & n) : _type(INT), _int(n) { }
     
-    Number(const long & n) : _type(LONG), _long(n) { }
+    Number(const int64_t & n) : _type(LONG), _long(n) { }
     
     Number(const float & n) : _type(FLOAT), _float(n) { }
     
@@ -149,6 +163,9 @@ public:
     
     friend std::ostream & operator<<(std::ostream & os, const Number & n) {
         switch (n._type) {
+            case EMPTY:
+                os << "Uninitialized";
+                break;
             case BOOL:
                 os << "B:" << (n._bool ? "true" : "false");
                 break;
@@ -168,9 +185,39 @@ public:
         return os;
     }
     
+    static bool isSameType(const Number & lhs, const Number & rhs) {
+        return lhs.isSameType(rhs);
+    }
+    
+    bool isSameType(const Number & o) const {
+        return _type == o._type;
+    }
+    
+    friend Number operator+(const Number & lhs, const Number & rhs) {
+        if (!lhs.isSameType(rhs)) {
+            throw "Add number must be same type.";
+        }
+        
+        switch (lhs._type) {
+            case EMPTY:
+                throw "Add number uninitialized.";
+            case BOOL:
+                throw "Add number type can not be bool.";
+            case INT:
+                return Number(lhs._int + rhs._int);
+            case LONG:
+                return Number(lhs._long + rhs._long);
+            case FLOAT:
+                return Number(lhs._float + rhs._float);
+            case DOUBLE:
+                return Number(lhs._double + rhs._double);
+        }
+    }
+    
 private:
     
     enum Number_Type {
+        EMPTY,
         BOOL,
         INT,
         LONG,
@@ -187,6 +234,7 @@ private:
         float _float;
         double _double;
     };
+
 };
 
 

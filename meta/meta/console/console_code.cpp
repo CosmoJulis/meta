@@ -26,6 +26,18 @@ std::ostream & operator<<(std::ostream & os, const Code & c) {
         case REPEAT:
             os << "repeat";
             break;
+        case ADD:
+            os << "add";
+            break;
+        case SUB:
+            os << "sub";
+            break;
+        case MUL:
+            os << "mul";
+            break;
+        case DIV:
+            os << "div";
+            break;
         case PAUSE:
             os << "pause";
             break;
@@ -45,6 +57,11 @@ int CodeBranch(const Code & c) {
         case SHOW:
             return 1;
         case REPEAT:
+            return 2;
+        case ADD:
+        case SUB:
+        case MUL:
+        case DIV:
             return 2;
         case PAUSE:
             return 0;

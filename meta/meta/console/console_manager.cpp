@@ -18,8 +18,8 @@ Instruction & Stack::top_inst() {
 }
 
 void Queue::pop() {
-    auto & id = front();
-    if (!Manager::shared()._map.remove(id)) {
+    auto & inst_id = front();
+    if (!Manager::shared()._map.remove(inst_id)) {
         throw "Pop instruction index not exist.";
     }
     _queue.pop();

@@ -68,36 +68,55 @@ using namespace meta::console;
 
 int main(int argc, const char * argv[]) {
         
+    MyObject obj0 = MyObject(0);
+    MyObject obj1 = MyObject(1);
+    
+    MyObject & o0 = dynamic_cast<MyObject &>(Pool::shared().find(0));
+    MyObject & o1 = dynamic_cast<MyObject &>(Pool::shared().find(1));
+    o1.age = 8;
     
     Manager & mgr = Manager::shared();
 
     // set 0 get 0 name "hello world"
 //    mgr.push(Code::SET);
 //    mgr.push(0);
+//    mgr.push("age");
 //    mgr.push(Code::GET);
-//    mgr.push(0);
-//    mgr.push("name");
-//    mgr.push("hello world");
+//    mgr.push(1);
+//    mgr.push("age");
 
     // show get 0 name
 //    mgr.push(Code::SHOW);
 //    mgr.push(Code::GET);
 //    mgr.push(0);
-//    mgr.push("name");
+//    mgr.push("age");
 
     // repeat 10 show get 0 name
-//    mgr.push(Code::REPEAT);
-//    mgr.push(10);
-//    mgr.push(Code::SHOW);
-//    mgr.push(Code::GET);
-//    mgr.push(0);
-//    mgr.push("name");
 
+    mgr.push(Code::REPEAT);
+    mgr.push(10);
+    
+//    for (int i = 0; i < 10; i++) {
+//    mgr.push(Code::SET);
+//    mgr.push(0);
+//    mgr.push("age");
     mgr.push(Code::SHOW);
-    mgr.push(true);
+
+    mgr.push(Code::ADD);
+    mgr.push(Code::GET);
+    mgr.push(1);
+    mgr.push("age");
+    mgr.push(1);
+//    }
     
+
+
+//    mgr.push(Code::SHOW);
+//    mgr.push(true);
+
     mgr.execute();
-    
+
+
 
     mgr.debug_log();
 

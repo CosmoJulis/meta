@@ -20,7 +20,6 @@ void Instruction::pop() {
 }
 
 Reg Instruction::execute() {
-    
     if (_branchs.size() != CodeBranch(code)) {
         throw "Instruction branch count not match.";
     }
@@ -28,16 +27,18 @@ Reg Instruction::execute() {
     if (CodeBranchReduce(code)) {
         size_t count = _branchs.size();
         for (int index = 0; index < count; index++) {
-            if (_branchs[index].type() == INSTRUCTION) {
-                auto & inst = Manager::shared()._map.get(_branchs[index].get_inst_id());
+            while (_branchs[index].type() == INSTRUCTION) {
+                int inst_id = _branchs[index].get_inst_id();
+                auto & inst = Manager::shared()._map.get(inst_id);
                 _branchs[index] = inst.execute();
+                Manager::shared()._map.remove(inst_id);
             }
         }
     }
     
     switch (code) {
         case SET: {
-            auto & obj = Object::find(_branchs[0]);
+            auto & obj = Pool::shared().find(_branchs[0]);
             if (_branchs[1].type() != STRING) {
                 throw "Key must be string.";
             }
@@ -45,7 +46,7 @@ Reg Instruction::execute() {
             return Reg::PLACE();
         }
         case GET: {
-            auto & obj = Object::find(_branchs[0]);
+            auto & obj = Pool::shared().find(_branchs[0]);
             if (_branchs[1].type() != STRING) {
                 throw "Key must be string.";
             }
@@ -59,12 +60,46 @@ Reg Instruction::execute() {
                 std::cout << _branchs[0].get_number() << std::endl;
             }
             else {
-                throw "Error with show value.";
+                throw "Show value not supported.";
             }
             return Reg::PLACE();
-        case REPEAT:
+        case REPEAT: {
+            while (_branchs[0].type() == INSTRUCTION) {
+                int inst_id = _branchs[0].get_inst_id();
+                auto & inst = Manager::shared()._map.get(inst_id);
+                _branchs[0] = inst.execute();
+                Manager::shared()._map.remove(inst_id);
+            }
             
-            break;
+            if (_branchs[0].type() != NUMBER) {
+                throw "Repeat count not supported.";
+            }
+            int count = _branchs[0].get_number();
+
+            if (_branchs[1].type() != INSTRUCTION) {
+                throw "Repeat is missing instruction.";
+            }
+            
+            int inst_id = _branchs[1].get_inst_id();
+            auto & inst = Manager::shared()._map.get(inst_id);
+            
+            for (int i = 0; i < count; i++) {
+                inst.execute();
+            }
+            Manager::shared()._map.remove(inst_id);
+            
+            return Reg::PLACE();
+        }
+            
+        case ADD: {
+            if (_branchs[0].type() != NUMBER || _branchs[1].type() != NUMBER) {
+                throw "Add must be number.";
+            }
+            Reg r;
+            r.set(_branchs[0].get_number() + _branchs[1].get_number());
+            return r;
+        }
+            
         case PAUSE:
             
             break;

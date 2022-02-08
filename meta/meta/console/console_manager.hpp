@@ -146,8 +146,8 @@ public:
     void popFullInstruction() {
         while (_stack.size() > 0) {
             if (_map.contains(_stack.top())) {
-                auto & i = _map.get(_stack.top());
-                if (i.isFullBranch()) {
+                auto & inst = _map.get(_stack.top());
+                if (inst.isFullBranch()) {
                     _stack.pop();
                     continue;
                 }
@@ -158,9 +158,8 @@ public:
     
     void execute() {
         while (_queue.size() > 0) {
-//            std::cout << "queue pop\n";
-            auto & i = _map.get(_queue.front());
-            i.execute();
+            auto & inst = _map.get(_queue.front());
+            inst.execute();
             _queue.pop();
         }
     }
