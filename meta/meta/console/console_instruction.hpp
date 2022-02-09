@@ -15,6 +15,18 @@
 
 namespace meta::console {
 
+class InstID {
+public:
+    InstID(const int & i = 0) : _inst_id(i) { }
+    
+    operator int() const {
+        return _inst_id;
+    }
+    
+private:
+    int _inst_id = -1;
+};
+
 class Reg {
 public:
     
@@ -26,7 +38,7 @@ public:
     
     template <typename T>
     void set(const T & t) {
-        if constexpr (std::is_same_v<T, int>) {
+        if constexpr (std::is_same_v<T, InstID>) {
             _type = INSTRUCTION;
             _inst_id = t;
         }
@@ -49,7 +61,7 @@ public:
         return _type;
     }
     
-    int get_inst_id() const {
+    InstID get_inst_id() const {
         return _inst_id;
     }
     
@@ -63,7 +75,7 @@ public:
     
 private:
     
-    int _inst_id = -1;
+    InstID _inst_id;
     Number _number;
     std::string _string;
     
@@ -95,8 +107,8 @@ public:
         return _branchs.size() == CodeBranch(code);
     }
     
-    void setID(int inst_id) {
-        _id = inst_id;
+    void setID(InstID id) {
+        _id = id;
     }
     
 protected:
@@ -105,7 +117,7 @@ protected:
     
     std::vector<Reg> _branchs;
     
-    int _id = -1;
+    InstID _id;
     
 
 };

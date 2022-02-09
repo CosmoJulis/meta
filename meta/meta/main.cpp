@@ -78,15 +78,30 @@ int main(int argc, const char * argv[]) {
 
 
 
+//    mgr.push(Code::SHOW);
+//    mgr.push(Code::GREATER);
+//    mgr.push(1);
+//    mgr.push(0);
 
-    mgr.push(Code::SHOW);
-    mgr.push(Code::GREATER);
-    mgr.push(1);
+    
+    mgr.push(Code::REPEAT);
+    mgr.push(10);
+    mgr.push(Code::SET);
     mgr.push(0);
-
+    mgr.push("age");
+    mgr.push(Code::ADD);
+    mgr.push(Code::GET);
+    mgr.push(0);
+    mgr.push("age");
+    mgr.push(1);
+    
+    
+    mgr.push(Code::SHOW);
+    mgr.push(Code::GET);
+    mgr.push(0);
+    mgr.push("age");
+    
     mgr.execute();
-
-
 
     mgr.debug_log();
 

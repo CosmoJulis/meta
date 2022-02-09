@@ -31,8 +31,8 @@ Reg Instruction::execute() {
     if (CodeBranchReduce(code)) {
         for (int index = 0; index < count; index++) {
             while (tmpBranchs[index].type() == INSTRUCTION) {
-                int inst_id = tmpBranchs[index].get_inst_id();
-                auto & inst = Manager::shared()._map.get(inst_id);
+                InstID id = tmpBranchs[index].get_inst_id();
+                auto & inst = Manager::shared()._map.get(id);
                 tmpBranchs[index] = inst.execute();
             }
         }
@@ -67,10 +67,10 @@ Reg Instruction::execute() {
             return Reg::PLACE();
         case REPEAT: {
             while (tmpBranchs[0].type() == INSTRUCTION) {
-                int inst_id = _branchs[0].get_inst_id();
-                auto & inst = Manager::shared()._map.get(inst_id);
+                InstID id = _branchs[0].get_inst_id();
+                auto & inst = Manager::shared()._map.get(id);
                 tmpBranchs[0] = inst.execute();
-                Manager::shared()._map.remove(inst_id);
+                Manager::shared()._map.remove(id);
             }
             
             if (tmpBranchs[0].type() != NUMBER) {
@@ -82,13 +82,13 @@ Reg Instruction::execute() {
                 throw "Repeat is missing instruction.";
             }
             
-            int inst_id = tmpBranchs[1].get_inst_id();
-            auto & inst = Manager::shared()._map.get(inst_id);
+            InstID id = tmpBranchs[1].get_inst_id();
+            auto & inst = Manager::shared()._map.get(id);
             
             for (int i = 0; i < count; i++) {
                 inst.execute();
             }
-            Manager::shared()._map.remove(inst_id);
+            Manager::shared()._map.remove(id);
             
             return Reg::PLACE();
         }

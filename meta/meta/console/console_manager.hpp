@@ -56,7 +56,7 @@ public:
         return r;
     }
     
-    bool remove(const int & id) {
+    bool remove(const InstID & id) {
         if (_map.contains(id)) {
             auto & inst = _map[id];
             inst.pop();
@@ -70,11 +70,11 @@ public:
         return _map.size();
     }
     
-    bool contains(const int & id) const {
+    bool contains(const InstID & id) const {
         return _map.contains(id);
     }
     
-    Instruction & get(int id) {
+    Instruction & get(InstID id) {
         if (_map.contains(id)) {
             return _map[id];
         } else {
@@ -120,13 +120,13 @@ public:
     template <typename T>
     void push(const T t) {
         if constexpr (std::is_same_v<T, Code>) {
-            int inst_id = _map.add(t);
+            InstID id = _map.add(t);
             if (_stack.size() > 0) {
-                _stack.top_inst().push(inst_id);
+                _stack.top_inst().push(id);
             } else {
-                _queue.push(inst_id);
+                _queue.push(id);
             }
-            _stack.push(inst_id);
+            _stack.push(id);
         }
         else if constexpr (NumberSupportType<T>) {
             _stack.top_inst().push(Number(t));
