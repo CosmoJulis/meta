@@ -19,10 +19,25 @@ enum Code {
     GET,
     SHOW,
     REPEAT,
+    
+    // Math
     ADD,
     SUB,
     MUL,
     DIV,
+    
+    // Operator
+    EQUAL,
+    LESS,
+    GREATER,
+    NOT,
+//    AND,
+//    OR,
+//    XOR,
+
+
+    
+    
     PAUSE,
 //        play,
 //        step,
@@ -167,19 +182,19 @@ public:
                 os << "Uninitialized";
                 break;
             case BOOL:
-                os << "B:" << (n._bool ? "true" : "false");
+                os << "B(" << (n._bool ? "true" : "false") << ")";
                 break;
             case INT:
-                os << "I:" << n._int;
+                os << "I(" << n._int << ")";
                 break;
             case LONG:
-                os << "L:" << n._long;
+                os << "L(" << n._long << ")";
                 break;
             case FLOAT:
-                os << "F:" << n._float;
+                os << "F(" << n._float << ")";
                 break;
             case DOUBLE:
-                os << "D:" << n._double;
+                os << "D(" << n._double << ")";
                 break;
         }
         return os;
@@ -198,7 +213,7 @@ public:
             throw "Add number must be same type.";
         }
         
-        switch (lhs._type) {
+        switch (rhs._type) {
             case EMPTY:
                 throw "Add number uninitialized.";
             case BOOL:
@@ -213,6 +228,144 @@ public:
                 return Number(lhs._double + rhs._double);
         }
     }
+    
+    friend Number operator-(const Number & lhs, const Number & rhs) {
+        if (!lhs.isSameType(rhs)) {
+            throw "Sub number must be same type.";
+        }
+        
+        switch (rhs._type) {
+            case EMPTY:
+                throw "Sub number uninitialized.";
+            case BOOL:
+                throw "Sub number type can not be bool.";
+            case INT:
+                return Number(lhs._int - rhs._int);
+            case LONG:
+                return Number(lhs._long - rhs._long);
+            case FLOAT:
+                return Number(lhs._float - rhs._float);
+            case DOUBLE:
+                return Number(lhs._double - rhs._double);
+        }
+    }
+    
+    friend Number operator*(const Number & lhs, const Number & rhs) {
+        if (!lhs.isSameType(rhs)) {
+            throw "Mul number must be same type.";
+        }
+        
+        switch (rhs._type) {
+            case EMPTY:
+                throw "Mul number uninitialized.";
+            case BOOL:
+                throw "Mul number type can not be bool.";
+            case INT:
+                return Number(lhs._int * rhs._int);
+            case LONG:
+                return Number(lhs._long * rhs._long);
+            case FLOAT:
+                return Number(lhs._float * rhs._float);
+            case DOUBLE:
+                return Number(lhs._double * rhs._double);
+        }
+    }
+    
+    friend Number operator/(const Number & lhs, const Number & rhs) {
+        if (!lhs.isSameType(rhs)) {
+            throw "Div number must be same type.";
+        }
+        
+        switch (rhs._type) {
+            case EMPTY:
+                throw "Div number uninitialized.";
+            case BOOL:
+                throw "Div number type can not be bool.";
+            case INT:
+                if (rhs._int == 0) throw "Divisor number can not be zero";
+                return Number(lhs._int / rhs._int);
+            case LONG:
+                if (rhs._long == 0) throw "Divisor number can not be zero";
+                return Number(lhs._long / rhs._long);
+            case FLOAT:
+                if (rhs._float == 0) throw "Divisor number can not be zero";
+                return Number(lhs._float / rhs._float);
+            case DOUBLE:
+                if (rhs._double == 0) throw "Divisor number can not be zero";
+                return Number(lhs._double / rhs._double);
+        }
+    }
+    
+    friend Number operator==(const Number & lhs, const Number & rhs) {
+        if (!lhs.isSameType(rhs)) {
+            throw "Equal number must be same type.";
+        }
+        
+        switch (rhs._type) {
+            case EMPTY:
+                throw "Equal number uninitialized.";
+            case BOOL:
+                throw "Equal number type can not be bool.";
+            case INT:
+                return Number(lhs._int == rhs._int);
+            case LONG:
+                return Number(lhs._long == rhs._long);
+            case FLOAT:
+                return Number(lhs._float == rhs._float);
+            case DOUBLE:
+                return Number(lhs._double == rhs._double);
+        }
+    }
+    
+    friend Number operator<(const Number & lhs, const Number & rhs) {
+        if (!lhs.isSameType(rhs)) {
+            throw "Less number must be same type.";
+        }
+        
+        switch (rhs._type) {
+            case EMPTY:
+                throw "Less number uninitialized.";
+            case BOOL:
+                throw "Less number type can not be bool.";
+            case INT:
+                return Number(lhs._int < rhs._int);
+            case LONG:
+                return Number(lhs._long < rhs._long);
+            case FLOAT:
+                return Number(lhs._float < rhs._float);
+            case DOUBLE:
+                return Number(lhs._double < rhs._double);
+        }
+    }
+    
+    friend Number operator>(const Number & lhs, const Number & rhs) {
+        if (!lhs.isSameType(rhs)) {
+            throw "Greater number must be same type.";
+        }
+        
+        switch (rhs._type) {
+            case EMPTY:
+                throw "Greater number uninitialized.";
+            case BOOL:
+                throw "Greater number type can not be bool.";
+            case INT:
+                return Number(lhs._int > rhs._int);
+            case LONG:
+                return Number(lhs._long > rhs._long);
+            case FLOAT:
+                return Number(lhs._float > rhs._float);
+            case DOUBLE:
+                return Number(lhs._double > rhs._double);
+        }
+    }
+    
+    friend Number operator!(const Number & o) {
+        if (o._type != BOOL) {
+            throw "Not number must be bool.";
+        }
+        return Number(!o._bool);
+    }
+    
     
 private:
     

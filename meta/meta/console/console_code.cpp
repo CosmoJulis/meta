@@ -26,6 +26,7 @@ std::ostream & operator<<(std::ostream & os, const Code & c) {
         case REPEAT:
             os << "repeat";
             break;
+            
         case ADD:
             os << "add";
             break;
@@ -38,6 +39,30 @@ std::ostream & operator<<(std::ostream & os, const Code & c) {
         case DIV:
             os << "div";
             break;
+
+        case EQUAL:
+            os << "equal";
+            break;
+        case LESS:
+            os << "less";
+            break;
+        case GREATER:
+            os << "greater";
+            break;
+        case NOT:
+            os << "not";
+            break;
+//        case AND:
+//            os << "and";
+//            break;
+//        case OR:
+//            os << "or";
+//            break;
+//        case XOR:
+//            os << "xor";
+//            break;
+
+            
         case PAUSE:
             os << "pause";
             break;
@@ -63,6 +88,17 @@ int CodeBranch(const Code & c) {
         case MUL:
         case DIV:
             return 2;
+        case EQUAL:
+        case LESS:
+        case GREATER:
+            return 2;
+        case NOT:
+            return 1;
+//        case AND:
+//        case OR:
+//        case XOR:
+//            return 2;
+
         case PAUSE:
             return 0;
         default:
@@ -78,10 +114,6 @@ bool CodeBranchReduce(const Code & c) {
             return true;
     }
 }
-
-
-
-
 
 std::ostream & operator<<(std::ostream & os, const Type & t) {
     switch (t) {
