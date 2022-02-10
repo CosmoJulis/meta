@@ -70,7 +70,6 @@ Reg Instruction::execute() {
                 InstID id = _branchs[0].get_inst_id();
                 auto & inst = Manager::shared()._map.get(id);
                 tmpBranchs[0] = inst.execute();
-                Manager::shared()._map.remove(id);
             }
             
             if (tmpBranchs[0].type() != NUMBER) {
@@ -88,7 +87,6 @@ Reg Instruction::execute() {
             for (int i = 0; i < count; i++) {
                 inst.execute();
             }
-            Manager::shared()._map.remove(id);
             
             return Reg::PLACE();
         }

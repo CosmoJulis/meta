@@ -101,6 +101,22 @@ int main(int argc, const char * argv[]) {
     mgr.push(0);
     mgr.push("age");
     
+    
+    mgr.push(Code::SET);
+    mgr.push(0);
+    mgr.push("age");
+    mgr.push(Code::MUL);
+    mgr.push(Code::GET);
+    mgr.push(0);
+    mgr.push("age");
+    mgr.push(2);
+    
+    
+    mgr.push(Code::SHOW);
+    mgr.push(Code::GET);
+    mgr.push(0);
+    mgr.push("age");
+    
     mgr.execute();
 
     mgr.debug_log();

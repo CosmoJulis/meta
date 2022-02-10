@@ -12,7 +12,8 @@
 #include "console_instruction.hpp"
 #include "console_manager.hpp"
 #include "console_object.hpp"
-
+#include "console_parser.hpp"
 
 
 #endif /* console_hpp */
+

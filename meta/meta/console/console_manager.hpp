@@ -141,8 +141,6 @@ public:
         popFullInstruction();
     }
     
-
-    
     void popFullInstruction() {
         while (_stack.size() > 0) {
             if (_map.contains(_stack.top())) {
