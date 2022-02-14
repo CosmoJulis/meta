@@ -1,7 +1,7 @@
 # JNI Helper 
 
 
-## C++ to Java Callback
+## Callback from C++ to Java 
 
 use class JniHelper to callback values.
 
@@ -59,10 +59,29 @@ auto jc = j_call<
 jc.execute();
 ````
 
-## Java to C++ Callback
+## Callback from Java to C++
 
 use class JniInteface to callback value
 
+```` Java
+    javaMethod(5, new JniInterface() {
+        @Override
+        public <T> void callback(T... arr) {
+            for (Object i: arr) {
+                System.out.println(i);
+            }
+        }
+    });
+    
+    public native void javaMethod(int i, JniInterface jhi);
+````
 
+```` C++
+int a = 1;
+double b = 0.5f;
+auto jc = j_call<j_void, j_array<j_int, j_double>>(j_object(jhi), "callback",
+                         make_array<j_int, j_double, j_string>(a, b));
+jc.execute();
+````
 
 

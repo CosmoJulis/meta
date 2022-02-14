@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<Object> arr = new ArrayList<Object>();
             arr.add("hello");
             arr.add(2);
-            my_test(arr.toArray());
 
             //            test(arr.toArray());
 
@@ -80,13 +79,6 @@ public class MainActivity extends AppCompatActivity {
             });
 
         }, 2000);
-    }
-
-    public <T> void my_test(T... arr) {
-        System.out.println(arr.getClass().toString());
-        for (Object i: arr) {
-            System.out.println("sl2577 " + i);
-        }
     }
 
     public native String stringFromJNI();
