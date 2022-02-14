@@ -1,16 +1,16 @@
 //
-//  console_code.cpp
+//  console_type.cpp
 //  meta
 //
-//  Created by Cosmo Julis on 1/30/22.
+//  Created by Cosmo Julis on 2/10/22.
 //
 
-#include "console_code.hpp"
+#include "console_type.hpp"
 
-namespace meta::console {
+namespace meta::console::instruction {
 
-std::ostream & operator<<(std::ostream & os, const Code & c) {
-    switch (c) {
+std::ostream & operator<<(std::ostream & os, const Instruction & inst) {
+    switch (inst) {
         case NOP:
             os << "nop";
             break;
@@ -66,6 +66,9 @@ std::ostream & operator<<(std::ostream & os, const Code & c) {
         case PAUSE:
             os << "pause";
             break;
+        case SLEEP:
+            os << "sleep";
+            break;
         default:
             os << "unknown";
             break;
@@ -73,8 +76,8 @@ std::ostream & operator<<(std::ostream & os, const Code & c) {
     return os;
 }
 
-int CodeBranch(const Code & c) {
-    switch (c) {
+int BranchCount(const Instruction & inst) {
+    switch (inst) {
         case SET:
             return 3;
         case GET:
@@ -94,6 +97,7 @@ int CodeBranch(const Code & c) {
             return 2;
         case NOT:
             return 1;
+            
 //        case AND:
 //        case OR:
 //        case XOR:
@@ -101,40 +105,21 @@ int CodeBranch(const Code & c) {
 
         case PAUSE:
             return 0;
+        case SLEEP:
+            return 1;
         default:
             return 0;
     }
 }
 
-bool CodeBranchReduce(const Code & c) {
-    switch (c) {
-        case REPEAT:
-            return false;
-        default:
-            return true;
-    }
-}
-
-std::ostream & operator<<(std::ostream & os, const Type & t) {
-    switch (t) {
-        case NONE:
-            os << "none";
-            break;
-        case INSTRUCTION:
-            os << "instruction";
-            break;
-        case NUMBER:
-            os << "number";
-            break;
-        case STRING:
-            os << "string";
-            break;
-        default:
-            os << "unknown";
-            break;
-    }
-    return os;
-}
+//bool BranchNeedReduce(const Instruction & inst) {
+//    switch (inst) {
+//        case REPEAT:
+//            return false;
+//        default:
+//            return true;
+//    }
+//}
 
 
 }

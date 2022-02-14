@@ -66,13 +66,14 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<Object> arr = new ArrayList<Object>();
             arr.add("hello");
             arr.add(2);
+            my_test(arr.toArray());
 
+            //            test(arr.toArray());
 
-            test(5, arr.toArray(), new JniInterface() {
+            test(5, 0.5, "hello world", new JniInterface() {
                 @Override
                 public <T> void callback(T... arr) {
-                    System.out.println();
-                    for (Object i:arr) {
+                    for (Object i: arr) {
                         System.out.println("sl2577 " + i);
                     }
                 }
@@ -81,13 +82,20 @@ public class MainActivity extends AppCompatActivity {
         }, 2000);
     }
 
+    public <T> void my_test(T... arr) {
+        System.out.println(arr.getClass().toString());
+        for (Object i: arr) {
+            System.out.println("sl2577 " + i);
+        }
+    }
+
     public native String stringFromJNI();
 
     public native void test();
+    public native void test(Object a[]);
     public native void testClassTest();
 
-    public native void test(int a, Object[] arr, JniInterface jhi);
-    public native void test(int a, JniInterface jhi);
+    public native void test(int a, double b, String s, JniInterface jhi);
 
     public static void javaMethod(int i, JniHelper jhi) {
         System.out.println("i = " + i);

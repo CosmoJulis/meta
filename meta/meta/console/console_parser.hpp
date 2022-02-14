@@ -9,9 +9,15 @@
 #define console_parser_hpp
 
 #include <iostream>
-#include "../utilities/utility.hpp"
 
 namespace meta::console {
+
+
+
+
+
+
+
 
 class Parser {
 public:
@@ -26,11 +32,21 @@ public:
         SPACE,
     };
     
+    void parser(const std::stringstream & ss) {
+    
+    }
+    
     void parser(const std::string & str) {
-        "set 0 name hello";
-        "set 0 name \"hello world\"";
-        "set 0 age 12";
-        "set 0 name \"123\"";
+        // TODO: parse str
+//        "set get 0 index name \"hello world\"";
+//        "set 0 age false";
+//        "set 0 repeat 10";
+//        "set 0 sleep true";
+//        "set 0 set set";
+//        "set 0 name hello";
+//        "set 0 name \"hello world\"";
+//        "set 0 age 12";
+//        "set 0 name \"123\"";
     }
     
 };

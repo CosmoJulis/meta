@@ -9,7 +9,7 @@
 #define console_object_hpp
 
 #include <unordered_map>
-#include "console_reg.hpp"
+#include "console_instruction.hpp"
 
 namespace meta::console {
 
@@ -19,6 +19,7 @@ public:
     int id = -1;
     
     Object(int obj_id) : id(obj_id) { }
+    
     
     virtual void set(const std::string & key, const Reg & value) { };
     
@@ -48,9 +49,9 @@ public:
     
     Object & find(const Reg & r) {
         switch (r.type()) {
-            case Reg::NUMBER:
+            case NUMBER:
                 return find(int(r.get_number()));
-            case Reg::STRING:
+            case STRING:
                 return find(r.get_string());
             default:
                 throw "Not support type.";

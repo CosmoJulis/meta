@@ -8,12 +8,14 @@
 #ifndef MyObject_hpp
 #define MyObject_hpp
 
-#include "console_object.hpp"
+#include "console/console.hpp"
 
-class MyObject : public meta::console::Object {
+namespace meta::console {
+
+class MyObject : public Object {
 public:
-
-    MyObject(int id = 0) : meta::console::Object(id) {
+    
+    MyObject(int id = 0) : Object(id) {
         Pool::shared().obj_id_map[id] = std::shared_ptr<MyObject>(new MyObject(*this));
     }
     
@@ -35,22 +37,25 @@ public:
     }
     
     Reg get(const std::string & key) override {
-        Reg r;
         if (key == "age") {
-            r.set(Number(age));
+            return Reg(Number(age));
         }
         else if (key == "height") {
-            r.set(Number(height));
+            return Reg(Number(height));
         }
         else if (key == "name") {
-            r.set(name);
+            return Reg(name);
         }
-        return r;
+        return Reg();
     }
     
     void log() override {
         std::cout << "MyObject\n";
     }
 };
+
+}
+
+
 
 #endif /* MyObject_hpp */

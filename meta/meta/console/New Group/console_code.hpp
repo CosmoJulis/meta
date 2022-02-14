@@ -35,15 +35,17 @@ enum Code {
 //    OR,
 //    XOR,
 
+    // Type Cast
 
     
     
-    PAUSE,
+    PAUSE,  // Need Impl
 //        play,
 //        step,
 //        clear,
 //        push,
 //        pop,
+    SLEEP,  // Need Impl
 };
 
 std::ostream & operator<<(std::ostream & os, const Code & c);

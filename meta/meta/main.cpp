@@ -8,8 +8,8 @@
 #include <iostream>
 #include "template/arg.hpp"
 #include "java/jni_helper.hpp"
-#include "console/console.hpp"
 #include "utilities/utility.hpp"
+#include "console/console.hpp"
 #include <version>
 #include <vector>
 #include <any>
@@ -65,16 +65,23 @@ using namespace meta::console;
 
 #include "MyObject.hpp"
 
-
 int main(int argc, const char * argv[]) {
+    
+    Parser::shared().parser("set 0 name \"hello wrold\" show get 0 name");
+
+    
         
-    MyObject obj0 = MyObject(0);
-    MyObject obj1 = MyObject(1);
-    
-    MyObject & o0 = dynamic_cast<MyObject &>(Pool::shared().find(0));
-    MyObject & o1 = dynamic_cast<MyObject &>(Pool::shared().find(1));
-    
-    Manager & mgr = Manager::shared();
+//    MyObject obj0 = MyObject(0);
+//    MyObject obj1 = MyObject(1);
+//
+//    MyObject & o0 = dynamic_cast<MyObject &>(Pool::shared().find(0));
+//    MyObject & o1 = dynamic_cast<MyObject &>(Pool::shared().find(1));
+//
+//
+//
+//    return 0;
+//
+//    Manager & mgr = Manager::shared();
 
 
 
@@ -84,42 +91,43 @@ int main(int argc, const char * argv[]) {
 //    mgr.push(0);
 
     
-    mgr.push(Code::REPEAT);
-    mgr.push(10);
-    mgr.push(Code::SET);
-    mgr.push(0);
-    mgr.push("age");
-    mgr.push(Code::ADD);
-    mgr.push(Code::GET);
-    mgr.push(0);
-    mgr.push("age");
-    mgr.push(1);
-    
-    
-    mgr.push(Code::SHOW);
-    mgr.push(Code::GET);
-    mgr.push(0);
-    mgr.push("age");
-    
-    
-    mgr.push(Code::SET);
-    mgr.push(0);
-    mgr.push("age");
-    mgr.push(Code::MUL);
-    mgr.push(Code::GET);
-    mgr.push(0);
-    mgr.push("age");
-    mgr.push(2);
-    
-    
-    mgr.push(Code::SHOW);
-    mgr.push(Code::GET);
-    mgr.push(0);
-    mgr.push("age");
-    
-    mgr.execute();
-
-    mgr.debug_log();
+//    mgr.push(Code::REPEAT);
+//    mgr.push(10);
+//    mgr.push(Code::SET);
+//    mgr.push(0);
+//    mgr.push("age");
+//    mgr.push(Code::ADD);
+//    mgr.push(Code::GET);
+//    mgr.push(0);
+//    mgr.push("age");
+//    mgr.push(1);
+//
+//    mgr.debug_log();
+//
+//    mgr.push(Code::SHOW);
+//    mgr.push(Code::GET);
+//    mgr.push(0);
+//    mgr.push("age");
+//
+//
+//    mgr.push(Code::SET);
+//    mgr.push(0);
+//    mgr.push("age");
+//    mgr.push(Code::MUL);
+//    mgr.push(Code::GET);
+//    mgr.push(0);
+//    mgr.push("age");
+//    mgr.push(2);
+//
+//
+//    mgr.push(Code::SHOW);
+//    mgr.push(Code::GET);
+//    mgr.push(0);
+//    mgr.push("age");
+//
+//    mgr.execute();
+//
+//    mgr.debug_log();
 
     return 0;
 }

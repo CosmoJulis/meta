@@ -8,11 +8,11 @@
 #ifndef console_hpp
 #define console_hpp
 
-#include "console_inst_node.hpp"
+#include "console_code.hpp"
+#include "console_instruction1.hpp"
+#include "console_manager.hpp"
 #include "console_object.hpp"
-#include "console_parser.hpp"
-#include "console_reg.hpp"
-#include "console_type.hpp"
+//#include "console_parser.hpp"
 
 
 #endif /* console_hpp */

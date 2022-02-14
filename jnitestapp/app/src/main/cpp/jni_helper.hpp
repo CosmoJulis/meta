@@ -56,6 +56,10 @@ namespace meta::jni::helper {
     struct j_boolean : j_type {
         static inline const std::string sig() { return "Z";}
 
+        virtual inline const std::string classname() const {
+            return "java.lang.Boolean";
+        }
+
         j_boolean(const bool & v = false) : value(v) { }
         j_boolean(const jboolean & jb) : value(jb) { }
 
@@ -72,6 +76,10 @@ namespace meta::jni::helper {
 
     struct j_byte : j_type {
         static inline const std::string sig() { return "B";}
+
+        virtual inline const std::string classname() const {
+            return "java.lang.Byte";
+        }
 
         j_byte(const jbyte & jb = 0) : value(jb) { }
 
@@ -97,6 +105,10 @@ namespace meta::jni::helper {
     struct j_char : j_type {
         static inline const std::string sig() { return "C";}
 
+        virtual inline const std::string classname() const {
+            return "java.lang.Character";
+        }
+
         j_char(const char & v) : value(v) { }
         j_char(const jchar & jc = 0) : value(jc) { }
 
@@ -118,6 +130,10 @@ namespace meta::jni::helper {
     struct j_short : j_type {
         static inline const std::string sig() { return "S";}
 
+        virtual inline const std::string classname() const {
+            return "java.lang.Short";
+        }
+
         j_short(const jshort & js = 0) : value(js) { }
 
         short value;
@@ -133,6 +149,10 @@ namespace meta::jni::helper {
 
     struct j_int : j_type {
         static inline const std::string sig() { return "I";}
+
+        virtual inline const std::string classname() const {
+            return "java.lang.Integer";
+        }
 
         j_int(const jint & ji = 0) : value(ji) { }
 
@@ -150,6 +170,10 @@ namespace meta::jni::helper {
     struct j_long : j_type {
         static inline const std::string sig() { return "L";}
 
+        virtual inline const std::string classname() const {
+            return "java.lang.Long";
+        }
+
         j_long(const jlong & jl = 0) : value(jl) { }
 
         long value;
@@ -165,6 +189,10 @@ namespace meta::jni::helper {
 
     struct j_float : j_type {
         static inline const std::string sig() { return "F";}
+
+        virtual inline const std::string classname() const {
+            return "java.lang.Float";
+        }
 
         j_float(const jfloat & jf = 0) : value(jf) { }
 
@@ -182,11 +210,15 @@ namespace meta::jni::helper {
     struct j_double : j_type {
         static inline const std::string sig() { return "D";}
 
+        virtual inline const std::string classname() const {
+            return "java.lang.Double";
+        }
+
         j_double(const jdouble & jd = 0) : value(jd) { }
 
         double value;
 
-        operator double() {
+        operator double() const {
             return value;
         }
 
@@ -355,10 +387,22 @@ namespace meta::jni::helper {
             }
         }
 
+
 #if _LIBCPP_STD_VER >= 20
         j_base_array(const jobject & jobj) : j_derive_object<"java.lang.Array">(jobj) { }
+
+        j_base_array(const jobjectArray & jarr) : j_derive_object<"java.lang.Array">(jarr) { }
+
+        template <typename ... Args>
+        j_base_array(const Args & ... args) : j_derive_object<"java.lang.Array">(make_array(args...)) { }
+
 #else
         j_base_array(const jobject & jobj) : j_derive_object<j_java_lang_Array>(jobj) { }
+
+        j_base_array(const jobjectArray & jarr) : j_derive_object<j_java_lang_Array>(jarr) { }
+
+        template <typename ... Args>
+        j_base_array(const Args & ... args) : j_derive_object<j_java_lang_Array>(make_array(args...)) { }
 #endif
 
     };
@@ -507,11 +551,23 @@ namespace meta::jni::helper {
             return _env->NewObject(jcls, jmethod);
         }
 
+        jobject  new_object(const jclass & jcls, const jmethodID & jmethod, const jvalue & jval) const {
+            return _env->NewObjectA(jcls, jmethod, &jval);
+        }
+
         bool is_same_object(const jobject & lhs, const jobject & rhs) const {
             return _env->IsSameObject(lhs, rhs);
         }
 
-        jsize get_array_length(const jobjectArray & joa) const {
+        jobjectArray new_object_array(const size_t & len, const jclass & jcls, const jobject & obj) const {
+            return _env->NewObjectArray((jsize)len, jcls, obj);
+        }
+
+        void set_object_array_element(const jobjectArray & arr, const size_t & index, jobject val) const {
+            _env->SetObjectArrayElement(arr, (jsize)index, val);
+        }
+
+        size_t get_array_length(const jobjectArray & joa) const {
             return _env->GetArrayLength(joa);
         }
 
@@ -621,6 +677,59 @@ namespace meta::jni::helper {
             return _env->CallObjectMethodA(jobj, jmethod, args);
         }
 
+        template <typename T>
+        jobject get_object(const T & t) const {
+            static_assert(
+                    meta::arg::is::all_base_of_v<j_type, T>, "Unsupported basic types, try j_type");
+            static_assert(!std::is_same_v<j_void, T>, "Unsupported j_void");
+
+            LOGV("sl2577 get object");
+
+            const auto & cls_name = t.classname();
+
+            const auto & cls = find_class(meta::string::join(meta::string::split(cls_name, "."), "/"));
+
+            LOGV("sl2577 get object class");
+
+            if constexpr (std::is_same_v<j_boolean, T>) {
+                const auto & mtd = get_method_id(cls, "<init>", "(Z)V");
+                return new_object(cls, mtd, j_boolean(t));
+            }
+            else if constexpr (std::is_same_v<j_byte, T>) {
+                const auto & mtd = get_method_id(cls, "<init>", "(B)V");
+                return new_object(cls, mtd, j_byte(t));
+            }
+            else if constexpr (std::is_same_v<j_char, T>) {
+                const auto & mtd = get_method_id(cls, "<init>", "(C)V");
+                return new_object(cls, mtd, j_char(t));
+            }
+            else if constexpr (std::is_same_v<j_short, T>) {
+                const auto & mtd = get_method_id(cls, "<init>", "(S)V");
+                return new_object(cls, mtd, j_short(t));
+            }
+            else if constexpr (std::is_same_v<j_int, T>) {
+                const auto & mtd = get_method_id(cls, "<init>", "(I)V");
+                return new_object(cls, mtd, j_int(t));
+            }
+            else if constexpr (std::is_same_v<j_long, T>) {
+                const auto & mtd = get_method_id(cls, "<init>", "(L)V");
+                return new_object(cls, mtd, j_long(t));
+            }
+            else if constexpr (std::is_same_v<j_float, T>) {
+                const auto & mtd = get_method_id(cls, "<init>", "(F)V");
+                return new_object(cls, mtd, j_float(t));
+            }
+            else if constexpr (std::is_same_v<j_double, T>) {
+                const auto & mtd = get_method_id(cls, "<init>", "(D)V");
+                return new_object(cls, mtd, j_double(t));
+            }
+            else if constexpr (std::is_same_v<j_string, T>) {
+                return t;
+            }
+            else {
+                return t;
+            }
+        }
 
 
     private:
@@ -664,7 +773,7 @@ namespace meta::jni::helper {
 #ifdef Xcode
                 if (_vm->AttachCurrentThread(reinterpret_cast<void**>(&_env), nullptr) >= 0)
 #else
-                if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
+                    if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
 #endif
                 {
                     return j_env(_env);
@@ -1033,9 +1142,43 @@ struct j_helper : j_derive_object<"com.cosmojulis.meta.JniHelper">
     };
 
 
-
-
 #pragma mark - jni delay
+
+
+    template <typename ... Args>
+    j_array<Args...> make_array(const Args & ... args) {
+#ifndef Xcode
+
+        LOGV("sl577 make array");
+
+        size_t len = sizeof...(args);
+        const auto & m_env = j_vm::shared().env();
+        const jclass & elementCls = m_env.find_class(meta::string::join(meta::string::split("java.lang.Object", "."), "/"));
+
+        LOGV("sl577 make array class success");
+
+        jobjectArray objArr = m_env.new_object_array(len, elementCls, NULL);
+
+        LOGV("sl577 make array object success");
+
+        size_t index = 0;
+        (void)std::initializer_list<nullptr_t>{
+                ([&index, &args, &m_env, &objArr] {
+                    jobject jobj = m_env.get_object(args);
+                    m_env.set_object_array_element(objArr, index, jobj);
+                    index++;
+                }(), nullptr)...
+        };
+
+        LOGV("sl577 make array success");
+
+        return objArr;
+#else
+        j_object obj;
+        return obj;
+#endif
+    }
+
 
     j_base_object::j_base_object(const std::string & name) : _classname(name) {
         LOGV("jni_helper j_object<%s> init", classname().c_str());
@@ -1186,13 +1329,16 @@ void magic_call(const meta::jni::helper::j_env & m_env, const jobject & thiz, co
             magic_call<C - 1, R, j_boolean, Args...>(m_env, thiz, a, get_value<j_boolean>(jobj), args...);
         }
         else if (jobj_classname == "java.lang.Byte") {
-            magic_call<C - 1, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
+            throw "Unsupported j_byte now.";
+//            magic_call<C - 1, R, j_byte, Args...>(m_env, thiz, a, get_value<j_byte>(jobj), args...);
         }
         else if (jobj_classname == "java.lang.Char") {
-            magic_call<C - 1, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
+            throw "Unsupported j_char now.";
+//            magic_call<C - 1, R, j_char, Args...>(m_env, thiz, a, get_value<j_char>(jobj), args...);
         }
         else if (jobj_classname == "java.lang.Short") {
-            magic_call<C - 1, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
+            throw "Unsupported j_short now.";
+//            magic_call<C - 1, R, j_short, Args...>(m_env, thiz, a, get_value<j_short>(jobj), args...);
         }
         else if (jobj_classname == "java.lang.Integer") {
             magic_call<C - 1, R, j_int, Args...>(m_env, thiz, a, get_value<j_int>(jobj), args...);
@@ -1223,7 +1369,7 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
 
     auto m_env = j_env(env);
 
-    int count = m_env.get_array_length(a);
+    size_t count = m_env.get_array_length(a);
 
 #ifndef Xcode
     if (count == 0) {
@@ -1240,12 +1386,12 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
         magic_call<2, j_void>(m_env, thiz, a);
         return;
     }
-#endif
 
 //    if (count == 3) {
 //        magic_call<3, j_void>(m_env, thiz, a);
 //        return;
 //    }
+#endif
 
     throw "No atuo impl args count at " + std::to_string(count);
 }
