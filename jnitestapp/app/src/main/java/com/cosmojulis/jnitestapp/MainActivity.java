@@ -25,29 +25,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
-    public static String getSignature(Method m){
-        String sig;
-        try {
-            Field gSig = Method.class.getDeclaredField("signature");
-            gSig.setAccessible(true);
-            sig = (String) gSig.get(m);
-            if(sig!=null) return sig;
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-//            e.printStackTrace();
-        }
-
-        StringBuilder sb = new StringBuilder("(");
-        for(Class<?> c : m.getParameterTypes())
-            sb.append((sig=Array.newInstance(c, 0).toString())
-                    .substring(1, sig.indexOf('@')));
-        return sb.append(')')
-                .append(
-                        m.getReturnType()==void.class?"V":
-                                (sig=Array.newInstance(m.getReturnType(), 0).toString()).substring(1, sig.indexOf('@'))
-                )
-                .toString();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,42 +32,40 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Example of a call to a native method
-        TextView tv = binding.sampleText;
-        tv.setText(stringFromJNI());
-
-
 
         new Handler().postDelayed(() -> {
-
-            ArrayList<Object> arr = new ArrayList<Object>();
-            arr.add("hello");
-            arr.add(2);
-
-            //            test(arr.toArray());
-
-            test(5, 0.5, "hello world", new JniInterface() {
-                @Override
-                public <T> void callback(T... arr) {
-                    for (Object i: arr) {
-                        System.out.println("sl2577 " + i);
-                    }
-                }
-            });
-
+            testFromCppToJavaStaticCall();
+            testFromCppToJavaCall(this);
+            testFromJavaToCppCall();
         }, 2000);
     }
 
-    public native String stringFromJNI();
+    public native void testFromCppToJavaStaticCall();
+    public native void testFromCppToJavaCall(MainActivity m);
 
-    public native void test();
-    public native void test(Object a[]);
-    public native void testClassTest();
-
-    public native void test(int a, double b, String s, JniInterface jhi);
-
-    public static void javaMethod(int i, JniHelper jhi) {
-        System.out.println("i = " + i);
-        jhi.callback(5, "hello world");
+    public static void javaStaticMethod(int i, JniHelper jni) {
+        System.out.println("javaStaticMethod");
+        jni.callback(5, "hello world");
     }
+
+    public void javaMethod(int i, JniHelper jni) {
+        System.out.println("javaMethod");
+        jni.callback(5, "hello world");
+    }
+
+    public void testFromJavaToCppCall() {
+        System.out.println("testFromJavaToCppCall");
+        testFromJavaToCppCall(5, new JniInterface() {
+            @Override
+            public <T> void callback(T... arr) {
+                System.out.println("testFromJavaToCppCall callback");
+                for (Object i: arr) {
+                    System.out.println(i);
+                }
+            }
+        });
+    }
+
+    public native void testFromJavaToCppCall(int a, JniInterface jni);
+
 }

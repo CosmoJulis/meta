@@ -390,7 +390,7 @@ namespace meta::jni::helper {
 
 #if _LIBCPP_STD_VER >= 20
         j_base_array(const jobject & jobj) : j_derive_object<"java.lang.Array">(jobj) { }
-        
+
         j_base_array(const jobjectArray & jarr) : j_derive_object<"java.lang.Array">(jarr) { }
 
         template <typename ... Args>
@@ -398,7 +398,7 @@ namespace meta::jni::helper {
 
 #else
         j_base_array(const jobject & jobj) : j_derive_object<j_java_lang_Array>(jobj) { }
-        
+
         j_base_array(const jobjectArray & jarr) : j_derive_object<j_java_lang_Array>(jarr) { }
 
         template <typename ... Args>
@@ -683,13 +683,8 @@ namespace meta::jni::helper {
                     meta::arg::is::all_base_of_v<j_type, T>, "Unsupported basic types, try j_type");
             static_assert(!std::is_same_v<j_void, T>, "Unsupported j_void");
 
-            LOGV("sl2577 get object");
-
             const auto & cls_name = t.classname();
-
             const auto & cls = find_class(meta::string::join(meta::string::split(cls_name, "."), "/"));
-
-            LOGV("sl2577 get object class");
 
             if constexpr (std::is_same_v<j_boolean, T>) {
                 const auto & mtd = get_method_id(cls, "<init>", "(Z)V");
@@ -773,7 +768,7 @@ namespace meta::jni::helper {
 #ifdef Xcode
                 if (_vm->AttachCurrentThread(reinterpret_cast<void**>(&_env), nullptr) >= 0)
 #else
-                if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
+                    if (_vm->AttachCurrentThread(&_env, nullptr) >= 0)
 #endif
                 {
                     return j_env(_env);
@@ -1148,18 +1143,11 @@ struct j_helper : j_derive_object<"com.cosmojulis.meta.JniHelper">
     template <typename ... Args>
     j_array<Args...> make_array(const Args & ... args) {
 #ifndef Xcode
-
-        LOGV("sl577 make array");
-
         size_t len = sizeof...(args);
         const auto & m_env = j_vm::shared().env();
         const jclass & elementCls = m_env.find_class(meta::string::join(meta::string::split("java.lang.Object", "."), "/"));
 
-        LOGV("sl577 make array class success");
-
         jobjectArray objArr = m_env.new_object_array(len, elementCls, NULL);
-
-        LOGV("sl577 make array object success");
 
         size_t index = 0;
         (void)std::initializer_list<nullptr_t>{
@@ -1169,9 +1157,6 @@ struct j_helper : j_derive_object<"com.cosmojulis.meta.JniHelper">
                     index++;
                 }(), nullptr)...
         };
-
-        LOGV("sl577 make array success");
-
         return objArr;
 #else
         j_object obj;
@@ -1181,7 +1166,6 @@ struct j_helper : j_derive_object<"com.cosmojulis.meta.JniHelper">
 
 
     j_base_object::j_base_object(const std::string & name) : _classname(name) {
-        LOGV("jni_helper j_object<%s> init", classname().c_str());
 #ifndef Xcode
         const auto & m_env = j_vm::shared().env();
         auto jm = j_method<j_void>(classname(), "<init>");
