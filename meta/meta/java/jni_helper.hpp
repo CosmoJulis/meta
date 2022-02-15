@@ -1371,10 +1371,10 @@ Java_com_cosmojulis_meta_JniHelper_callback(JNIEnv *env, jobject thiz, jobjectAr
         return;
     }
 
-//    if (count == 3) {
-//        magic_call<3, j_void>(m_env, thiz, a);
-//        return;
-//    }
+    if (count == 3) {
+        magic_call<3, j_void>(m_env, thiz, a);
+        return;
+    }
 #endif
 
     throw "No atuo impl args count at " + std::to_string(count);
