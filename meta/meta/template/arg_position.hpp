@@ -75,6 +75,12 @@ struct index {
 };
 
 
+/*
+ *  Get first index T at Args...
+ *  -1 no exist
+ *  获取在Args...中index位置的类型
+ *  -1 不存在
+ */
 template <int index, typename ... Args>
 struct of {
     
